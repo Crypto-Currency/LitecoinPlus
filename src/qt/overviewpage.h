@@ -48,6 +48,8 @@ private:
 private slots:
     void updateDisplayUnit();
     void handleTransactionClicked(const QModelIndex &index);
+    /** launch web browser to home page */
+    void handleHomeButton();
 };
 
 #endif // OVERVIEWPAGE_H
