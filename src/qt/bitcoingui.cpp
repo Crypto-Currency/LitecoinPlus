@@ -25,6 +25,8 @@
 #include "notificator.h"
 #include "guiutil.h"
 #include "rpcconsole.h"
+#include "wallet.h"
+#include "bitcoinrpc.h"
 #include "version.h"
 
 #ifdef Q_OS_MAC
@@ -57,6 +59,11 @@
 #include <QStyle>
 
 #include <iostream>
+
+extern CWallet *pwalletMain;
+extern int64 nLastCoinStakeSearchInterval;
+extern unsigned int nStakeTargetSpacing;
+extern bool fWalletUnlockMintOnly;
 
 BitcoinGUI::BitcoinGUI(QWidget *parent):
     QMainWindow(parent),
@@ -125,21 +132,39 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
     // Status bar notification icons
     QFrame *frameBlocks = new QFrame();
     frameBlocks->setContentsMargins(0,0,0,0);
-    frameBlocks->setMinimumWidth(56);
-    frameBlocks->setMaximumWidth(56);
+    frameBlocks->setMinimumWidth(85);
+    frameBlocks->setMaximumWidth(85);
     QHBoxLayout *frameBlocksLayout = new QHBoxLayout(frameBlocks);
     frameBlocksLayout->setContentsMargins(3,0,3,0);
     frameBlocksLayout->setSpacing(3);
     labelEncryptionIcon = new QLabel();
+    labelMintingIcon = new QLabel();
     labelConnectionsIcon = new QLabel();
     labelBlocksIcon = new QLabel();
     frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelEncryptionIcon);
     frameBlocksLayout->addStretch();
+    frameBlocksLayout->addWidget(labelMintingIcon);
+    frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelConnectionsIcon);
     frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelBlocksIcon);
     frameBlocksLayout->addStretch();
+
+    // Set minting pixmap
+    labelMintingIcon->setPixmap(QIcon(":/icons/staking_on").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+    labelMintingIcon->setEnabled(false);
+    // Add timer to update minting icon
+    QTimer *timerMintingIcon = new QTimer(labelMintingIcon);
+    timerMintingIcon->start(MODEL_UPDATE_DELAY);
+    connect(timerMintingIcon, SIGNAL(timeout()), this, SLOT(updateMintingIcon()));
+    // Add timer to update minting weights
+    QTimer *timerMintingWeights = new QTimer(labelMintingIcon);
+    timerMintingWeights->start(30 * 1000);
+    connect(timerMintingWeights, SIGNAL(timeout()), this, SLOT(updateMintingWeights()));
+    // Set initial values for user and network weights
+    nWeight=0;
+    nNetworkWeight = 0;
 
     // Progress bar and label for blocks download
     progressBarLabel = new QLabel();
@@ -253,6 +278,7 @@ void BitcoinGUI::createActions()
     encryptWalletAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Encrypt Wallet..."), this);
     encryptWalletAction->setToolTip(tr("Encrypt or decrypt wallet"));
     encryptWalletAction->setCheckable(true);
+
     backupWalletAction = new QAction(QIcon(":/icons/filesave"), tr("&Backup Wallet..."), this);
     backupWalletAction->setToolTip(tr("Backup wallet to another location"));
     changePassphraseAction = new QAction(QIcon(":/icons/key"), tr("&Change Passphrase..."), this);
@@ -881,4 +907,64 @@ void BitcoinGUI::showNormalIfMinimized(bool fToggleHidden)
 void BitcoinGUI::toggleHidden()
 {
     showNormalIfMinimized(true);
+}
+
+void BitcoinGUI::updateMintingIcon()
+{
+      if (!walletModel)
+         return;
+
+        labelMintingIcon->setEnabled(false);
+//      labelStakingIcon->setPixmap(QIcon(":/icons/staking_off").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+
+      if (!clientModel->getNumConnections())
+         labelMintingIcon->setToolTip(tr("Not staking because wallet is offline"));
+      else if (clientModel->inInitialBlockDownload() ||
+               clientModel->getNumBlocks() < clientModel->getNumBlocksOfPeers())
+         labelMintingIcon->setToolTip(tr("Not staking because wallet is syncing"));
+      else if(walletModel->getEncryptionStatus() == WalletModel::Locked)
+         labelMintingIcon->setToolTip(tr("Not staking because wallet is locked"));
+      else
+      {
+         uint64 nMinWeight = 0, nMaxWeight = 0, nWeight = 0;
+
+         walletModel->getStakeWeight(nMinWeight,nMaxWeight,nWeight);
+         if (!nWeight)
+            labelMintingIcon->setToolTip(tr("Not staking because you don't have mature coins"));
+          else
+          {
+            uint64 nNetworkWeight = clientModel->getPosKernalPS();
+            int nEstimateTime = clientModel->getStakeTargetSpacing() * 10 * nNetworkWeight / nWeight;
+            QString text;
+            if (nEstimateTime < 60)
+               text = tr("%n second(s)", "", nEstimateTime);
+            else if (nEstimateTime < 60*60)
+               text = tr("%n minute(s)", "", nEstimateTime/60);
+            else if (nEstimateTime < 24*60*60)
+               text = tr("%n hour(s)", "", nEstimateTime/(60*60));
+            else
+               text = tr("%n day(s)", "", nEstimateTime/(60*60*24));
+
+        labelMintingIcon->setEnabled(true);
+//            labelStakingIcon->setPixmap(QIcon(":/icons/staking_on").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+            labelMintingIcon->setToolTip(tr("Staking.\n Your weight is %1\n Network weight is %2\n You have 50\% chance of producing a stake within %3").arg(nWeight).arg(nNetworkWeight).arg(text));
+          }
+       }
+
+
+
+}
+
+void BitcoinGUI::updateMintingWeights()
+{
+    // Only update if we have the network's current number of blocks, or weight(s) are zero (fixes lagging GUI)
+    if ((clientModel && clientModel->getNumBlocks() == clientModel->getNumBlocksOfPeers()) || !nWeight || !nNetworkWeight)
+    {
+        nWeight = 0;
+
+        if (pwalletMain)
+            pwalletMain->GetStakeWeight(*pwalletMain, nMinMax, nMinMax, nWeight);
+
+        nNetworkWeight = GetPoSKernelPS();
+    }
 }

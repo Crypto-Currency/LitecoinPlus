@@ -26,6 +26,8 @@ public:
     int getNumConnections() const;
     int getNumBlocks() const;
     int getNumBlocksAtStartup();
+    double getPosKernalPS();
+    int getStakeTargetSpacing();
 
     QDateTime getLastBlockDate() const;
 

@@ -23,6 +23,16 @@ static std::map<int, unsigned int> mapStakeModifierCheckpoints =
     (     0, 0xfd11f4e7u )
 	;
 
+// Get time weight
+int64 GetWeight(int64 nIntervalBeginning, int64 nIntervalEnd)
+{
+	// Kernel hash weight starts from 0 at the 30-day min age
+	// this change increases active coins participating the hash and helps
+	// to secure the network when proof-of-stake difficulty is low
+
+  return min(nIntervalEnd - nIntervalBeginning - GetStakeMinAge(nIntervalEnd), (int64)GetStakeMaxAge(nIntervalEnd));
+}
+
 // Get the last stake modifier and its generation time from a given block
 static bool GetLastStakeModifier(const CBlockIndex* pindex, uint64& nStakeModifier, int64& nModifierTime)
 {

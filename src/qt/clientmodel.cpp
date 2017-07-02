@@ -12,6 +12,8 @@
 #include <QTimer>
 
 static const int64 nClientStartupTime = GetTime();
+double GetPoSKernelPS(const CBlockIndex* blockindex = NULL);
+extern unsigned int nStakeTargetSpacing;
 
 ClientModel::ClientModel(OptionsModel *optionsModel, QObject *parent) :
     QObject(parent), optionsModel(optionsModel),
@@ -30,6 +32,16 @@ ClientModel::ClientModel(OptionsModel *optionsModel, QObject *parent) :
 ClientModel::~ClientModel()
 {
     unsubscribeFromCoreSignals();
+}
+
+double ClientModel::getPosKernalPS()
+{
+    return GetPoSKernelPS();
+}
+
+int ClientModel::getStakeTargetSpacing()
+{
+    return nStakeTargetSpacing;
 }
 
 int ClientModel::getNumConnections() const
