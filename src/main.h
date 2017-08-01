@@ -32,12 +32,14 @@ static const unsigned int MAX_ORPHAN_TRANSACTIONS = MAX_BLOCK_SIZE/100;
 static const unsigned int MAX_INV_SZ = 50000;
 static const int64 MIN_TX_FEE = 0.001 * CENT;
 static const int64 MIN_RELAY_TX_FEE = 0.001 * CENT;
-static const int64 MAX_MONEY = 442800 * COIN;			// 442,800
+//static const int64 MAX_MONEY = 442800 * COIN;			// 442,800
+static const int64 MAX_MONEY = 4000000 * COIN;			// 4,000,000
 static const int64 MAX_MINT_PROOF_OF_STAKE = 0.01 * COIN;	// 15% annual interest
-//static const int64 MAX_MINT_PROOF_OF_STAKE2 = 0.01 * COIN;	// 15% annual interest
+static const int64 MAX_MINT_PROOF_OF_STAKE2 = 0.15 * COIN;	// 15% annual interest
 static const int64 MIN_TXOUT_AMOUNT = MIN_TX_FEE;
 
 static const int POW_CUTOFF_BLOCK = 20000;
+static const int POW_RESTART_BLOCK = 210000;
 
 inline bool MoneyRange(int64 nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
 // Threshold for nLockTime: below this value it is interpreted as block number, otherwise as UNIX timestamp.

@@ -7,7 +7,7 @@
 #include "checkpoints.h"
 #include "db.h"
 #include "net.h"
-#include "init.h" 
+#include "init.h"
 #include "ui_interface.h"
 #include "kernel.h"
 #include "scrypt_mine.h"
@@ -25,7 +25,7 @@ using namespace boost;
 //
 
 CCriticalSection cs_setpwalletRegistered;
-set<CWallet*> setpwalletRegistered; 
+set<CWallet*> setpwalletRegistered;
 
 CCriticalSection cs_main;
 
@@ -41,9 +41,12 @@ static CBigNum bnProofOfStakeLimit(~uint256(0) >> 20);
 static CBigNum bnProofOfWorkLimitTestNet(~uint256(0) >> 20);
 static CBigNum bnProofOfStakeLimitTestNet(~uint256(0) >> 20);
 
-unsigned int nStakeMinAge = 60 * 60 * 6;	// minimum age for coin age: 6h
-unsigned int nStakeMaxAge = 60 * 60 * 24 * 30;	// stake age of full weight: 30d
-unsigned int nStakeTargetSpacing = 30;			// 30 sec block spacing
+//static CBigNum bnProofOfStakeHardLimit(~uint256(0) >> 18);
+//static CBigNum bnInitialHashTarget(~uint256(0) >> 20);
+
+unsigned int nStakeMinAge = 60 * 60 * 6; // minimum age for coin age: 6h
+unsigned int nStakeMaxAge = 60 * 60 * 24 * 30; // stake age of full weight: 30d
+unsigned int nStakeTargetSpacing = 30; // 30 second block spacing
 
 int64 nChainStartTime = 1399816781;
 int nCoinbaseMaturity = 30;
@@ -304,7 +307,7 @@ bool CTransaction::IsStandard() const
             return false;
 
 
-	}
+    }
 
     BOOST_FOREACH(const CTxOut& txout, vout) {
         if (!::IsStandard(txout.scriptPubKey))
@@ -466,15 +469,15 @@ bool CTransaction::CheckTransaction() const
     for (unsigned int i = 0; i < vout.size(); i++)
     {
         const CTxOut& txout = vout[i];
-		
+
         if (txout.IsEmpty() && !IsCoinBase() && !IsCoinStake())
             return DoS(100, error("CTransaction::CheckTransaction() : txout empty for user transaction"));
-	
-       /*
-        if ((!txout.IsEmpty()) && txout.nValue < MIN_TXOUT_AMOUNT)
-           return DoS(100, error("CTransaction::CheckTransaction() : txout.nValue below minimum"));
-		   */
-
+        // ppcoin: enforce minimum output amount
+        /*
+         if ((!txout.IsEmpty()) && txout.nValue < MIN_TXOUT_AMOUNT)
+            return DoS(100, error("CTransaction::CheckTransaction() : txout.nValue below minimum"));
+                    */ 
+   
         if (txout.nValue < 0)
            return DoS(100, error("CTransaction::CheckTransaction() : txout.nValue negative"));
 
@@ -631,7 +634,7 @@ bool CTxMemPool::accept(CTxDB& txdb, CTransaction &tx, bool fCheckInputs,
         unsigned int nSize = ::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION);
 
         // Don't accept it if it can't get into a block
-        int64 txMinFee = tx.GetMinFee(1000, false, GMF_RELAY, nSize);
+        int64 txMinFee = tx.GetMinFee(1000, false, GMF_RELAY);
         if (nFees < txMinFee)
             return error("CTxMemPool::accept() : not enough fees %s, %"PRI64d" < %"PRI64d,
                          hash.ToString().c_str(),
@@ -942,6 +945,28 @@ int generateMTRandom(unsigned int s, int range)
 }
 
 
+// miner's coin stake reward based on nBits and coin age spent (coin-days)
+// simple algorithm, not depend on the diff
+//const int YEARLY_BLOCKCOUNT = 0;	// 365 * 0
+int64 GetProofOfStakeReward(int64 nCoinAge, unsigned int nBits, unsigned int nTime, int nHeight)
+{
+    int64 nRewardCoinYear;
+    if(nHeight < POW_RESTART_BLOCK)   
+    {
+      nRewardCoinYear = MAX_MINT_PROOF_OF_STAKE;
+    }
+    else
+    {
+      nRewardCoinYear = MAX_MINT_PROOF_OF_STAKE2;  //correct minting to 15%
+    }
+
+    int64 nSubsidy = nCoinAge * nRewardCoinYear / 365;
+	if (fDebug && GetBoolArg("-printcreation"))
+        printf("GetProofOfStakeReward(): create=%s nCoinAge=%"PRI64d" nBits=%d\n", FormatMoney(nSubsidy).c_str(), nCoinAge, nBits);
+
+    return nSubsidy;
+}
+
 
 // miner's coin base reward based on nBits
 int64 GetProofOfWorkReward(int nHeight, int64 nFees, uint256 prevHash)
@@ -954,23 +979,47 @@ int64 GetProofOfWorkReward(int nHeight, int64 nFees, uint256 prevHash)
         return nSubsidy + nFees;
     }
     
+// block now 207054 7/29/2017
+//
+//1)200,000 at 2    = 400,000
+//2)200,000 at 1.75 = 350,000
+//3)200,000 at 1.5  = 300,000
+//4)200,000 at 1.25 = 250,000
+//5)200,000 at 1    = 200,000
+//6)200,000 at .75  = 150,000
+//7)200,000 at .5   = 100,000
+
+//  int64 nSubsidy=0;
+  if(nHeight > POW_RESTART_BLOCK)   
+  {
+    nSubsidy= 2 * COIN;
+    if(nHeight > POW_RESTART_BLOCK+200000)   
+    {
+      nSubsidy = 1.75 * COIN;
+    }
+    else if(nHeight > POW_RESTART_BLOCK+400000)   
+    {
+      nSubsidy = 1.5 * COIN;
+    }
+    else if(nHeight > POW_RESTART_BLOCK+600000)   
+    {
+      nSubsidy = 1.25 * COIN;
+    }
+    else if(nHeight > POW_RESTART_BLOCK+800000) //1010000   210,000+800,000
+    {
+      nSubsidy = 1 * COIN;
+    }
+    else if(nHeight > POW_RESTART_BLOCK+1000000)   
+    {
+      nSubsidy = .75 * COIN;
+    }
+    else if(nHeight > POW_RESTART_BLOCK+1200000)   
+    {
+      nSubsidy = .5 * COIN;
+    }
+  }
     
     return nSubsidy + nFees;
-}
-
-// miner's coin stake reward based on nBits and coin age spent (coin-days)
-// simple algorithm, not depend on the diff
-//const int YEARLY_BLOCKCOUNT = 0;	// 365 * 0
-int64 GetProofOfStakeReward(int64 nCoinAge, unsigned int nBits, unsigned int nTime, int nHeight)
-{
-    int64 nRewardCoinYear;
-	nRewardCoinYear = MAX_MINT_PROOF_OF_STAKE;
-
-    int64 nSubsidy = nCoinAge * nRewardCoinYear / 365;
-	if (fDebug && GetBoolArg("-printcreation"))
-        printf("GetProofOfStakeReward(): create=%s nCoinAge=%"PRI64d" nBits=%d\n", FormatMoney(nSubsidy).c_str(), nCoinAge, nBits);
-
-    return nSubsidy;
 }
 
 unsigned int GetStakeMinAge(unsigned int nTime)
@@ -990,7 +1039,7 @@ unsigned int GetStakeMaxAge(unsigned int nTime)
 }
 
 static const int64 nTargetTimespan = 60 * 60 * 4;  // 4 hours
-static const int64 nTargetSpacingWorkMax = 2 * nStakeTargetSpacing; 
+static const int64 nTargetSpacingWorkMax = 2 * nStakeTargetSpacing;
 
 //
 // maximum nBits value could possible be required nTime after
@@ -1015,7 +1064,7 @@ unsigned int ComputeMaxBits(CBigNum bnTargetLimit, unsigned int nBase, int64 nTi
 
 //
 // minimum amount of work that could possibly be required nTime after
-// minimum proof-of-work required was nBase
+// minimum work required was nBase
 //
 unsigned int ComputeMinWork(unsigned int nBase, int64 nTime)
 {
@@ -1416,6 +1465,7 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs,
 
     return true;
 }
+
 
 
 bool CTransaction::ClientConnectInputs()
@@ -2108,8 +2158,8 @@ bool CBlock::AcceptBlock()
     CBlockIndex* pindexPrev = (*mi).second;
     int nHeight = pindexPrev->nHeight+1;
 
-	if (IsProofOfWork() && nHeight > POW_CUTOFF_BLOCK)
-        return DoS(100, error("AcceptBlock() : No PoW block allowed anymore (height = %d)", nHeight));
+	if (IsProofOfWork() && nHeight > POW_CUTOFF_BLOCK && nHeight < POW_RESTART_BLOCK)
+        return DoS(100, error("AcceptBlock() : No PoW block allowed between %d and %d (height= %d))",POW_CUTOFF_BLOCK,POW_RESTART_BLOCK, nHeight));
 
     // Check proof-of-work or proof-of-stake
     if (nBits != GetNextTargetRequired(pindexPrev, IsProofOfStake()))
@@ -2412,7 +2462,7 @@ bool CBlock::SignBlock(const CKeyStore& keystore)
 // ppcoin: check block signature
 bool CBlock::CheckBlockSignature() const
 {
-    if (GetHash() == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet))
+    if (GetHash() == hashGenesisBlock)
         return vchBlockSig.empty();
 
     vector<valtype> vSolutions;
@@ -2608,7 +2658,7 @@ bool LoadBlockIndex(bool fAllowNew)
 		       }
         }
 
-        assert(block.hashMerkleRoot == uint256("b62df2ea7bf8a735345806cd98e3aeffcad42028699e7d0460d7c24041b51944"));
+        assert(block.hashMerkleRoot == uint256("0x0d05d4780fa20225c36f785971ee30ce1c45b0631fd588751c583cb52795f46d"));
 
         //// debug print
         block.print();
@@ -2828,10 +2878,10 @@ string GetWarnings(string strFor)
 
     // ppcoin: should not enter safe mode for longer invalid chain
     // ppcoin: if sync-checkpoint is too old do not enter safe mode
-
-//    if (Checkpoints::IsSyncCheckpointTooOld(60 * 60 * 24 * 365) && !fTestNet && !IsInitialBlockDownload())
+//    if (Checkpoints::IsSyncCheckpointTooOld(60 * 60 * 24 * 10) && !fTestNet && !IsInitialBlockDownload())
 //    {
 //        nPriority = 100;
+//        printf("WARNING: Checkpoint is too old. Wait for block chain to download, or notify developers.\n");
 //        strStatusBar = "WARNING: Checkpoint is too old. Wait for block chain to download, or notify developers.";
 //    }
 
@@ -3990,17 +4040,16 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake)
     static int64 nLastCoinStakeSearchTime = GetAdjustedTime();  // only initialized at startup
     CBlockIndex* pindexPrev = pindexBest;
 
-    if (fProofOfStake)  // attempt to find a coinstake
+    if (fProofOfStake)  // attemp to find a coinstake
     {
         pblock->nBits = GetNextTargetRequired(pindexPrev, true);
         CTransaction txCoinStake;
         int64 nSearchTime = txCoinStake.nTime; // search to current time
         if (nSearchTime > nLastCoinStakeSearchTime)
         {
-			// printf(">>> OK1\n");
             if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, nSearchTime-nLastCoinStakeSearchTime, txCoinStake))
             {
-				if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - nMaxClockDrift))
+                if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - nMaxClockDrift))
                 {   // make sure coinstake would meet timestamp protocol
                     // as it would be the same as the block timestamp
                     pblock->vtx[0].vout[0].SetEmpty();
