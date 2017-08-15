@@ -992,7 +992,7 @@ int64 GetProofOfWorkReward(int nHeight, int64 nFees, uint256 prevHash)
 int64 GetProofOfStakeReward(int64 nCoinAge, unsigned int nBits, unsigned int nTime, int nHeight)
 {
   int64 nRewardCoinYear;
-  if(nHeight < POW_RESTART_BLOCK)
+  if(nHeight < STAKE_FIX_BLOCK)
   {  
     nRewardCoinYear = MAX_MINT_PROOF_OF_STAKE;
   }
@@ -2142,8 +2142,9 @@ bool CBlock::AcceptBlock()
     CBlockIndex* pindexPrev = (*mi).second;
     int nHeight = pindexPrev->nHeight+1;
 
-	if (IsProofOfWork() && nHeight > POW_CUTOFF_BLOCK)
-        return DoS(100, error("AcceptBlock() : No PoW block allowed anymore (height = %d)", nHeight));
+    if (IsProofOfWork() && nHeight > POW_CUTOFF_BLOCK && nHeight < POW_RESTART_BLOCK)
+      return DoS(100, error("AcceptBlock() : No PoW block allowed between %d and %d (height = %d)", POW_CUTOFF_BLOCK,POW_RESTART_BLOCK,nHeight));
+
 
     // Check proof-of-work or proof-of-stake
     if (nBits != GetNextTargetRequired(pindexPrev, IsProofOfStake()))
@@ -2981,7 +2982,19 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         if (!vRecv.empty())
             vRecv >> addrFrom >> nNonce;
         if (!vRecv.empty())
-            vRecv >> pfrom->strSubVer;
+        {
+          vRecv >> pfrom->strSubVer;
+          printf("peer connecting subver is %s",pfrom->strSubVer.c_str());
+          int iSubVer=pfrom->strSubVer.find("LitecoinPlus");
+          if(iSubVer < 1)
+          {
+            printf("  -  disconnecting .....\n");
+            pfrom->fDisconnect = true;
+            return false;
+          }
+          printf("\n");
+        }
+
         if (!vRecv.empty())
             vRecv >> pfrom->nStartingHeight;
 
