@@ -57,13 +57,14 @@
 #include <QDragEnterEvent>
 #include <QUrl>
 #include <QStyle>
+#include <QSplashScreen>
 
 #include <iostream>
 
 extern CWallet *pwalletMain;
 extern int64 nLastCoinStakeSearchInterval;
 extern unsigned int nStakeTargetSpacing;
-extern bool fWalletUnlockMintOnly;
+static QSplashScreen *splashref;
 
 BitcoinGUI::BitcoinGUI(QWidget *parent):
     QMainWindow(parent),
@@ -77,7 +78,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     rpcConsole(0)
 {
     resize(850, 550);
-    setWindowTitle(tr("LitecoinPlus ") +"-"+ tr(" Wallet ")+QString::fromStdString(CLIENT_BUILD));
+    setWindowTitle(tr("LitecoinPlus - Wallet  ")+QString::fromStdString(CLIENT_BUILD));
 #ifndef Q_OS_MAC
     qApp->setWindowIcon(QIcon(":icons/bitcoin"));
     setWindowIcon(QIcon(":icons/bitcoin"));
@@ -279,6 +280,18 @@ void BitcoinGUI::createActions()
     encryptWalletAction->setToolTip(tr("Encrypt or decrypt wallet"));
     encryptWalletAction->setCheckable(true);
 
+    unlockWalletStakeAction = new QAction(QIcon(":/icons/lock_open"), tr("&Unlock To Stake..."), this);
+    unlockWalletStakeAction->setStatusTip(tr("Unlock wallet for Staking only"));
+
+    checkWalletAction = new QAction(QIcon(":/icons/inspect"), tr("&Check Wallet..."), this);
+    checkWalletAction->setStatusTip(tr("Check wallet integrity and report findings"));
+
+    repairWalletAction = new QAction(QIcon(":/icons/repair"), tr("&Repair Wallet..."), this);
+    repairWalletAction->setStatusTip(tr("Fix wallet integrity and remove orphans"));
+
+    zapWalletAction = new QAction(QIcon(":/icons/repair"), tr("&Zap Wallet..."), this);
+    zapWalletAction->setStatusTip(tr("Zaps txes from wallet then rescans (this is slow)..."));
+
     backupWalletAction = new QAction(QIcon(":/icons/filesave"), tr("&Backup Wallet..."), this);
     backupWalletAction->setToolTip(tr("Backup wallet to another location"));
     changePassphraseAction = new QAction(QIcon(":/icons/key"), tr("&Change Passphrase..."), this);
@@ -297,6 +310,13 @@ void BitcoinGUI::createActions()
     connect(optionsAction, SIGNAL(triggered()), this, SLOT(optionsClicked()));
     connect(toggleHideAction, SIGNAL(triggered()), this, SLOT(toggleHidden()));
     connect(encryptWalletAction, SIGNAL(triggered(bool)), this, SLOT(encryptWallet(bool)));
+
+    connect(unlockWalletStakeAction, SIGNAL(triggered()), this, SLOT(unlockWalletStake()));
+
+    connect(checkWalletAction, SIGNAL(triggered()), this, SLOT(checkWallet()));
+    connect(repairWalletAction, SIGNAL(triggered()), this, SLOT(repairWallet()));
+    connect(zapWalletAction, SIGNAL(triggered()), this, SLOT(zapWallet()));
+
     connect(backupWalletAction, SIGNAL(triggered()), this, SLOT(backupWallet()));
     connect(changePassphraseAction, SIGNAL(triggered()), this, SLOT(changePassphrase()));
     connect(signMessageAction, SIGNAL(triggered()), this, SLOT(gotoSignMessageTab()));
@@ -315,27 +335,32 @@ void BitcoinGUI::createMenuBar()
 
     // Configure the menus
     QMenu *file = appMenuBar->addMenu(tr("&File"));
-    file->addAction(backupWalletAction);
     file->addAction(exportAction);
-    file->addAction(signMessageAction);
-    file->addAction(verifyMessageAction);
     file->addSeparator();
     file->addAction(quitAction);
 
     QMenu *settings = appMenuBar->addMenu(tr("&Settings"));
-    settings->addAction(encryptWalletAction);
-    settings->addAction(changePassphraseAction);
-    settings->addSeparator();
     settings->addAction(optionsAction);
+
+    QMenu *wallet = appMenuBar->addMenu(tr("&Wallet"));
+     wallet->addAction(backupWalletAction);
+    wallet->addSeparator();
+    wallet->addAction(encryptWalletAction);
+    wallet->addAction(changePassphraseAction);
+    wallet->addAction(unlockWalletStakeAction);
+    wallet->addSeparator();
+    wallet->addAction(checkWalletAction);
+    wallet->addAction(repairWalletAction);
+    wallet->addAction(zapWalletAction);
+    wallet->addSeparator();
+    wallet->addAction(signMessageAction);
+    wallet->addAction(verifyMessageAction);
 
     QMenu *help = appMenuBar->addMenu(tr("&Help"));
     help->addAction(openRPCConsoleAction);
     help->addSeparator();
     help->addAction(aboutAction);
     help->addAction(aboutQtAction);
-
-	// QString ss("QMenuBar::item { background-color: #ceffee; color: black }"); 
-    // appMenuBar->setStyleSheet(ss);
 }
 
 void BitcoinGUI::createToolBars()
@@ -824,17 +849,29 @@ void BitcoinGUI::setEncryptionStatus(int status)
         labelEncryptionIcon->show();
         labelEncryptionIcon->setPixmap(QIcon(":/icons/lock_open").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
         labelEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>"));
-        encryptWalletAction->setChecked(true);
+        encryptWalletAction->setChecked(false);
         changePassphraseAction->setEnabled(true);
         encryptWalletAction->setEnabled(false); // TODO: decrypt currently not supported
+
+        labelEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>"));
+        if(pwalletMain->fWalletUnlockMintOnly)
+        {
+          labelEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b> for Staking only."));
+          unlockWalletStakeAction->setEnabled(false);
+        } 
         break;
     case WalletModel::Locked:
         labelEncryptionIcon->show();
         labelEncryptionIcon->setPixmap(QIcon(":/icons/lock_closed").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
         labelEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>locked</b>"));
-        encryptWalletAction->setChecked(true);
-        changePassphraseAction->setEnabled(true);
-        encryptWalletAction->setEnabled(false); // TODO: decrypt currently not supported
+        if(pwalletMain->fWalletUnlockMintOnly)
+        {
+          labelEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b> for Staking only."));
+          unlockWalletStakeAction->setEnabled(false);
+        } 
+//        encryptWalletAction->setChecked(true);
+//        changePassphraseAction->setEnabled(true);
+//        encryptWalletAction->setEnabled(false); // TODO: decrypt currently not supported
         break;
     }
 }
@@ -849,6 +886,213 @@ void BitcoinGUI::encryptWallet(bool status)
     dlg.exec();
 
     setEncryptionStatus(walletModel->getEncryptionStatus());
+}
+
+void BitcoinGUI::unlockWalletStake()
+{
+  if(!walletModel)
+    return;
+
+  // Unlock wallet when requested by user
+  if(walletModel->getEncryptionStatus() == WalletModel::Locked)
+  {
+    AskPassphraseDialog dlg(AskPassphraseDialog::Unlock, this);
+    dlg.setModel(walletModel);
+    dlg.exec();
+
+    // Only show message if unlock is sucessfull.
+    if(walletModel->getEncryptionStatus() == WalletModel::Unlocked)
+    {
+      pwalletMain->fWalletUnlockMintOnly=true;      
+      error(tr("Unlock Wallet Information"),
+        tr("Wallet has been unlocked. \n"
+          "Proof of Stake has started.\n"),true);
+    }
+  }
+}
+
+void BitcoinGUI::checkWallet()
+{
+
+    int nMismatchSpent;
+    int64 nBalanceInQuestion;
+    int nOrphansFound;
+
+    if(!walletModel)
+        return;
+
+    // Check the wallet as requested by user
+    walletModel->checkWallet(nMismatchSpent, nBalanceInQuestion, nOrphansFound);
+
+    if (nMismatchSpent == 0 && nOrphansFound == 0)
+        error(tr("Check Wallet Information"),
+                tr("Wallet passed integrity test!\n"
+                   "Nothing found to fix."),true);
+  else
+       error(tr("Check Wallet Information"),
+               tr("Wallet failed integrity test!\n\n"
+                  "Mismatched coin(s) found: %1.\n"
+                  "Amount in question: %2.\n"
+                  "Orphans found: %3.\n\n"
+                  "Please backup wallet and run repair wallet.\n")
+                        .arg(nMismatchSpent)
+                        .arg(BitcoinUnits::formatWithUnit(walletModel->getOptionsModel()->getDisplayUnit(), nBalanceInQuestion,true))
+                        .arg(nOrphansFound),true);
+}
+
+void BitcoinGUI::repairWallet()
+{
+    int nMismatchSpent;
+    int64 nBalanceInQuestion;
+    int nOrphansFound;
+
+    if(!walletModel)
+        return;
+
+    // Repair the wallet as requested by user
+    walletModel->repairWallet(nMismatchSpent, nBalanceInQuestion, nOrphansFound);
+
+    if (nMismatchSpent == 0 && nOrphansFound == 0)
+       error(tr("Repair Wallet Information"),
+               tr("Wallet passed integrity test!\n"
+                  "Nothing found to fix."),true);
+    else
+       error(tr("Repair Wallet Information"),
+               tr("Wallet failed integrity test and has been repaired!\n"
+                  "Mismatched coin(s) found: %1\n"
+                  "Amount affected by repair: %2\n"
+                  "Orphans removed: %3\n")
+                        .arg(nMismatchSpent)
+                        .arg(BitcoinUnits::formatWithUnit(walletModel->getOptionsModel()->getDisplayUnit(), nBalanceInQuestion,true))
+                        .arg(nOrphansFound),true);
+}
+
+void BitcoinGUI::zapWallet()
+{
+  if(!walletModel)
+    return;
+  //debug
+  printf("running zapwallettxes from qt menu.\n");
+
+  // bring up splash screen
+  QSplashScreen splash(QPixmap(":/images/splash"), 0);
+  splash.show();
+  splash.setAutoFillBackground(true);
+  splashref = &splash;
+
+  // Zap the wallet as requested by user
+  // 1= save meta data
+  // 2=remove meta data needed to restore wallet transaction meta data after -zapwallettxes
+  std::vector<CWalletTx> vWtx;
+
+
+  splashMessage(_("Zapping all transactions from wallet..."));
+  printf("Zapping all transactions from wallet...\n");
+
+// clear tables
+
+  pwalletMain = new CWallet("wallet.dat");
+  DBErrors nZapWalletRet = pwalletMain->ZapWalletTx(vWtx);
+  if (nZapWalletRet != DB_LOAD_OK)
+  {
+    splashMessage(_("Error loading wallet.dat: Wallet corrupted"));
+    printf("Error loading wallet.dat: Wallet corrupted\n");
+    if (splashref)
+      splash.close();
+    return;
+  }
+
+  delete pwalletMain;
+  pwalletMain = NULL;
+
+  splashMessage(_("Loading wallet..."));
+  printf("Loading wallet...\n");
+
+  int64 nStart = GetTimeMillis();
+  bool fFirstRun = true;
+  pwalletMain = new CWallet("wallet.dat");
+
+
+  DBErrors nLoadWalletRet = pwalletMain->LoadWallet(fFirstRun);
+  if (nLoadWalletRet != DB_LOAD_OK)
+  {
+    if (nLoadWalletRet == DB_CORRUPT)
+    {
+    splashMessage(_("Error loading wallet.dat: Wallet corrupted"));
+      printf("Error loading wallet.dat: Wallet corrupted\n");
+    }
+    else if (nLoadWalletRet == DB_NONCRITICAL_ERROR)
+    {
+      setStatusTip(tr("Warning: error reading wallet.dat! All keys read correctly, but transaction data or address book entries might be missing or incorrect."));
+      printf("Warning: error reading wallet.dat! All keys read correctly, but transaction data or address book entries might be missing or incorrect.\n");
+    }
+    else if (nLoadWalletRet == DB_TOO_NEW)
+    {
+      setStatusTip(tr("Error loading wallet.dat: Wallet requires newer version of BitBar"));
+      printf("Error loading wallet.dat: Wallet requires newer version of BitBar\n");
+    }
+    else if (nLoadWalletRet == DB_NEED_REWRITE)
+    {
+      setStatusTip(tr("Wallet needed to be rewritten: restart BitBar to complete"));
+      printf("Wallet needed to be rewritten: restart BitBar to complete\n");
+      if (splashref)
+        splash.close();
+      return;
+    }
+    else
+    {
+      setStatusTip(tr("Error loading wallet.dat"));
+      printf("Error loading wallet.dat\n");
+    } 
+  }
+  
+  splashMessage(_("Wallet loaded..."));
+  printf(" zap wallet  load     %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+
+  splashMessage(_("Loaded lables..."));
+  printf(" zap wallet  loading metadata\n");
+
+  // Restore wallet transaction metadata after -zapwallettxes=1
+  BOOST_FOREACH(const CWalletTx& wtxOld, vWtx)
+  {
+    uint256 hash = wtxOld.GetHash();
+    std::map<uint256, CWalletTx>::iterator mi = pwalletMain->mapWallet.find(hash);
+    if (mi != pwalletMain->mapWallet.end())
+    {
+      const CWalletTx* copyFrom = &wtxOld;
+      CWalletTx* copyTo = &mi->second;
+      copyTo->mapValue = copyFrom->mapValue;
+      copyTo->vOrderForm = copyFrom->vOrderForm;
+      copyTo->nTimeReceived = copyFrom->nTimeReceived;
+      copyTo->nTimeSmart = copyFrom->nTimeSmart;
+      copyTo->fFromMe = copyFrom->fFromMe;
+      copyTo->strFromAccount = copyFrom->strFromAccount;
+      copyTo->nOrderPos = copyFrom->nOrderPos;
+      copyTo->WriteToDisk();
+    }
+  }
+  splashMessage(_("scanning for transactions..."));
+  printf(" zap wallet  scanning for transactions\n");
+
+  pwalletMain->ScanForWalletTransactions(pindexGenesisBlock, true);
+  pwalletMain->ReacceptWalletTransactions();
+  splashMessage(_("Please restart your wallet."));
+  printf(" zap wallet  done - please restart wallet.\n");
+
+//  close splash screen
+  if (splashref)
+    splash.close();
+
+  QMessageBox::warning(this, tr("Zap Wallet Finished."), tr("Please restart your wallet for changes to take effect."));
+}
+
+void BitcoinGUI::splashMessage(const std::string &message)
+{
+  if(splashref)
+  {
+    splashref->showMessage(QString::fromStdString(message), Qt::AlignVCenter|Qt::AlignHCenter, QColor(255,40,55));
+    QApplication::instance()->processEvents();
+  }
 }
 
 void BitcoinGUI::backupWallet()

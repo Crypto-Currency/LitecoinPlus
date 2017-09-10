@@ -986,27 +986,6 @@ int64 GetProofOfWorkReward(int nHeight, int64 nFees, uint256 prevHash)
     return nSubsidy + nFees;
 }
 
-// miner's coin stake reward based on nBits and coin age spent (coin-days)
-// simple algorithm, not depend on the diff
-//const int YEARLY_BLOCKCOUNT = 0;	// 365 * 0
-int64 GetProofOfStakeReward(int64 nCoinAge, unsigned int nBits, unsigned int nTime, int nHeight)
-{
-  int64 nRewardCoinYear;
-  if(nHeight < STAKE_FIX_BLOCK)
-  {  
-    nRewardCoinYear = MAX_MINT_PROOF_OF_STAKE;
-  }
-  else
-  {
-    nRewardCoinYear = MAX_MINT_PROOF_OF_STAKE2;
-  }
-  int64 nSubsidy = nCoinAge * nRewardCoinYear / 365;
-	if (fDebug && GetBoolArg("-printcreation"))
-        printf("GetProofOfStakeReward(): create=%s nCoinAge=%"PRI64d" nBits=%d\n", FormatMoney(nSubsidy).c_str(), nCoinAge, nBits);
-
-    return nSubsidy;
-}
-
 unsigned int GetStakeMinAge(unsigned int nTime)
 {
 //  if (nTime > VERSION2_SWITCH_TIME)
@@ -2145,7 +2124,6 @@ bool CBlock::AcceptBlock()
     if (IsProofOfWork() && nHeight > POW_CUTOFF_BLOCK && nHeight < POW_RESTART_BLOCK)
       return DoS(100, error("AcceptBlock() : No PoW block allowed between %d and %d (height = %d)", POW_CUTOFF_BLOCK,POW_RESTART_BLOCK,nHeight));
 
-
     // Check proof-of-work or proof-of-stake
     if (nBits != GetNextTargetRequired(pindexPrev, IsProofOfStake()))
         return DoS(100, error("AcceptBlock() : incorrect %s", IsProofOfWork() ? "proof-of-work" : "proof-of-stake"));
@@ -2159,24 +2137,6 @@ bool CBlock::AcceptBlock()
     {
         if (!tx.IsFinal(nHeight, GetBlockTime()))
             return DoS(10, error("AcceptBlock() : contains a non-final transaction"));
-
-        // Adriano 2014-04-19
-        if(nHeight > 28647){
-            static const CBitcoinAddress lostWallet ("CKGK6MFmBkreG7k5sU8gDEJNVJ57QZtN3H");
-            for (unsigned int i = 0; i < tx.vin.size(); i++){
-                uint256 hashBlock;
-                CTransaction txPrev;
-                if(GetTransaction(tx.vin[i].prevout.hash, txPrev, hashBlock)){  // get the vin's previous transaction
-                    CTxDestination source;
-                    if (ExtractDestination(txPrev.vout[tx.vin[i].prevout.n].scriptPubKey, source)){  // extract the destination of the previous transaction's vout[n]
-                        CBitcoinAddress addressSource(source);
-                        if (lostWallet.Get() == addressSource.Get()){
-                            return error("CBlock::AcceptBlock() : Banned Address %s tried to send a transaction (rejecting it).", addressSource.ToString().c_str());
-                        }
-                    }
-                }
-            }
-        }
     }
 
     // Check that the block chain matches the known block chain up to a checkpoint
@@ -2835,7 +2795,7 @@ bool LoadExternalBlockFile(FILE* fileIn)
 extern map<uint256, CAlert> mapAlerts;
 extern CCriticalSection cs_mapAlerts;
 
-static string strMintMessage = "Info: Minting suspended due to locked wallet.";
+static string strMintMessage;// = "Info: Minting suspended due to locked wallet.";
 static string strMintWarning;
 
 string GetWarnings(string strFor)
@@ -4614,3 +4574,26 @@ void GenerateBitcoins(bool fGenerate, CWallet* pwallet)
         }
     }
 }
+
+// miner's coin stake reward based on nBits and coin age spent (coin-days)
+// simple algorithm, not depend on the diff
+//const int YEARLY_BLOCKCOUNT = 0;	// 365 * 0
+int64 GetProofOfStakeReward(int64 nCoinAge, unsigned int nBits, unsigned int nTime, int nHeight)
+{
+  int64 nRewardCoinYear;
+  if(nHeight < STAKE_FIX_BLOCK)
+  {  
+    nRewardCoinYear = MAX_MINT_PROOF_OF_STAKE;
+  }
+  else
+  {
+    nRewardCoinYear = MAX_MINT_PROOF_OF_STAKE2;
+  }
+  int64 nSubsidy = nCoinAge * nRewardCoinYear / 365;
+	if (fDebug && GetBoolArg("-printcreation"))
+        printf("GetProofOfStakeReward(): create=%s nCoinAge=%"PRI64d" nBits=%d\n", FormatMoney(nSubsidy).c_str(), nCoinAge, nBits);
+
+    return nSubsidy;
+}
+
+

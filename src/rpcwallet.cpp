@@ -28,7 +28,7 @@ void EnsureWalletIsUnlocked()
 {
     if (pwalletMain->IsLocked())
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
-    if (fWalletUnlockMintOnly)
+    if (pwalletMain->fWalletUnlockMintOnly)
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Wallet unlocked for block minting only.");
 }
 
@@ -1420,9 +1420,9 @@ Value walletpassphrase(const Array& params, bool fHelp)
 
     // ppcoin: if user OS account compromised prevent trivial sendmoney commands
     if (params.size() > 2)
-        fWalletUnlockMintOnly = params[2].get_bool();
+        pwalletMain->fWalletUnlockMintOnly = params[2].get_bool();
     else
-        fWalletUnlockMintOnly = false;
+        pwalletMain->fWalletUnlockMintOnly = false;
 
     return Value::null;
 }
@@ -1740,3 +1740,109 @@ Value makekeypair(const Array& params, bool fHelp)
     result.push_back(Pair("PublicKey", HexStr(key.GetPubKey().Raw())));
     return result;
 }
+
+// zapwallettxes
+Value zapwallettxes(const Array& params, bool fHelp)
+{
+  if (fHelp || params.size() > 0)
+    throw runtime_error("-zapwallettxes\n"
+          "Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup\n");
+
+  std::vector<CWalletTx> vWtx;
+  Object result;
+
+  char *mess="Zapping all transactions from wallet ...\n";
+  printf(mess); // to debug.log
+
+  pwalletMain = new CWallet("wallet.dat");
+  DBErrors nZapWalletRet = pwalletMain->ZapWalletTx(vWtx);
+  if (nZapWalletRet != DB_LOAD_OK)
+  {
+    mess="Error loading wallet.dat: Wallet corrupted\n";
+    printf(mess);
+    return(mess);
+  }
+
+  delete pwalletMain;
+  pwalletMain = NULL;
+
+  mess="Loading wallet...\n";
+  printf(mess);
+
+  int64 nStart = GetTimeMillis();
+  bool fFirstRun = true;
+  pwalletMain = new CWallet("wallet.dat");
+
+
+  DBErrors nLoadWalletRet = pwalletMain->LoadWallet(fFirstRun);
+  if (nLoadWalletRet != DB_LOAD_OK)
+  {
+    if (nLoadWalletRet == DB_CORRUPT)
+    {
+      mess="Error loading wallet.dat: Wallet corrupted\n";
+      printf(mess);
+      return(mess);
+    }
+    else if (nLoadWalletRet == DB_NONCRITICAL_ERROR)
+    {
+      mess="Warning: error reading wallet.dat! All keys read correctly, but transaction data or address book entries might be missing or incorrect.\n";
+      printf(mess);
+    }
+    else if (nLoadWalletRet == DB_TOO_NEW)
+    {
+      mess="Error loading wallet.dat: Wallet requires newer version of LitecoinPlus\n";
+      printf(mess);
+      return(mess);
+    }
+    else if (nLoadWalletRet == DB_NEED_REWRITE)
+    {
+      mess="Wallet needed to be rewritten: restart LitecoinPlus to complete\n";
+      printf(mess);
+      return(mess);
+    }
+    else
+    {
+      mess="Unknown error loading wallet.dat\n";
+      printf(mess);
+      return(mess);
+    } 
+  }
+  
+  mess="Wallet loaded...\n";
+  printf(mess);
+
+  mess="Loaded lables...\n";
+  printf(mess);
+
+  // Restore wallet transaction metadata
+  BOOST_FOREACH(const CWalletTx& wtxOld, vWtx)
+  {
+    uint256 hash = wtxOld.GetHash();
+    std::map<uint256, CWalletTx>::iterator mi = pwalletMain->mapWallet.find(hash);
+    if (mi != pwalletMain->mapWallet.end())
+    {
+      const CWalletTx* copyFrom = &wtxOld;
+      CWalletTx* copyTo = &mi->second;
+      copyTo->mapValue = copyFrom->mapValue;
+      copyTo->vOrderForm = copyFrom->vOrderForm;
+      copyTo->nTimeReceived = copyFrom->nTimeReceived;
+      copyTo->nTimeSmart = copyFrom->nTimeSmart;
+      copyTo->fFromMe = copyFrom->fFromMe;
+      copyTo->strFromAccount = copyFrom->strFromAccount;
+      copyTo->nOrderPos = copyFrom->nOrderPos;
+      copyTo->WriteToDisk();
+    }
+  }
+  mess="scanning for transactions...\n";
+  printf(mess);
+
+  pwalletMain->ScanForWalletTransactions(pindexGenesisBlock, true);
+  pwalletMain->ReacceptWalletTransactions();
+  mess="Please restart your wallet.\n";
+  printf(mess);
+
+  mess="Zap Wallet Finished.\nPlease restart your wallet for changes to take effect.\n";
+
+  return (mess);
+}
+

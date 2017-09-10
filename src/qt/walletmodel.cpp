@@ -280,16 +280,24 @@ bool WalletModel::setWalletEncrypted(bool encrypted, const SecureString &passphr
     }
 }
 
-bool WalletModel::setWalletLocked(bool locked, const SecureString &passPhrase)
+bool WalletModel::setWalletLocked(bool locked, const SecureString &passPhrase, bool formint)
 {
     if(locked)
     {
+        if(formint)
+            wallet->fWalletUnlockMintOnly=false;
         // Lock
         return wallet->Lock();
     }
     else
     {
         // Unlock
+        bool rc;
+        rc = wallet->Unlock(passPhrase);
+        if (rc && formint)
+            wallet->fWalletUnlockMintOnly=true;
+
+        return rc;
         return wallet->Unlock(passPhrase);
     }
 }
@@ -308,6 +316,16 @@ bool WalletModel::changePassphrase(const SecureString &oldPass, const SecureStri
 bool WalletModel::backupWallet(const QString &filename)
 {
     return BackupWallet(*wallet, filename.toLocal8Bit().data());
+}
+
+void WalletModel::checkWallet(int& nMismatchSpent, int64& nBalanceInQuestion, int& nOrphansFound)
+{
+    wallet->Fix_SpentCoins(nMismatchSpent, nBalanceInQuestion, nOrphansFound, true);
+}
+
+void WalletModel::repairWallet(int& nMismatchSpent, int64& nBalanceInQuestion, int& nOrphansFound)
+{
+    wallet->Fix_SpentCoins(nMismatchSpent, nBalanceInQuestion, nOrphansFound);
 }
 
 void WalletModel::getStakeWeight(uint64& nMinWeight, uint64& nMaxWeight, uint64& nWeight )
@@ -360,6 +378,12 @@ void WalletModel::unsubscribeFromCoreSignals()
 WalletModel::UnlockContext WalletModel::requestUnlock()
 {
     bool was_locked = getEncryptionStatus() == Locked;
+
+    if ((!was_locked) && wallet->fWalletUnlockMintOnly)
+    {
+        setWalletLocked(true);
+        was_locked = getEncryptionStatus() == Locked;
+    }
     if(was_locked)
     {
         // Request UI to unlock wallet
@@ -368,7 +392,7 @@ WalletModel::UnlockContext WalletModel::requestUnlock()
     // If wallet is still locked, unlock was failed or cancelled, mark context as invalid
     bool valid = getEncryptionStatus() != Locked;
 
-    return UnlockContext(this, valid, was_locked);
+    return UnlockContext(this, valid, was_locked && !wallet->fWalletUnlockMintOnly);
 }
 
 WalletModel::UnlockContext::UnlockContext(WalletModel *wallet, bool valid, bool relock):

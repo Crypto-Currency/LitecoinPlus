@@ -19,6 +19,8 @@
 #include <QScrollBar>
 #include <QClipboard>
 
+extern bool fWalletUnlockMintOnly;
+
 SendCoinsDialog::SendCoinsDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SendCoinsDialog),

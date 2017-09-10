@@ -94,7 +94,7 @@ double GetPoSKernelPS(const CBlockIndex* blockindex)
         pindex = pindex->pprev;
     }
 
-    return dStakeKernelsTriedAvg / nStakesTime;
+    return nStakesTime ? dStakeKernelsTriedAvg / nStakesTime : 0;
 }
 
 

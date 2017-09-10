@@ -283,6 +283,7 @@ std::string HelpMessage()
         "  -keypool=<n>           " + _("Set key pool size to <n> (default: 100)") + "\n" +
         "  -rescan                " + _("Rescan the block chain for missing wallet transactions") + "\n" +
         "  -salvagewallet         " + _("Attempt to recover private keys from a corrupt wallet.dat") + "\n" +
+        "  -zapwallettxes  " + _("Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup") + "\n" +
         "  -checkblocks=<n>       " + _("How many blocks to check at startup (default: 2500, 0 = all)") + "\n" +
         "  -checklevel=<n>        " + _("How thorough the block verification is (0-6, default: 1)") + "\n" +
         "  -loadblock=<file>      " + _("Imports blocks from external blk000?.dat file") + "\n" +
@@ -387,6 +388,11 @@ bool AppInit2()
 
     if (GetBoolArg("-salvagewallet")) {
         // Rewrite just private keys: rescan to find transactions
+        SoftSetBoolArg("-rescan", true);
+    }
+
+    if (GetBoolArg("-zapwallettxes", false)) {
+        // -zapwallettx implies a rescan
         SoftSetBoolArg("-rescan", true);
     }
 
@@ -649,9 +655,6 @@ bool AppInit2()
     BOOST_FOREACH(string strDest, mapMultiArgs["-seednode"])
         AddOneShot(strDest);
 
-    // TODO: replace this by DNSseed
-    // AddOneShot(string(""));
-
     // ********************************************************* Step 7: load blockchain
 
     if (!bitdb.Open(GetDataDir()))
@@ -716,6 +719,29 @@ bool AppInit2()
     }
 
     // ********************************************************* Step 8: load wallet
+
+    // needed to restore wallet transaction meta data after -zapwallettxes
+    std::vector<CWalletTx> vWtx;
+
+    if (GetBoolArg("-zapwallettxes", false))
+    {
+      //debug
+      printf("running zapwallettxes from startup.\n");
+
+        uiInterface.InitMessage(_("Zapping all transactions from wallet..."));
+        printf("Zapping all transactions from wallet...\n");
+
+        pwalletMain = new CWallet("wallet.dat");
+        DBErrors nZapWalletRet = pwalletMain->ZapWalletTx(vWtx);
+        if (nZapWalletRet != DB_LOAD_OK) {
+            uiInterface.InitMessage(_("Error loading wallet.dat: Wallet corrupted"));
+            printf("Error loading wallet.dat: Wallet corrupted\n");
+            return false;
+        }
+
+        delete pwalletMain;
+        pwalletMain = NULL;
+    }
 
     uiInterface.InitMessage(_("Loading wallet..."));
     printf("Loading wallet...\n");
@@ -796,6 +822,30 @@ bool AppInit2()
         nStart = GetTimeMillis();
         pwalletMain->ScanForWalletTransactions(pindexRescan, true);
         printf(" rescan      %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+        nWalletDBUpdated++;
+
+        // Restore wallet transaction metadata after -zapwallettxes
+        if (GetBoolArg("-zapwallettxes", false))
+        {
+          BOOST_FOREACH(const CWalletTx& wtxOld, vWtx)
+          {
+            uint256 hash = wtxOld.GetHash();
+            std::map<uint256, CWalletTx>::iterator mi = pwalletMain->mapWallet.find(hash);
+            if (mi != pwalletMain->mapWallet.end())
+            {
+              const CWalletTx* copyFrom = &wtxOld;
+              CWalletTx* copyTo = &mi->second;
+              copyTo->mapValue = copyFrom->mapValue;
+              copyTo->vOrderForm = copyFrom->vOrderForm;
+              copyTo->nTimeReceived = copyFrom->nTimeReceived;
+              copyTo->nTimeSmart = copyFrom->nTimeSmart;
+              copyTo->fFromMe = copyFrom->fFromMe;
+              copyTo->strFromAccount = copyFrom->strFromAccount;
+              copyTo->nOrderPos = copyFrom->nOrderPos;
+              copyTo->WriteToDisk();
+            }
+          }
+        }
     }
 
     // ********************************************************* Step 9: import blocks

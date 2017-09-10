@@ -88,7 +88,11 @@ private:
     QAction *optionsAction;
     QAction *toggleHideAction;
     QAction *exportAction;
+    QAction *unlockWalletStakeAction;
     QAction *encryptWalletAction;
+    QAction *checkWalletAction;
+    QAction *repairWalletAction;
+    QAction *zapWalletAction;
     QAction *backupWalletAction;
     QAction *changePassphraseAction;
     QAction *aboutQtAction;
@@ -113,6 +117,8 @@ private:
     void createToolBars();
     /** Create system tray (notification) icon */
     void createTrayIcon();
+
+  void splashMessage(const std::string &message);
 
 public slots:
     /** Set number of connections shown in the UI */
@@ -170,6 +176,16 @@ private slots:
     void incomingTransaction(const QModelIndex & parent, int start, int end);
     /** Encrypt the wallet */
     void encryptWallet(bool status);
+    /** Unlock wallet to stake*/
+    void unlockWalletStake();
+
+    /** Check the wallet */
+    void checkWallet();
+    /** Repair the wallet */
+    void repairWallet();
+
+    /** zap the wallet */
+    void zapWallet();
     /** Backup the wallet */
     void backupWallet();
     /** Change encrypted wallet passphrase */
