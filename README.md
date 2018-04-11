@@ -22,7 +22,8 @@ That takes us roughly to half way to the cap of 4,000,000<br>
 <br>
 web site http://litecoinplus.co/<br>
 explorer http://lcp.altcoinwarz.com/<br>
-windows-QT https://drive.google.com/open?id=0B1cnD3W8c0jtd3lzbVNYamJzR1k<br>
+windows-QT http://litecoinplus.co/Downloads/litecoinplus-qt-v3.0.1.1.zip<br>
+macOS QT  http://litecoinplus.co/Downloads/LitecoinPlus-Qt.dmg<br>
 BitcoinTalk https://bitcointalk.org/index.php?topic=599095.780<br>
 
 
