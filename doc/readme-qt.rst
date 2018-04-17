@@ -1,10 +1,10 @@
-Bitcoin-qt: Qt4 GUI for Bitcoin
+litecoinplus-qt: Qt4 GUI for LitecoinPlus
 ===============================
 
 Build instructions
 ===================
 
-Debian
+Debian / Ubuntu
 -------
 
 First, make sure that the required packages for Qt4 development of your
@@ -16,16 +16,22 @@ distribution are installed, for Debian and Ubuntu these are:
         libboost-filesystem-dev libboost-program-options-dev libboost-thread-dev \
         libssl-dev libdb4.8++-dev
 
-then execute the following:
+If you get an error that libdb4.8++dev cannot be found, please do the following first:
+
+::
+    add-apt-repository ppa:bitcoin/bitcoin
+    apt-get update
+
+then do the first step again. After installation completed, then execute the following:
 
 ::
 
     qmake
     make
 
-Alternatively, install Qt Creator and open the `bitcoin-qt.pro` file.
+Alternatively, install Qt Creator and open the `litecoinplus-qt.pro` file.
 
-An executable named `bitcoin-qt` will be built.
+An executable named `litecoinplus-qt` will be built.
 
 
 Windows
@@ -104,35 +110,6 @@ FreeDesktop notification interface through DBUS using the following qmake option
 
     qmake "USE_DBUS=1"
 
-Generation of QR codes
------------------------
-
-libqrencode may be used to generate QRCode images for payment requests. 
-It can be downloaded from http://fukuchi.org/works/qrencode/index.html.en, or installed via your package manager. Pass the USE_QRCODE 
-flag to qmake to control this:
-
-+--------------+--------------------------------------------------------------------------+
-| USE_QRCODE=0 | (the default) No QRCode support - libarcode not required                 |
-+--------------+--------------------------------------------------------------------------+
-| USE_QRCODE=1 | QRCode support enabled                                                   |
-+--------------+--------------------------------------------------------------------------+
-
-
-Berkely DB version warning
-==========================
-
-A warning for people using the *static binary* version of Bitcoin on a Linux/UNIX-ish system (tl;dr: **Berkely DB databases are not forward compatible**).
-
-The static binary version of Bitcoin is linked against libdb4.8 (see also `this Debian issue`_).
-
-Now the nasty thing is that databases from 5.X are not compatible with 4.X.
-
-If the globally installed development package of Berkely DB installed on your system is 5.X, any source you
-build yourself will be linked against that. The first time you run with a 5.X version the database will be upgraded,
-and 4.X cannot open the new format. This means that you cannot go back to the old statically linked version without
-significant hassle!
-
-.. _`this Debian issue`: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=621425
 
 Ubuntu 11.10 warning
 ====================
