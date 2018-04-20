@@ -45,14 +45,13 @@ protected:
 	unsigned int hashesSize;
 	hashList *baseHash;
 	hashList *latestHash;
-	unsigned int totalHashes;
 
 public:
 	boostStartup() {
 		this->baseHash = NULL;
-		this->totalHashes = 0;
 	}
 	~boostStartup() {
+		this->hashes.clear();
 		hashList *loopHashes = this->baseHash;
 		hashList *deleteThis;
 		while (loopHashes != NULL) {
@@ -75,6 +74,9 @@ public:
 		}
 	}
 	void AddHash(uint256 hash, unsigned int nHeight) {
+		if (hash == uint256(0)) {
+			return;
+		}
 		hashList *loopHashes = new hashList();
 		loopHashes->hash = hash;
 		loopHashes->nHeight = nHeight;
@@ -90,9 +92,7 @@ public:
 		boost::filesystem::path path = GetDataDir() / "boost.dat";
 	    FILE* file = fopen(path.string().c_str(), "rb");
 	    if (file) {
-			this->totalHashes = GetFilesize(file) / sizeof(uint256);
-			int i = this->totalHashes;
-			while (i > 0) {
+			while (!feof(file)) {
 				hashList *loopHashes = new hashList();
 				fread(reinterpret_cast<char*>(&loopHashes->hash), 1, sizeof(loopHashes->hash), file);
 				fread(reinterpret_cast<char*>(&loopHashes->nHeight), 1, sizeof(loopHashes->nHeight), file);
@@ -103,7 +103,6 @@ public:
 					this->latestHash->next = loopHashes;
 					this->latestHash = loopHashes;
 				}
-				i--;
 			}
 			fclose(file);
 	    }
