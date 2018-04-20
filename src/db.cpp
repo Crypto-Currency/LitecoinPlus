@@ -23,6 +23,108 @@ using namespace boost;
 
 unsigned int nWalletDBUpdated;
 
+// by Simone: startup boost system (see LoadBlockIndexGuts() below)
+class hashList
+{
+protected:
+public:
+	hashList() {
+		this->hash = uint256(0);
+		this->nHeight = 0;
+		this->next = NULL;
+	}
+	uint256 hash;
+	unsigned int nHeight;
+	hashList *next;
+};
+
+class boostStartup
+{
+protected:
+	map<unsigned int, uint256> hashes;
+	unsigned int hashesSize;
+	hashList *baseHash;
+	hashList *latestHash;
+	unsigned int totalHashes;
+
+public:
+	boostStartup() {
+		this->baseHash = NULL;
+		this->totalHashes = 0;
+	}
+	~boostStartup() {
+		hashList *loopHashes = this->baseHash;
+		hashList *deleteThis;
+		while (loopHashes != NULL) {
+			deleteThis = loopHashes = loopHashes->next;
+			delete deleteThis;
+		}
+	}
+	uint256 GetHash(unsigned int nHeight) {
+	    map<unsigned int, uint256>::iterator mi = this->hashes.find(nHeight);
+		if (mi != this->hashes.end()) {
+        	return (*mi).second;
+		}
+		return(uint256(0));
+	}
+	void BoostSearch() {
+		hashList *loopHashes = this->baseHash;
+		while (loopHashes != NULL) {
+			this->hashes[loopHashes->nHeight] = loopHashes->hash;
+			loopHashes = loopHashes->next;
+		}
+	}
+	void AddHash(uint256 hash, unsigned int nHeight) {
+		hashList *loopHashes = new hashList();
+		loopHashes->hash = hash;
+		loopHashes->nHeight = nHeight;
+		if (this->baseHash == NULL) {
+			this->baseHash = loopHashes;
+			this->latestHash = this->baseHash;
+		} else {
+			this->latestHash->next = loopHashes;
+			this->latestHash = loopHashes;
+		}
+	}
+	void Load() {
+		boost::filesystem::path path = GetDataDir() / "boost.dat";
+	    FILE* file = fopen(path.string().c_str(), "rb");
+	    if (file) {
+			this->totalHashes = GetFilesize(file) / sizeof(uint256);
+			int i = this->totalHashes;
+			while (i > 0) {
+				hashList *loopHashes = new hashList();
+				fread(reinterpret_cast<char*>(&loopHashes->hash), 1, sizeof(loopHashes->hash), file);
+				fread(reinterpret_cast<char*>(&loopHashes->nHeight), 1, sizeof(loopHashes->nHeight), file);
+				if (this->baseHash == NULL) {
+					this->baseHash = loopHashes;
+					this->latestHash = this->baseHash;
+				} else {
+					this->latestHash->next = loopHashes;
+					this->latestHash = loopHashes;
+				}
+				i--;
+			}
+			fclose(file);
+	    }
+	}
+	void Store() {
+		boost::filesystem::path path = GetDataDir() / "boost.dat";
+	    FILE* file = fopen(path.string().c_str(), "wb");
+	    if (file) {
+			hashList *loopHashes = this->baseHash;
+			while (loopHashes != NULL) {
+				fwrite(reinterpret_cast<const char*>(&loopHashes->hash), 1, sizeof(loopHashes->hash), file);
+				fwrite(reinterpret_cast<const char*>(&loopHashes->nHeight), 1, sizeof(loopHashes->nHeight), file);
+				loopHashes = loopHashes->next;
+			}
+			fclose(file);
+	    }
+	}
+};
+
+
+
 
 
 //
@@ -615,10 +717,10 @@ CBlockIndex static * InsertBlockIndex(uint256 hash)
 bool CTxDB::LoadBlockIndex()
 {
     if (!LoadBlockIndexGuts())
-        return false;
+    	return false;
 
     if (fRequestShutdown)
-        return true;
+		return true;
 
     // Calculate bnChainTrust
     vector<pair<int, CBlockIndex*> > vSortedByHeight;
@@ -787,10 +889,8 @@ bool CTxDB::LoadBlockIndex()
         CTxDB txdb;
         block.SetBestChain(txdb, pindexFork);
     }
-
     return true;
 }
-
 
 
 bool CTxDB::LoadBlockIndexGuts()
@@ -802,6 +902,13 @@ bool CTxDB::LoadBlockIndexGuts()
 
     // Load mapBlockIndex
     unsigned int fFlags = DB_SET_RANGE;
+
+	// By Simone: Boost startup
+	boostStartup *boost = new boostStartup();
+	boost->Load();
+	boost->BoostSearch();
+	unsigned int ccc = 0;
+
     loop
     {
         // Read next record
@@ -813,8 +920,10 @@ bool CTxDB::LoadBlockIndexGuts()
         fFlags = DB_NEXT;
         if (ret == DB_NOTFOUND)
             break;
-        else if (ret != 0)
+        else if (ret != 0) {
+			delete boost;
             return false;
+		}
 
         // Unserialize
 
@@ -826,36 +935,49 @@ bool CTxDB::LoadBlockIndexGuts()
             CDiskBlockIndex diskindex;
             ssValue >> diskindex;
 
+			// by Simone: the hash function is extremely heavy, let's use the booster to read a cache of hashes from the disk, if available
+			uint256 blockHash;
+			blockHash = boost->GetHash(diskindex.nHeight);
+			if (blockHash == uint256(0)) {
+				blockHash = diskindex.GetBlockHash();
+				boost->AddHash(blockHash, diskindex.nHeight);
+			}
+			ccc++;
+
             // Construct block index object
-            CBlockIndex* pindexNew = InsertBlockIndex(diskindex.GetBlockHash());
-            pindexNew->pprev          = InsertBlockIndex(diskindex.hashPrev);
-            pindexNew->pnext          = InsertBlockIndex(diskindex.hashNext);
-            pindexNew->nFile          = diskindex.nFile;
-            pindexNew->nBlockPos      = diskindex.nBlockPos;
-            pindexNew->nHeight        = diskindex.nHeight;
-            pindexNew->nMint          = diskindex.nMint;
-            pindexNew->nMoneySupply   = diskindex.nMoneySupply;
-            pindexNew->nFlags         = diskindex.nFlags;
-            pindexNew->nStakeModifier = diskindex.nStakeModifier;
-            pindexNew->prevoutStake   = diskindex.prevoutStake;
-            pindexNew->nStakeTime     = diskindex.nStakeTime;
-            pindexNew->hashProofOfStake = diskindex.hashProofOfStake;
-            pindexNew->nVersion       = diskindex.nVersion;
-            pindexNew->hashMerkleRoot = diskindex.hashMerkleRoot;
-            pindexNew->nTime          = diskindex.nTime;
-            pindexNew->nBits          = diskindex.nBits;
-            pindexNew->nNonce         = diskindex.nNonce;
+	        CBlockIndex* pindexNew = InsertBlockIndex(blockHash);
+	        pindexNew->pprev          = InsertBlockIndex(diskindex.hashPrev);
+	        pindexNew->pnext          = InsertBlockIndex(diskindex.hashNext);
+	        pindexNew->nFile          = diskindex.nFile;
+	        pindexNew->nBlockPos      = diskindex.nBlockPos;
+	        pindexNew->nHeight        = diskindex.nHeight;
+	        pindexNew->nMint          = diskindex.nMint;
+	        pindexNew->nMoneySupply   = diskindex.nMoneySupply;
+	        pindexNew->nFlags         = diskindex.nFlags;
+	        pindexNew->nStakeModifier = diskindex.nStakeModifier;
+	        pindexNew->prevoutStake   = diskindex.prevoutStake;
+	        pindexNew->nStakeTime     = diskindex.nStakeTime;
+	        pindexNew->hashProofOfStake = diskindex.hashProofOfStake;
+	        pindexNew->nVersion       = diskindex.nVersion;
+	        pindexNew->hashMerkleRoot = diskindex.hashMerkleRoot;
+	        pindexNew->nTime          = diskindex.nTime;
+	        pindexNew->nBits          = diskindex.nBits;
+	        pindexNew->nNonce         = diskindex.nNonce;
 
-            // Watch for genesis block
-            if (pindexGenesisBlock == NULL && diskindex.GetBlockHash() == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet))
-                pindexGenesisBlock = pindexNew;
+	        // Watch for genesis block
+	        if (pindexGenesisBlock == NULL && blockHash == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet)) {
+	            pindexGenesisBlock = pindexNew;
+			}
 
-            if (!pindexNew->CheckIndex())
-                return error("LoadBlockIndex() : CheckIndex failed at %d", pindexNew->nHeight);
+			if (!pindexNew->CheckIndex()) {
+				delete boost;
+	            return error("LoadBlockIndex() : CheckIndex failed at %d", pindexNew->nHeight);
+			}
 
-            // ppcoin: build setStakeSeen
-            if (pindexNew->IsProofOfStake())
-                setStakeSeen.insert(make_pair(pindexNew->prevoutStake, pindexNew->nStakeTime));
+	        // ppcoin: build setStakeSeen
+	        if (pindexNew->IsProofOfStake())
+	            setStakeSeen.insert(make_pair(pindexNew->prevoutStake, pindexNew->nStakeTime));
+
         }
         else
         {
@@ -863,15 +985,17 @@ bool CTxDB::LoadBlockIndexGuts()
         }
         }    // try
         catch (std::exception &e) {
-            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
+			delete boost;
+			return error("%s() : deserialize error", __PRETTY_FUNCTION__);
         }
     }
-    pcursor->close();
 
+	// by Simone: close cursor, store boostStartup file for next time the software is run
+    pcursor->close();
+	boost->Store();
+	delete boost;
     return true;
 }
-
-
 
 
 
