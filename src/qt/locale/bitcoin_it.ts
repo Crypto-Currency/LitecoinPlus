@@ -342,6 +342,17 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
         <translation>Staking non attivo perche' non ci sono coin maturi</translation>
     </message>
     <message>
+        <location line="+1194"/>
+        <source>Staking.
+ Your weight is %1
+ Network weight is %2
+ You have 50% chance of producing a stake within %3</source>
+        <translation>Staking.
+ Il tuo peso e' %1
+ Il peso della rete e' %2
+ Hai 50% di possibilita' di produrre un blocco da stake in %3</translation>
+    </message>
+    <message>
         <location line="+237"/>
         <source>Synchronizing with network...</source>
         <translation>Sincronizzazione con la rete...</translation>
