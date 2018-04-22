@@ -30,80 +30,59 @@ protected:
 public:
 	hashList() {
 		this->hash = uint256(0);
-		this->nHeight = 0;
-		this->next = NULL;
+		this->key = 0;
 	}
 	uint256 hash;
-	unsigned int nHeight;
-	hashList *next;
+	unsigned long long key;
 };
 
 class boostStartup
 {
 protected:
-	map<unsigned int, uint256> hashes;
-	unsigned int hashesSize;
-	hashList *baseHash;
-	hashList *latestHash;
+	map<unsigned long long, uint256> hashes;
 
 public:
+	bool lastSearchSuccess;
 	boostStartup() {
-		this->baseHash = NULL;
+		this->lastSearchSuccess = false;
 	}
 	~boostStartup() {
 		this->hashes.clear();
-		hashList *loopHashes = this->baseHash;
-		hashList *deleteThis;
-		while (loopHashes != NULL) {
-			deleteThis = loopHashes = loopHashes->next;
-			delete deleteThis;
-		}
 	}
-	uint256 GetHash(unsigned int nHeight) {
-	    map<unsigned int, uint256>::iterator mi = this->hashes.find(nHeight);
+	uint256 GetHash(int nHeight, unsigned int nBlockPos) {
+		unsigned long long key = nHeight + ((unsigned long)nBlockPos << 32);
+	    map<unsigned long long, uint256>::iterator mi = this->hashes.find(key);
 		if (mi != this->hashes.end()) {
+			this->lastSearchSuccess = true;
         	return (*mi).second;
 		}
+		this->lastSearchSuccess = false;
 		return(uint256(0));
 	}
-	void BoostSearch() {
-		hashList *loopHashes = this->baseHash;
-		while (loopHashes != NULL) {
-			this->hashes[loopHashes->nHeight] = loopHashes->hash;
-			loopHashes = loopHashes->next;
-		}
-	}
-	void AddHash(uint256 hash, unsigned int nHeight) {
-		if (hash == uint256(0)) {
+	void AddHash(uint256 hash, int nHeight, unsigned int nBlockPos) {
+		unsigned long long key = nHeight + ((unsigned long)nBlockPos << 32);
+	    map<unsigned long long, uint256>::iterator mi = this->hashes.find(key);
+		if (mi != this->hashes.end()) {
+			string s = "boostStartup::DUPLICATED KEY, please report these 3 lines: %d\n";
+			s += "%s\n";
+			s += "%s\n\n";
+			OutputDebugStringF(s.c_str(), nHeight, hash.ToString().c_str(), (*mi).second.ToString().c_str());
 			return;
 		}
-		hashList *loopHashes = new hashList();
-		loopHashes->hash = hash;
-		loopHashes->nHeight = nHeight;
-		if (this->baseHash == NULL) {
-			this->baseHash = loopHashes;
-			this->latestHash = this->baseHash;
-		} else {
-			this->latestHash->next = loopHashes;
-			this->latestHash = loopHashes;
-		}
+		this->hashes[key] = hash;
 	}
 	void Load() {
 		boost::filesystem::path path = GetDataDir() / "boost.dat";
 	    FILE* file = fopen(path.string().c_str(), "rb");
 	    if (file) {
+			hashList *loopHashes = new hashList();
+			bool r = true;
 			while (!feof(file)) {
-				hashList *loopHashes = new hashList();
-				fread(reinterpret_cast<char*>(&loopHashes->hash), 1, sizeof(loopHashes->hash), file);
-				fread(reinterpret_cast<char*>(&loopHashes->nHeight), 1, sizeof(loopHashes->nHeight), file);
-				if (this->baseHash == NULL) {
-					this->baseHash = loopHashes;
-					this->latestHash = this->baseHash;
-				} else {
-					this->latestHash->next = loopHashes;
-					this->latestHash = loopHashes;
-				}
+				r &= fread(reinterpret_cast<char*>(&loopHashes->hash), 1, sizeof(loopHashes->hash), file);
+				r &= fread(reinterpret_cast<char*>(&loopHashes->key), 1, sizeof(loopHashes->key), file);
+				this->hashes[loopHashes->key] = loopHashes->hash;
 			}
+			delete loopHashes;
 			fclose(file);
 	    }
 	}
@@ -111,13 +90,16 @@ public:
 		boost::filesystem::path path = GetDataDir() / "boost.dat";
 	    FILE* file = fopen(path.string().c_str(), "wb");
 	    if (file) {
-			hashList *loopHashes = this->baseHash;
-			while (loopHashes != NULL) {
+			hashList *loopHashes = new hashList();
+		    map<unsigned long long, uint256>::iterator mi = this->hashes.begin();
+			for (; mi != this->hashes.end(); ++mi) {
+				loopHashes->hash = mi->second;
+				loopHashes->key = mi->first;
 				fwrite(reinterpret_cast<const char*>(&loopHashes->hash), 1, sizeof(loopHashes->hash), file);
-				fwrite(reinterpret_cast<const char*>(&loopHashes->nHeight), 1, sizeof(loopHashes->nHeight), file);
-				loopHashes = loopHashes->next;
+				fwrite(reinterpret_cast<const char*>(&loopHashes->key), 1, sizeof(loopHashes->key), file);
 			}
 			fclose(file);
+			delete loopHashes;
 	    }
 	}
 };
@@ -899,15 +881,12 @@ bool CTxDB::LoadBlockIndexGuts()
     if (!pcursor)
         return false;
 
-    // Load mapBlockIndex
-    unsigned int fFlags = DB_SET_RANGE;
-
 	// By Simone: Boost startup
 	boostStartup *boost = new boostStartup();
 	boost->Load();
-	boost->BoostSearch();
-	unsigned int ccc = 0;
 
+    // Load mapBlockIndex
+    unsigned int fFlags = DB_SET_RANGE;
     loop
     {
         // Read next record
@@ -919,10 +898,8 @@ bool CTxDB::LoadBlockIndexGuts()
         fFlags = DB_NEXT;
         if (ret == DB_NOTFOUND)
             break;
-        else if (ret != 0) {
-			delete boost;
+        else if (ret != 0)
             return false;
-		}
 
         // Unserialize
 
@@ -934,49 +911,44 @@ bool CTxDB::LoadBlockIndexGuts()
             CDiskBlockIndex diskindex;
             ssValue >> diskindex;
 
-			// by Simone: the hash function is extremely heavy, let's use the booster to read a cache of hashes from the disk, if available
-			uint256 blockHash;
-			blockHash = boost->GetHash(diskindex.nHeight);
-			if (blockHash == uint256(0)) {
+			// by Simone: boost structure
+			uint256 blockHash = uint256(0);
+			blockHash = boost->GetHash(diskindex.nHeight, diskindex.nBlockPos);
+			if (!boost->lastSearchSuccess) {
 				blockHash = diskindex.GetBlockHash();
-				boost->AddHash(blockHash, diskindex.nHeight);
+				boost->AddHash(blockHash, diskindex.nHeight, diskindex.nBlockPos);
 			}
-			ccc++;
 
             // Construct block index object
-	        CBlockIndex* pindexNew = InsertBlockIndex(blockHash);
-	        pindexNew->pprev          = InsertBlockIndex(diskindex.hashPrev);
-	        pindexNew->pnext          = InsertBlockIndex(diskindex.hashNext);
-	        pindexNew->nFile          = diskindex.nFile;
-	        pindexNew->nBlockPos      = diskindex.nBlockPos;
-	        pindexNew->nHeight        = diskindex.nHeight;
-	        pindexNew->nMint          = diskindex.nMint;
-	        pindexNew->nMoneySupply   = diskindex.nMoneySupply;
-	        pindexNew->nFlags         = diskindex.nFlags;
-	        pindexNew->nStakeModifier = diskindex.nStakeModifier;
-	        pindexNew->prevoutStake   = diskindex.prevoutStake;
-	        pindexNew->nStakeTime     = diskindex.nStakeTime;
-	        pindexNew->hashProofOfStake = diskindex.hashProofOfStake;
-	        pindexNew->nVersion       = diskindex.nVersion;
-	        pindexNew->hashMerkleRoot = diskindex.hashMerkleRoot;
-	        pindexNew->nTime          = diskindex.nTime;
-	        pindexNew->nBits          = diskindex.nBits;
-	        pindexNew->nNonce         = diskindex.nNonce;
+            CBlockIndex* pindexNew = InsertBlockIndex(blockHash);
+            pindexNew->pprev          = InsertBlockIndex(diskindex.hashPrev);
+            pindexNew->pnext          = InsertBlockIndex(diskindex.hashNext);
+            pindexNew->nFile          = diskindex.nFile;
+            pindexNew->nBlockPos      = diskindex.nBlockPos;
+            pindexNew->nHeight        = diskindex.nHeight;
+            pindexNew->nMint          = diskindex.nMint;
+            pindexNew->nMoneySupply   = diskindex.nMoneySupply;
+            pindexNew->nFlags         = diskindex.nFlags;
+            pindexNew->nStakeModifier = diskindex.nStakeModifier;
+            pindexNew->prevoutStake   = diskindex.prevoutStake;
+            pindexNew->nStakeTime     = diskindex.nStakeTime;
+            pindexNew->hashProofOfStake = diskindex.hashProofOfStake;
+            pindexNew->nVersion       = diskindex.nVersion;
+            pindexNew->hashMerkleRoot = diskindex.hashMerkleRoot;
+            pindexNew->nTime          = diskindex.nTime;
+            pindexNew->nBits          = diskindex.nBits;
+            pindexNew->nNonce         = diskindex.nNonce;
 
-	        // Watch for genesis block
-	        if (pindexGenesisBlock == NULL && blockHash == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet)) {
-	            pindexGenesisBlock = pindexNew;
-			}
+            // Watch for genesis block
+            if (pindexGenesisBlock == NULL && blockHash == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet))
+                pindexGenesisBlock = pindexNew;
 
-			if (!pindexNew->CheckIndex()) {
-				delete boost;
-	            return error("LoadBlockIndex() : CheckIndex failed at %d", pindexNew->nHeight);
-			}
+            if (!pindexNew->CheckIndex())
+                return error("LoadBlockIndex() : CheckIndex failed at %d", pindexNew->nHeight);
 
-	        // ppcoin: build setStakeSeen
-	        if (pindexNew->IsProofOfStake())
-	            setStakeSeen.insert(make_pair(pindexNew->prevoutStake, pindexNew->nStakeTime));
-
+            // ppcoin: build setStakeSeen
+            if (pindexNew->IsProofOfStake())
+                setStakeSeen.insert(make_pair(pindexNew->prevoutStake, pindexNew->nStakeTime));
         }
         else
         {
@@ -985,17 +957,14 @@ bool CTxDB::LoadBlockIndexGuts()
         }    // try
         catch (std::exception &e) {
 			delete boost;
-			return error("%s() : deserialize error", __PRETTY_FUNCTION__);
+            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
         }
     }
-
-	// by Simone: close cursor, store boostStartup file for next time the software is run
     pcursor->close();
 	boost->Store();
 	delete boost;
     return true;
 }
-
 
 
 //
