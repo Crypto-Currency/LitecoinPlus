@@ -975,7 +975,8 @@ void BitcoinGUI::zapWallet()
   printf("running zapwallettxes from qt menu.\n");
 
   // bring up splash screen
-  QSplashScreen splash(QPixmap(":/images/splash"), 0);
+  QSplashScreen splash(QPixmap(":/images/splash"), Qt::WindowStaysOnTopHint);
+  splash.setEnabled(false);
   splash.show();
   splash.setAutoFillBackground(true);
   splashref = &splash;
