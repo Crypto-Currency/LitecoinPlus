@@ -65,6 +65,16 @@ extern CWallet *pwalletMain;
 extern int64 nLastCoinStakeSearchInterval;
 extern unsigned int nStakeTargetSpacing;
 static QSplashScreen *splashref;
+extern BitcoinGUI *guiref;
+
+// by Simone: used for progress around the code
+// ATTENTION: be sure to be in the same thread when calling this one, is not like the ui_interface one
+void updateBitcoinGUISplashMessage(char *message)
+{
+	if (guiref) {
+		guiref-> splashMessage(_(message), true);
+	}
+}
 
 BitcoinGUI::BitcoinGUI(QWidget *parent):
     QMainWindow(parent),
@@ -1075,7 +1085,7 @@ void BitcoinGUI::zapWallet()
   splashMessage(_("scanning for transactions..."));
   printf(" zap wallet  scanning for transactions\n");
 
-  pwalletMain->ScanForWalletTransactions(pindexGenesisBlock, true);
+  pwalletMain->ScanForWalletTransactions(pindexGenesisBlock, true, clientModel->getNumBlocks());
   pwalletMain->ReacceptWalletTransactions();
   splashMessage(_("Please restart your wallet."));
   printf(" zap wallet  done - please restart wallet.\n");
@@ -1087,12 +1097,17 @@ void BitcoinGUI::zapWallet()
   QMessageBox::warning(this, tr("Zap Wallet Finished."), tr("Please restart your wallet for changes to take effect."));
 }
 
-void BitcoinGUI::splashMessage(const std::string &message)
+void BitcoinGUI::splashMessage(const std::string &message, bool quickSleep)
 {
   if(splashref)
   {
     splashref->showMessage(QString::fromStdString(message), Qt::AlignVCenter|Qt::AlignHCenter, QColor(255,40,55));
     QApplication::instance()->processEvents();
+	if (quickSleep) {
+		Sleep(50);
+	} else {
+		Sleep(500);
+	}
   }
 }
 
