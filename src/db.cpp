@@ -7,6 +7,7 @@
 #include "net.h"
 #include "checkpoints.h"
 #include "util.h"
+#include "ui_interface.h"
 #include "main.h"
 #include "kernel.h"
 #include <boost/version.hpp>
@@ -20,6 +21,7 @@
 using namespace std;
 using namespace boost;
 
+extern CClientUIInterface uiInterface;
 
 unsigned int nWalletDBUpdated;
 
@@ -42,9 +44,11 @@ protected:
 	map<unsigned long long, uint256> hashes;
 
 public:
+	bool isBoosted;
 	bool lastSearchSuccess;
 	boostStartup() {
 		this->lastSearchSuccess = false;
+		this->isBoosted = false;
 	}
 	~boostStartup() {
 		this->hashes.clear();
@@ -75,14 +79,14 @@ public:
 		boost::filesystem::path path = GetDataDir() / "boost.dat";
 	    FILE* file = fopen(path.string().c_str(), "rb");
 	    if (file) {
-			hashList *loopHashes = new hashList();
+			hashList loopHashes;
 			bool r = true;
 			while (!feof(file)) {
-				r &= fread(reinterpret_cast<char*>(&loopHashes->hash), 1, sizeof(loopHashes->hash), file);
-				r &= fread(reinterpret_cast<char*>(&loopHashes->key), 1, sizeof(loopHashes->key), file);
-				this->hashes[loopHashes->key] = loopHashes->hash;
+				this->isBoosted = true;
+				r &= fread(reinterpret_cast<char*>(&loopHashes.hash), 1, sizeof(loopHashes.hash), file);
+				r &= fread(reinterpret_cast<char*>(&loopHashes.key), 1, sizeof(loopHashes.key), file);
+				this->hashes[loopHashes.key] = loopHashes.hash;
 			}
-			delete loopHashes;
 			fclose(file);
 	    }
 	}
@@ -90,16 +94,15 @@ public:
 		boost::filesystem::path path = GetDataDir() / "boost.dat";
 	    FILE* file = fopen(path.string().c_str(), "wb");
 	    if (file) {
-			hashList *loopHashes = new hashList();
+			hashList loopHashes;
 		    map<unsigned long long, uint256>::iterator mi = this->hashes.begin();
 			for (; mi != this->hashes.end(); ++mi) {
-				loopHashes->hash = mi->second;
-				loopHashes->key = mi->first;
-				fwrite(reinterpret_cast<const char*>(&loopHashes->hash), 1, sizeof(loopHashes->hash), file);
-				fwrite(reinterpret_cast<const char*>(&loopHashes->key), 1, sizeof(loopHashes->key), file);
+				loopHashes.hash = mi->second;
+				loopHashes.key = mi->first;
+				fwrite(reinterpret_cast<const char*>(&loopHashes.hash), 1, sizeof(loopHashes.hash), file);
+				fwrite(reinterpret_cast<const char*>(&loopHashes.key), 1, sizeof(loopHashes.key), file);
 			}
 			fclose(file);
-			delete loopHashes;
 	    }
 	}
 };
@@ -874,11 +877,19 @@ bool CTxDB::LoadBlockIndex()
 }
 
 
+u_int32_t CTxDB::GetCount()
+{
+	// TO DO
+
+    return 0;
+}
+
 bool CTxDB::LoadBlockIndexGuts()
 {
     // Get database cursor
     Dbc* pcursor = GetCursor();
-    if (!pcursor)
+    Dbc* pcursor1 = GetCursor();
+    if (!pcursor || !pcursor1)
         return false;
 
 	// By Simone: Boost startup
@@ -887,22 +898,62 @@ bool CTxDB::LoadBlockIndexGuts()
 
     // Load mapBlockIndex
     unsigned int fFlags = DB_SET_RANGE;
+	unsigned long ccc = 0;
+
+	// count number of records
+	unsigned long cnt = 0;
     loop
     {
         // Read next record
-        CDataStream ssKey(SER_DISK, CLIENT_VERSION);
-        if (fFlags == DB_SET_RANGE)
+	    CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+        if (fFlags == DB_SET_RANGE) {
             ssKey << make_pair(string("blockindex"), uint256(0));
-        CDataStream ssValue(SER_DISK, CLIENT_VERSION);
+		}
+	    CDataStream ssValue(SER_DISK, CLIENT_VERSION);
         int ret = ReadAtCursor(pcursor, ssKey, ssValue, fFlags);
+        if (ret == DB_NOTFOUND)
+            break;
+        fFlags = DB_NEXT;
+        string strType;
+        ssKey >> strType;
+		if (strType == "blockindex") {
+			cnt++;
+		}
+	}
+	fFlags = DB_SET_RANGE;
+	int oldProgress = -1;
+    loop
+    {
+        // Read next record
+	    CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+        if (fFlags == DB_SET_RANGE) {
+            ssKey << make_pair(string("blockindex"), uint256(0));
+		}
+	    CDataStream ssValue(SER_DISK, CLIENT_VERSION);
+        int ret = ReadAtCursor(pcursor1, ssKey, ssValue, fFlags);
         fFlags = DB_NEXT;
         if (ret == DB_NOTFOUND)
             break;
         else if (ret != 0)
             return false;
+		int progress = (int)(((double)(ccc) / (double)(cnt)) * 100);
+		if (progress > 100) {
+			progress = 100;
+		}
+		if (oldProgress != progress) {
+			char pString[256];
+			if (boost->isBoosted) {
+				sprintf(pString, _("Fast load (%d%%)...").c_str(), progress);
+			} else {
+				
+				sprintf(pString, (_("Building index (SLOW, %d%%)...") + "\n" + _("[DO NOT close, wait until 100%%]")).c_str(), progress);
+			}
+			uiInterface.InitMessage(pString);
+			oldProgress = progress;
+		}
+		ccc++;
 
         // Unserialize
-
         try {
         string strType;
         ssKey >> strType;
@@ -961,6 +1012,7 @@ bool CTxDB::LoadBlockIndexGuts()
         }
     }
     pcursor->close();
+    pcursor1->close();
 	boost->Store();
 	delete boost;
     return true;
