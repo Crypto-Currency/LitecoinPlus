@@ -375,7 +375,7 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
     <message>
         <location line="+292"/>
         <source>&amp;Zap Wallet...</source>
-        <translation>&amp;Elimina portafoglio...</translation>
+        <translation>&amp;Ricostruisci portafoglio...</translation>
     </message>
     <message>
         <location line="-299"/>
@@ -726,6 +726,11 @@ Indirizzo: %4
         <location filename="../bitcoin.cpp" line="+109"/>
         <source>A fatal error occurred. LitecoinPlus can no longer continue safely and will quit.</source>
         <translation>E' occorso un errore di sistema. LitecoinPlus non puo' continuare in sicurezza e sara' terminato.</translation>
+    </message>
+    <message>
+        <location line="+62"/>
+        <source>"Do NOT shutdown your PC until this window disappears"</source>
+        <translation>NON spegnere il PC fino a che questa finestra scompare</translation>
     </message>
 </context>
 <context>
@@ -2540,6 +2545,21 @@ Indirizzo: %4
         <location line="+1"/>
         <source>wallet.dat corrupt, salvage failed</source>
         <translation>wallet.dat e' corrotto, recupero fallito</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Fast load (%d%%)...</source>
+        <translation>Caricamento rapido (%d%%)...</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Building index (SLOW, %d%%)...</source>
+        <translation>Ricostruzione indice (LENTA %d%%)...</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>[DO NOT close, wait until 100%%]</source>
+        <translation>[NON CHIUDERE fino a che arriva al 100%%]</translation>
     </message>
     <message>
         <location line="-43"/>
