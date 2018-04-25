@@ -57,8 +57,7 @@ void Shutdown(void* parg)
     static bool fTaken;
 
     // Make this thread recognisable as the shutdown thread
-	// By Simone: changed the thread name to litecoinplus- instead of bitcoin-
-    RenameThread("litecoinplus-shutoff");
+    RenameThread("bitcoin-shutoff");
 
     bool fFirstThread = false;
     {
@@ -84,7 +83,6 @@ void Shutdown(void* parg)
         Sleep(50);
         printf("LitecoinPlus exited\n\n");
         fExit = true;
-
 #ifndef QT_GUI
         // ensure non-UI client gets exited here, but let Bitcoin-Qt reach 'return 0;' in bitcoin.cpp
         exit(0);
@@ -123,8 +121,6 @@ bool AppInit(int argc, char* argv[])
     bool fRet = false;
     try
     {
-
-
         //
         // Parameters
         //
@@ -916,7 +912,6 @@ bool AppInit2()
     // ********************************************************* Step 12: finished
 
     uiInterface.InitMessage(_("Done loading"));
-
     printf("Done loading\n");
 
     if (!strErrors.str().empty())

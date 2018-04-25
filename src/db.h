@@ -101,7 +101,6 @@ protected:
     std::string strFile;
     DbTxn *activeTxn;
     bool fReadOnly;
-	void *statData;
 
     explicit CDB(const char* pszFile, const char* pszMode="r+");
     ~CDB() { Close(); }
@@ -347,7 +346,6 @@ public:
     bool WriteCheckpointPubKey(const std::string& strPubKey);
     bool LoadBlockIndex();
 private:
-    u_int32_t GetCount();
     bool LoadBlockIndexGuts();
 };
 

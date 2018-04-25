@@ -174,8 +174,4 @@ QT_TRANSLATE_NOOP("bitcoin-core", "Wallet needed to be rewritten: restart Liteco
 QT_TRANSLATE_NOOP("bitcoin-core", "Warning: Disk space is low!"),
 QT_TRANSLATE_NOOP("bitcoin-core", "Warning: This version is obsolete, upgrade required!"),
 QT_TRANSLATE_NOOP("bitcoin-core", "wallet.dat corrupt, salvage failed"),
-QT_TRANSLATE_NOOP("bitcoin-core", "Fast load (%d%%)..."),
-QT_TRANSLATE_NOOP("bitcoin-core", "Building index (SLOW, %d%%)..."),
-QT_TRANSLATE_NOOP("bitcoin-core", "[DO NOT close, wait until 100%%]"),
-
 };

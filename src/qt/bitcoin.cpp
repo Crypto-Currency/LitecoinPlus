@@ -12,9 +12,6 @@
 #include "ui_interface.h"
 #include "qtipcserver.h"
 
-#include <stdint.h>
-
-#include <QDesktopWidget>
 #include <QApplication>
 #include <QMessageBox>
 #include <QTextCodec>
@@ -22,14 +19,6 @@
 #include <QTranslator>
 #include <QSplashScreen>
 #include <QLibraryInfo>
-#include <QEvent>
-#include <QCloseEvent>
-#include <QLabel>
-#include <QRegExp>
-#include <QTextTable>
-#include <QTextCursor>
-#include <QVBoxLayout>
-#include <QObject>
 
 #if defined(BITCOIN_NEED_QT_PLUGINS) && !defined(_BITCOIN_QT_PLUGINS_INCLUDED)
 #define _BITCOIN_QT_PLUGINS_INCLUDED
@@ -45,37 +34,6 @@ Q_IMPORT_PLUGIN(qtaccessiblewidgets)
 // Need a global reference for the notifications to find the GUI
 static BitcoinGUI *guiref;
 static QSplashScreen *splashref;
-
-/** by Simone: "Shutdown" window */
-ShutdownWindow::ShutdownWindow(QWidget *parent, Qt::WindowFlags f):
-    QWidget(parent, f)
-{
-    QVBoxLayout *layout = new QVBoxLayout();
-	QLabel *l = new QLabel();
-	l->setText("LitecoinPlus: do NOT shutdown the computer until this window disappears");
-    layout->addWidget(l);
-    setLayout(layout);
-}
-QWidget* ShutdownWindow::showShutdownWindow(Qt::WindowFlags f)
-{
-    // Show a simple window indicating shutdown status
-    QWidget *shutdownWindow = new ShutdownWindow(0, f);
-    shutdownWindow->setWindowTitle("Do NOT shutdown your PC until this window disappears");
-
-    // Center shutdown window in the screen
-	QRect screenGeometry = QApplication::desktop()->screenGeometry();
-	int x = (screenGeometry.width() - shutdownWindow->width()) / 2;
-	int y = (screenGeometry.height() - shutdownWindow->height()) / 2;
-	shutdownWindow->move(x, y);
-    shutdownWindow->show();
-    return shutdownWindow;
-}
-
-void ShutdownWindow::closeEvent(QCloseEvent *event)
-{
-    event->ignore();
-}
-
 
 static void ThreadSafeMessageBox(const std::string& message, const std::string& caption, int style)
 {
@@ -126,7 +84,7 @@ static void InitMessage(const std::string &message)
 {
     if(splashref)
     {
-		splashref->showMessage(QString::fromStdString(message), Qt::AlignVCenter|Qt::AlignHCenter, QColor(60,40,12));
+        splashref->showMessage(QString::fromStdString(message), Qt::AlignVCenter|Qt::AlignHCenter, QColor(60,40,12));
         QApplication::instance()->processEvents();
     }
 }
@@ -239,8 +197,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    QSplashScreen splash(QPixmap(":/images/splash"), Qt::WindowStaysOnTopHint);
-	splash.setEnabled(false);
+    QSplashScreen splash(QPixmap(":/images/splash"), 0);
     if (GetBoolArg("-splash", true) && !GetBoolArg("-min"))
     {
         splash.show();
@@ -291,11 +248,6 @@ int main(int argc, char *argv[])
                 ipcInit(argc, argv);
 
                 app.exec();
-
-				// by Simone: shutdown Window
-				ShutdownWindow::showShutdownWindow(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint);
-				app.processEvents();
-				Sleep(100);
 
                 window.hide();
                 window.setClientModel(0);
