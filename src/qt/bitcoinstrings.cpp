@@ -177,5 +177,5 @@ QT_TRANSLATE_NOOP("bitcoin-core", "wallet.dat corrupt, salvage failed"),
 QT_TRANSLATE_NOOP("bitcoin-core", "Fast load (%d%%)..."),
 QT_TRANSLATE_NOOP("bitcoin-core", "Building index (SLOW, %d%%)..."),
 QT_TRANSLATE_NOOP("bitcoin-core", "[DO NOT close, wait until 100%%]"),
-QT_TRANSLATE_NOOP("bitcoin-core", "Scanning transactions %d%%..."),
+
 };
