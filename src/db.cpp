@@ -911,7 +911,7 @@ bool CTxDB::LoadBlockIndexGuts()
 		}
 	    CDataStream ssValue(SER_DISK, CLIENT_VERSION);
         int ret = ReadAtCursor(pcursor, ssKey, ssValue, fFlags);
-        if (ret == DB_NOTFOUND)
+        if (ret != 0)
             break;
         fFlags = DB_NEXT;
         string strType;
@@ -920,6 +920,8 @@ bool CTxDB::LoadBlockIndexGuts()
 			cnt++;
 		}
 	}
+    pcursor->close();
+	Sleep(1000);
 	fFlags = DB_SET_RANGE;
 	int oldProgress = -1;
     loop
@@ -1012,7 +1014,6 @@ bool CTxDB::LoadBlockIndexGuts()
             return error("%s() : deserialize error", __PRETTY_FUNCTION__);
         }
     }
-    pcursor->close();
     pcursor1->close();
 	boost->Store();
 	delete boost;
