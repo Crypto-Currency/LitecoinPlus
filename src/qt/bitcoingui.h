@@ -133,9 +133,12 @@ private:
     /** Create system tray (notification) icon */
     void createTrayIcon();
 
-  void splashMessage(const std::string &message);
 
 public slots:
+
+// by Simone, make this public
+    void splashMessage(const std::string &message, bool quickSleep = false);
+
     /** Set number of connections shown in the UI */
     void setNumConnections(int count);
     /** Set number of blocks shown in the UI */

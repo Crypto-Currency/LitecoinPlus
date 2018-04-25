@@ -43,7 +43,8 @@ Q_IMPORT_PLUGIN(qtaccessiblewidgets)
 #endif
 
 // Need a global reference for the notifications to find the GUI
-static BitcoinGUI *guiref;
+// By Simone: BitcoinGUI is accessible from outside too, removes static
+BitcoinGUI *guiref;
 static QSplashScreen *splashref;
 
 /** by Simone: "Shutdown" window */
