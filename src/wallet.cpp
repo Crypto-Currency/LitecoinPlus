@@ -16,7 +16,7 @@
 using namespace std;
 extern int nStakeMaxAge;
 extern bool fWalletUnlockMintOnly;
-extern void updateBitcoinGUISplashMessage(char *);
+
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -788,27 +788,15 @@ bool CWalletTx::WriteToDisk()
 // Scan the block chain (starting in pindexStart) for transactions
 // from or to us. If fUpdate is true, found transactions that already
 // exist in the wallet will be updated.
-int CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate, int numBlocks)
+int CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate)
 {
     int ret = 0;
 
     CBlockIndex* pindex = pindexStart;
     {
         LOCK(cs_wallet);
-		int ccc = 0;
-		int progress;
-		int oldProgress = -1;
-		char message[256];
         while (pindex)
         {
-#ifdef QT_GUI
-			progress = (int)(((float)ccc / (float)numBlocks) * 100);
-			if ((progress != oldProgress) && (numBlocks != 0)) {
-				sprintf(message, "Scanning transactions %d%%...", progress);
-				updateBitcoinGUISplashMessage(message);
-				oldProgress = progress;
-			}
-#endif
             CBlock block;
             block.ReadFromDisk(pindex, true);
             BOOST_FOREACH(CTransaction& tx, block.vtx)
@@ -817,7 +805,6 @@ int CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate, i
                     ret++;
             }
             pindex = pindex->pnext;
-			ccc++;
         }
     }
     return ret;
