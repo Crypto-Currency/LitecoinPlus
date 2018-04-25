@@ -28,6 +28,21 @@ class QStackedWidget;
 class QUrl;
 QT_END_NAMESPACE
 
+
+/** by Simone: "Shutdown" window */
+class ShutdownWindow : public QWidget
+{
+	Q_OBJECT
+
+public:
+    explicit ShutdownWindow(QWidget *parent=0, Qt::WindowFlags f=0);
+    static QWidget *showShutdownWindow(Qt::WindowFlags f);
+
+protected:
+    void closeEvent(QCloseEvent *event);
+};
+
+
 /**
   Bitcoin GUI main class. This class represents the main window of the Bitcoin UI. It communicates with both the client and
   wallet models to give the user an up-to-date view of the current core state.

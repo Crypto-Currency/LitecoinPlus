@@ -281,16 +281,16 @@ void BitcoinGUI::createActions()
     encryptWalletAction->setCheckable(true);
 
     unlockWalletStakeAction = new QAction(QIcon(":/icons/lock_open"), tr("&Unlock To Stake..."), this);
-    unlockWalletStakeAction->setStatusTip(tr("Unlock wallet for Staking only"));
+    //unlockWalletStakeAction->setStatusTip(tr("Unlock wallet for Staking only"));
 
     checkWalletAction = new QAction(QIcon(":/icons/inspect"), tr("&Check Wallet..."), this);
-    checkWalletAction->setStatusTip(tr("Check wallet integrity and report findings"));
+    //checkWalletAction->setStatusTip(tr("Check wallet integrity and report findings"));
 
     repairWalletAction = new QAction(QIcon(":/icons/repair"), tr("&Repair Wallet..."), this);
-    repairWalletAction->setStatusTip(tr("Fix wallet integrity and remove orphans"));
+    //repairWalletAction->setStatusTip(tr("Fix wallet integrity and remove orphans"));
 
     zapWalletAction = new QAction(QIcon(":/icons/repair"), tr("&Zap Wallet..."), this);
-    zapWalletAction->setStatusTip(tr("Zaps txes from wallet then rescans (this is slow)..."));
+    //zapWalletAction->setStatusTip(tr("Zaps txes from wallet then rescans (this is slow)..."));
 
     backupWalletAction = new QAction(QIcon(":/icons/filesave"), tr("&Backup Wallet..."), this);
     backupWalletAction->setToolTip(tr("Backup wallet to another location"));
@@ -975,7 +975,8 @@ void BitcoinGUI::zapWallet()
   printf("running zapwallettxes from qt menu.\n");
 
   // bring up splash screen
-  QSplashScreen splash(QPixmap(":/images/splash"), 0);
+  QSplashScreen splash(QPixmap(":/images/splash"), Qt::WindowStaysOnTopHint);
+  splash.setEnabled(false);
   splash.show();
   splash.setAutoFillBackground(true);
   splashref = &splash;
