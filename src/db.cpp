@@ -32,16 +32,18 @@ protected:
 public:
 	hashList() {
 		this->hash = uint256(0);
-		this->key = 0;
+		this->nFile = 0;
+		this->nBlockPos = 0;
 	}
 	uint256 hash;
-	unsigned long long key;
+	unsigned int nFile;
+	unsigned int nBlockPos;
 };
 
 class boostStartup
 {
 protected:
-	map<unsigned long long, uint256> hashes;
+	map<unsigned int, uint256> hashes[8];
 
 public:
 	bool isBoosted;
@@ -51,59 +53,78 @@ public:
 		this->isBoosted = false;
 	}
 	~boostStartup() {
-		this->hashes.clear();
+		for (int i = 0; i < 8; i++) {
+			this->hashes[i].clear();
+		}
 	}
-	uint256 GetHash(int nHeight, unsigned int nBlockPos) {
-		unsigned long long key = nHeight + ((unsigned long)nBlockPos << 32);
-	    map<unsigned long long, uint256>::iterator mi = this->hashes.find(key);
-		if (mi != this->hashes.end()) {
+	uint256 GetHash(unsigned int nFile, unsigned int nBlockPos) {
+		if (nFile < 1) {
+			this->lastSearchSuccess = false;
+			return(uint256(0));
+		}
+	    map<unsigned int, uint256>::iterator mi = this->hashes[nFile - 1].find(nBlockPos);
+		if (mi != this->hashes[nFile - 1].end()) {
 			this->lastSearchSuccess = true;
         	return (*mi).second;
 		}
 		this->lastSearchSuccess = false;
 		return(uint256(0));
 	}
-	void AddHash(uint256 hash, int nHeight, unsigned int nBlockPos) {
-		unsigned long long key = nHeight + ((unsigned long)nBlockPos << 32);
-	    map<unsigned long long, uint256>::iterator mi = this->hashes.find(key);
-		if (mi != this->hashes.end()) {
+	void AddHash(uint256 hash, unsigned int nFile, unsigned int nBlockPos) {
+		if (nFile < 1) {
+			return;
+		}
+	    map<unsigned int, uint256>::iterator mi = this->hashes[nFile - 1].find(nBlockPos);
+		if (mi != this->hashes[nFile - 1].end()) {
 			string s = "boostStartup::DUPLICATED KEY, please report these 3 lines: %d\n";
 			s += "%s\n";
 			s += "%s\n\n";
-			OutputDebugStringF(s.c_str(), nHeight, hash.ToString().c_str(), (*mi).second.ToString().c_str());
+			OutputDebugStringF(s.c_str(), nFile, hash.ToString().c_str(), (*mi).second.ToString().c_str());
 			return;
 		}
-		this->hashes[key] = hash;
+		this->hashes[nFile - 1][nBlockPos] = hash;
 	}
 	void Load() {
-		boost::filesystem::path path = GetDataDir() / "boost.dat";
-	    FILE* file = fopen(path.string().c_str(), "rb");
-	    if (file) {
-			hashList loopHashes;
-			bool r = true;
-			while (!feof(file)) {
-				this->isBoosted = true;
-				r &= fread(reinterpret_cast<char*>(&loopHashes.hash), 1, sizeof(loopHashes.hash), file);
-				r &= fread(reinterpret_cast<char*>(&loopHashes.key), 1, sizeof(loopHashes.key), file);
-				this->hashes[loopHashes.key] = loopHashes.hash;
+		for (int i = 0; i < 8; i++) {
+			char fName[16];
+			sprintf(fName, "boost%04d.dat", i + 1);
+			boost::filesystem::path path = GetDataDir() / fName;
+			FILE* file = fopen(path.string().c_str(), "rb");
+			if (file) {
+				hashList loopHashes;
+				bool r = true;
+				while (!feof(file)) {
+					this->isBoosted = true;
+					r &= fread(reinterpret_cast<char*>(&loopHashes.hash), 1, sizeof(loopHashes.hash), file);
+					r &= fread(reinterpret_cast<char*>(&loopHashes.nBlockPos), 1, sizeof(loopHashes.nBlockPos), file);
+					this->hashes[i][loopHashes.nBlockPos] = loopHashes.hash;
+				}
+				fclose(file);
 			}
-			fclose(file);
-	    }
+		}
 	}
 	void Store() {
-		boost::filesystem::path path = GetDataDir() / "boost.dat";
-	    FILE* file = fopen(path.string().c_str(), "wb");
-	    if (file) {
-			hashList loopHashes;
-		    map<unsigned long long, uint256>::iterator mi = this->hashes.begin();
-			for (; mi != this->hashes.end(); ++mi) {
-				loopHashes.hash = mi->second;
-				loopHashes.key = mi->first;
-				fwrite(reinterpret_cast<const char*>(&loopHashes.hash), 1, sizeof(loopHashes.hash), file);
-				fwrite(reinterpret_cast<const char*>(&loopHashes.key), 1, sizeof(loopHashes.key), file);
+		for (int i = 0; i < 8; i++) {
+			char fName[16];
+			sprintf(fName, "boost%04d.dat", i + 1);
+			boost::filesystem::path path = GetDataDir() / fName;
+			map<unsigned int, uint256>::iterator mi = this->hashes[i].begin();
+			if (mi == this->hashes[i].end()) {
+				continue;
 			}
-			fclose(file);
-	    }
+			FILE* file = fopen(path.string().c_str(), "wb");
+			if (file) {
+				hashList loopHashes;
+				mi = this->hashes[i].begin();
+				for (; mi != this->hashes[i].end(); ++mi) {
+					loopHashes.hash = mi->second;
+					loopHashes.nBlockPos = mi->first;
+					fwrite(reinterpret_cast<const char*>(&loopHashes.hash), 1, sizeof(loopHashes.hash), file);
+					fwrite(reinterpret_cast<const char*>(&loopHashes.nBlockPos), 1, sizeof(loopHashes.nBlockPos), file);
+				}
+				fclose(file);
+			}
+		}
 	}
 };
 
@@ -967,10 +988,10 @@ bool CTxDB::LoadBlockIndexGuts()
 
 			// by Simone: boost structure
 			uint256 blockHash = uint256(0);
-			blockHash = boost->GetHash(diskindex.nHeight, diskindex.nBlockPos);
+			blockHash = boost->GetHash(diskindex.nFile, diskindex.nBlockPos);
 			if (!boost->lastSearchSuccess) {
 				blockHash = diskindex.GetBlockHash();
-				boost->AddHash(blockHash, diskindex.nHeight, diskindex.nBlockPos);
+				boost->AddHash(blockHash, diskindex.nFile, diskindex.nBlockPos);
 			}
 
             // Construct block index object
