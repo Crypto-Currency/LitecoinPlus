@@ -132,14 +132,6 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake);
 void ResendWalletTransactions();
 
 
-
-
-
-
-
-
-
-
 bool GetWalletFile(CWallet* pwallet, std::string &strWalletFileOut);
 
 /** Position on disk for a particular transaction. */
@@ -915,7 +907,9 @@ public:
     uint256 GetHash() const
     {
         uint256 thash;
-        void * scratchbuff = scrypt_buffer_alloc();
+		void * scratchbuff;
+
+        scratchbuff = scrypt_buffer_alloc();
 
         scrypt_hash(CVOIDBEGIN(nVersion), sizeof(block_header), UINTBEGIN(thash), scratchbuff);
 
@@ -1063,8 +1057,8 @@ public:
         }
 
         // Check the header
-        if (fReadTransactions && IsProofOfWork() && !CheckProofOfWork(GetHash(), nBits))
-            return error("CBlock::ReadFromDisk() : errors in block header");
+        //if (fReadTransactions && IsProofOfWork() && !CheckProofOfWork(GetHash(), nBits))
+        //    return error("CBlock::ReadFromDisk() : errors in block header");
 
         return true;
     }

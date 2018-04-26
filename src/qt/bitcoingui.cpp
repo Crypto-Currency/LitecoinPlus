@@ -65,6 +65,16 @@ extern CWallet *pwalletMain;
 extern int64 nLastCoinStakeSearchInterval;
 extern unsigned int nStakeTargetSpacing;
 static QSplashScreen *splashref;
+extern BitcoinGUI *guiref;
+
+// by Simone: used for progress around the code
+// ATTENTION: be sure to be in the same thread when calling this one, is not like the ui_interface one
+void updateBitcoinGUISplashMessage(char *message)
+{
+	if (guiref) {
+		guiref-> splashMessage(_(message), true);
+	}
+}
 
 BitcoinGUI::BitcoinGUI(QWidget *parent):
     QMainWindow(parent),
@@ -281,16 +291,16 @@ void BitcoinGUI::createActions()
     encryptWalletAction->setCheckable(true);
 
     unlockWalletStakeAction = new QAction(QIcon(":/icons/lock_open"), tr("&Unlock To Stake..."), this);
-    unlockWalletStakeAction->setStatusTip(tr("Unlock wallet for Staking only"));
+    //unlockWalletStakeAction->setStatusTip(tr("Unlock wallet for Staking only"));
 
     checkWalletAction = new QAction(QIcon(":/icons/inspect"), tr("&Check Wallet..."), this);
-    checkWalletAction->setStatusTip(tr("Check wallet integrity and report findings"));
+    //checkWalletAction->setStatusTip(tr("Check wallet integrity and report findings"));
 
     repairWalletAction = new QAction(QIcon(":/icons/repair"), tr("&Repair Wallet..."), this);
-    repairWalletAction->setStatusTip(tr("Fix wallet integrity and remove orphans"));
+    //repairWalletAction->setStatusTip(tr("Fix wallet integrity and remove orphans"));
 
     zapWalletAction = new QAction(QIcon(":/icons/repair"), tr("&Zap Wallet..."), this);
-    zapWalletAction->setStatusTip(tr("Zaps txes from wallet then rescans (this is slow)..."));
+    //zapWalletAction->setStatusTip(tr("Zaps txes from wallet then rescans (this is slow)..."));
 
     backupWalletAction = new QAction(QIcon(":/icons/filesave"), tr("&Backup Wallet..."), this);
     backupWalletAction->setToolTip(tr("Backup wallet to another location"));
@@ -975,7 +985,8 @@ void BitcoinGUI::zapWallet()
   printf("running zapwallettxes from qt menu.\n");
 
   // bring up splash screen
-  QSplashScreen splash(QPixmap(":/images/splash"), 0);
+  QSplashScreen splash(QPixmap(":/images/splash"), Qt::WindowStaysOnTopHint);
+  splash.setEnabled(false);
   splash.show();
   splash.setAutoFillBackground(true);
   splashref = &splash;
@@ -1074,7 +1085,7 @@ void BitcoinGUI::zapWallet()
   splashMessage(_("scanning for transactions..."));
   printf(" zap wallet  scanning for transactions\n");
 
-  pwalletMain->ScanForWalletTransactions(pindexGenesisBlock, true);
+  pwalletMain->ScanForWalletTransactions(pindexGenesisBlock, true, clientModel->getNumBlocks());
   pwalletMain->ReacceptWalletTransactions();
   splashMessage(_("Please restart your wallet."));
   printf(" zap wallet  done - please restart wallet.\n");
@@ -1086,12 +1097,17 @@ void BitcoinGUI::zapWallet()
   QMessageBox::warning(this, tr("Zap Wallet Finished."), tr("Please restart your wallet for changes to take effect."));
 }
 
-void BitcoinGUI::splashMessage(const std::string &message)
+void BitcoinGUI::splashMessage(const std::string &message, bool quickSleep)
 {
   if(splashref)
   {
     splashref->showMessage(QString::fromStdString(message), Qt::AlignVCenter|Qt::AlignHCenter, QColor(255,40,55));
     QApplication::instance()->processEvents();
+	if (quickSleep) {
+		Sleep(50);
+	} else {
+		Sleep(500);
+	}
   }
 }
 
