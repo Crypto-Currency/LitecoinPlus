@@ -48,9 +48,11 @@ protected:
 public:
 	bool isBoosted;
 	bool lastSearchSuccess;
+	unsigned int recordCount;
 	boostStartup() {
 		this->lastSearchSuccess = false;
 		this->isBoosted = false;
+		this->recordCount = 0;
 	}
 	~boostStartup() {
 		for (int i = 0; i < 8; i++) {
@@ -98,6 +100,7 @@ public:
 					r &= fread(reinterpret_cast<char*>(&loopHashes.hash), 1, sizeof(loopHashes.hash), file);
 					r &= fread(reinterpret_cast<char*>(&loopHashes.nBlockPos), 1, sizeof(loopHashes.nBlockPos), file);
 					this->hashes[i][loopHashes.nBlockPos] = loopHashes.hash;
+					this->recordCount++;
 				}
 				fclose(file);
 			}
@@ -908,9 +911,8 @@ u_int32_t CTxDB::GetCount()
 bool CTxDB::LoadBlockIndexGuts()
 {
     // Get database cursor
-    Dbc* pcursor = GetCursor();
     Dbc* pcursor1 = GetCursor();
-    if (!pcursor || !pcursor1)
+    if (!pcursor1)
         return false;
 
 	// By Simone: Boost startup
@@ -920,29 +922,36 @@ bool CTxDB::LoadBlockIndexGuts()
     // Load mapBlockIndex
     unsigned int fFlags = DB_SET_RANGE;
 	unsigned long ccc = 0;
+	unsigned long cnt = 0;
 
 	// count number of records
-	unsigned long cnt = 0;
-    loop
-    {
-        // Read next record
-	    CDataStream ssKey(SER_DISK, CLIENT_VERSION);
-        if (fFlags == DB_SET_RANGE) {
-            ssKey << make_pair(string("blockindex"), uint256(0));
+	if (boost->recordCount < 500000) {
+	    Dbc* pcursor = GetCursor();
+		if (!pcursor)
+		    return false;
+		loop
+		{
+		    // Read next record
+			CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+		    if (fFlags == DB_SET_RANGE) {
+		        ssKey << make_pair(string("blockindex"), uint256(0));
+			}
+			CDataStream ssValue(SER_DISK, CLIENT_VERSION);
+		    int ret = ReadAtCursor(pcursor, ssKey, ssValue, fFlags);
+		    if (ret != 0)
+		        break;
+		    fFlags = DB_NEXT;
+		    string strType;
+		    ssKey >> strType;
+			if (strType == "blockindex") {
+				cnt++;
+			}
 		}
-	    CDataStream ssValue(SER_DISK, CLIENT_VERSION);
-        int ret = ReadAtCursor(pcursor, ssKey, ssValue, fFlags);
-        if (ret != 0)
-            break;
-        fFlags = DB_NEXT;
-        string strType;
-        ssKey >> strType;
-		if (strType == "blockindex") {
-			cnt++;
-		}
+		pcursor->close();
+		Sleep(1000);
+	} else {
+		cnt = boost->recordCount;
 	}
-    pcursor->close();
-	Sleep(1000);
 	fFlags = DB_SET_RANGE;
 	int oldProgress = -1;
     loop
