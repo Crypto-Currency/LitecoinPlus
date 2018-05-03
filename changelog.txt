@@ -1,0 +1,10 @@
+***** Version 3.1.0.0 [release version]
+- Changed from beta to release
+- Boost startup speed by a factor of 15-20 times
+- Fix the splash message on top
+- Fix the clicking of the splash message making the splash disappear
+- Added Italian language
+- Shutdown window
+- ZAP Wallet command improved speed by a factor of 2-3
+- ZAP Wallet command display progress in splash
+
