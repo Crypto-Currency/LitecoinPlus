@@ -127,7 +127,7 @@ static void InitMessage(const std::string &message)
 {
     if(splashref)
     {
-		splashref->showMessage(QString::fromStdString(message), Qt::AlignVCenter|Qt::AlignHCenter, QColor(60,40,12));
+		splashref->showMessage(QString::fromStdString(message), Qt::AlignBottom|Qt::AlignHCenter, QColor(0xcce2fc));
         QApplication::instance()->processEvents();
     }
 }

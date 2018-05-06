@@ -89,6 +89,11 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 {
     resize(850, 550);
     setWindowTitle(tr("LitecoinPlus - Wallet  ")+QString::fromStdString(CLIENT_BUILD));
+  setStyleSheet("QMainWindow{border-image: url(:/images/background) 0 0 0 0 stretch stretch;} QToolButton:!hover{background-color:rgb(197,219,246); color:black;border-style:outset; border-width:2px; border-color:darkgrey; border-radius:10px}  QToolButton:hover{background-color:rgb(255,213,132); color:black; border-style: outset; border-width: 2px; border-radius: 10px; border-color: darkgrey} QToolTip {background-color:rgb(197,219,246); color:black; border: 2px solid grey;} QProgressBar{background-color: #e8e8e8; border: 1px solid grey; border-radius: 7px; padding: 1px; text-align: center;} QProgressBar::chunk{background: QLinearGradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #010e43, stop: 1 blue); border-radius: 7px; margin: 0px;}");
+
+
+    statusBar()->setStyleSheet("QStatusBar{background-color:rgb(197,219,246)}QToolTip {background-color:rgb(255,233,142); color:black; border: 2px solid grey;}");
+
 #ifndef Q_OS_MAC
     qApp->setWindowIcon(QIcon(":icons/bitcoin"));
     setWindowIcon(QIcon(":icons/bitcoin"));
@@ -188,10 +193,6 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
     // as they make the text unreadable (workaround for issue #1071)
     // See https://qt-project.org/doc/qt-4.8/gallery.html
     QString curStyle = qApp->style()->metaObject()->className();
-    if(curStyle == "QWindowsStyle" || curStyle == "QWindowsXPStyle")
-    {
-        progressBar->setStyleSheet("QProgressBar { background-color: #e8e8e8; border: 1px solid grey; border-radius: 7px; padding: 1px; text-align: center; } QProgressBar::chunk { background: QLinearGradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #FF8000, stop: 1 orange); border-radius: 7px; margin: 0px; }");
-    }
 
     statusBar()->addWidget(progressBarLabel);
     statusBar()->addWidget(progressBar);

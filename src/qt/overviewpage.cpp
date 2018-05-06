@@ -162,6 +162,7 @@ void OverviewPage::setNumTransactions(int count)
     ui->labelNumTransactions->setText(QLocale::system().toString(count));
 }
 
+/*
 void OverviewPage::unlockWallet()
 {
     if(model->getEncryptionStatus() == WalletModel::Locked)
@@ -179,6 +180,7 @@ void OverviewPage::unlockWallet()
         ui->unlockWalletButton->setText(QString("Unlock Wallet"));
     }
 }
+*/
 
 void OverviewPage::setModel(WalletModel *model)
 {
@@ -205,6 +207,7 @@ void OverviewPage::setModel(WalletModel *model)
 
         connect(model->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(updateDisplayUnit()));
 
+/*
         // Unlock wallet button
         WalletModel::EncryptionStatus status = model->getEncryptionStatus();
         if(status == WalletModel::Unencrypted)
@@ -212,6 +215,7 @@ void OverviewPage::setModel(WalletModel *model)
             ui->unlockWalletButton->setDisabled(true);
         }
         connect(ui->unlockWalletButton, SIGNAL(clicked()), this, SLOT(unlockWallet()));
+*/
      }
 
     // update the display unit, to not use the default ("ECC")
