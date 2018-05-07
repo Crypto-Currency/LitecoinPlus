@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>715</width>
-    <height>441</height>
+    <height>447</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -251,39 +251,43 @@
           </item>
           <item>
            <widget class="QPushButton" name="HomeButton">
-            <property name="toolTip">
-             <string> Click to go to LitecoinPlus Home page. </string>
-            </property>
             <property name="minimumSize">
              <size>
-              <width>128</width>
-              <height>128</height>
+              <width>200</width>
+              <height>200</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>128</width>
-              <height>128</height>
+              <width>200</width>
+              <height>200</height>
              </size>
             </property>
             <property name="cursor">
              <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="toolTip">
+             <string> Click to go to Litecoin Plus Home page. </string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton{background-color:transparent}</string>
             </property>
             <property name="text">
              <string/>
             </property>
             <property name="icon">
              <iconset resource="../bitcoin.qrc">
-              <normaloff>:/icons/bitcoin_testnet</normaloff>:/icons/bitcoin_testnet</iconset>
+              <normaloff>:/images/backg</normaloff>
+              <normalon>:/images/backg</normalon>:/images/backg</iconset>
             </property>
             <property name="iconSize">
              <size>
-              <width>128</width>
-              <height>128</height>
+              <width>200</width>
+              <height>200</height>
              </size>
             </property>
             <property name="flat">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -418,13 +422,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="unlockWalletButton">
-       <property name="text">
-        <string>Unlock Wallet</string>
-       </property>
-      </widget>
      </item>
     </layout>
    </item>
