@@ -1,0 +1,9 @@
+/*desc="Pacific NW:Inspired from living in Seattle area",vers="1.2"*/
+
+/* first line is looked at to get the skin description */
+
+QMainWindow
+{
+  border-image: url(images/pnw-background.jpg) 0 0 0 0 stretch stretch;
+}
+
