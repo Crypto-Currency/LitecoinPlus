@@ -3194,8 +3194,6 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 			pfrom->addrSeenByPeer = addrMe;
 		}
 
-		fprintf(stderr, "BINGOZZ %s \n", pfrom->addrSeenByPeer.ToString().c_str());
-
         // Be shy and don't send version until we hear
         if (pfrom->fInbound)
             pfrom->PushVersion();
