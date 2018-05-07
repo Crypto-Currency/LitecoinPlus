@@ -1,8 +1,10 @@
 #include "clientmodel.h"
+#include "bantablemodel.h"
 #include "guiconstants.h"
 #include "optionsmodel.h"
 #include "addresstablemodel.h"
 #include "transactiontablemodel.h"
+#include "peertablemodel.h"
 
 #include "alert.h"
 #include "main.h"
@@ -17,10 +19,13 @@ extern unsigned int nStakeTargetSpacing;
 
 ClientModel::ClientModel(OptionsModel *optionsModel, QObject *parent) :
     QObject(parent), optionsModel(optionsModel),
-    cachedNumBlocks(0), cachedNumBlocksOfPeers(0), pollTimer(0)
+    cachedNumBlocks(0), cachedNumBlocksOfPeers(0), pollTimer(0), banTableModel(0), peerTableModel(0)
+
 {
     numBlocksAtStartup = -1;
 
+    banTableModel = new BanTableModel(this);
+    peerTableModel = new PeerTableModel(this);
     pollTimer = new QTimer(this);
     pollTimer->setInterval(MODEL_UPDATE_DELAY);
     pollTimer->start();
@@ -32,6 +37,16 @@ ClientModel::ClientModel(OptionsModel *optionsModel, QObject *parent) :
 ClientModel::~ClientModel()
 {
     unsubscribeFromCoreSignals();
+}
+
+PeerTableModel *ClientModel::getPeerTableModel()
+{
+    return peerTableModel;
+}
+
+BanTableModel *ClientModel::getBanTableModel()
+{
+    return banTableModel;
 }
 
 double ClientModel::getPosKernalPS()
@@ -52,6 +67,16 @@ int ClientModel::getNumConnections() const
 int ClientModel::getNumBlocks() const
 {
     return nBestHeight;
+}
+
+quint64 ClientModel::getTotalBytesRecv() const
+{
+    return CNode::GetTotalBytesRecv();
+}
+
+quint64 ClientModel::getTotalBytesSent() const
+{
+    return CNode::GetTotalBytesSent();
 }
 
 int ClientModel::getNumBlocksAtStartup()
@@ -79,6 +104,7 @@ void ClientModel::updateTimer()
 
         emit numBlocksChanged(newNumBlocks, newNumBlocksOfPeers);
     }
+    Q_EMIT bytesChanged(getTotalBytesRecv(), getTotalBytesSent());
 }
 
 void ClientModel::updateNumConnections(int numConnections)

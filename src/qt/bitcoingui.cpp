@@ -28,6 +28,7 @@
 #include "wallet.h"
 #include "bitcoinrpc.h"
 #include "version.h"
+#include "skinspage.h"
 
 #ifdef Q_OS_MAC
 #include "macdockiconhandler.h"
@@ -89,6 +90,8 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 {
     resize(850, 550);
     setWindowTitle(tr("LitecoinPlus - Wallet  ")+QString::fromStdString(CLIENT_BUILD));
+//  setStyleSheet("");
+//    statusBar()->setStyleSheet("QToolTip {background-color:rgb(255,233,142); color:black; border: 2px solid grey;}");
 #ifndef Q_OS_MAC
     qApp->setWindowIcon(QIcon(":icons/bitcoin"));
     setWindowIcon(QIcon(":icons/bitcoin"));
@@ -129,12 +132,15 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
 
     signVerifyMessageDialog = new SignVerifyMessageDialog(this);
 
+	skinsPage = new SkinsPage(this);
+
     centralWidget = new QStackedWidget(this);
     centralWidget->addWidget(overviewPage);
     centralWidget->addWidget(transactionsPage);
     centralWidget->addWidget(addressBookPage);
     centralWidget->addWidget(receiveCoinsPage);
     centralWidget->addWidget(sendCoinsPage);
+	centralWidget->addWidget(skinsPage);
     setCentralWidget(centralWidget);
 
     // Create status bar
@@ -183,15 +189,6 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
     progressBar = new QProgressBar();
     progressBar->setAlignment(Qt::AlignCenter);
     progressBar->setVisible(false);
-
-    // Override style sheet for progress bar for styles that have a segmented progress bar,
-    // as they make the text unreadable (workaround for issue #1071)
-    // See https://qt-project.org/doc/qt-4.8/gallery.html
-    QString curStyle = qApp->style()->metaObject()->className();
-    if(curStyle == "QWindowsStyle" || curStyle == "QWindowsXPStyle")
-    {
-        progressBar->setStyleSheet("QProgressBar { background-color: #e8e8e8; border: 1px solid grey; border-radius: 7px; padding: 1px; text-align: center; } QProgressBar::chunk { background: QLinearGradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #FF8000, stop: 1 orange); border-radius: 7px; margin: 0px; }");
-    }
 
     statusBar()->addWidget(progressBarLabel);
     statusBar()->addWidget(progressBar);
@@ -261,6 +258,12 @@ void BitcoinGUI::createActions()
     addressBookAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     tabGroup->addAction(addressBookAction);
 
+    skinsPageAction = new QAction(QIcon(":/icons/address-book"), tr("&Skins Page"), this);
+    skinsPageAction->setToolTip(tr("Change the look of your wallet"));
+    skinsPageAction->setCheckable(true);
+    skinsPageAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
+    tabGroup->addAction(skinsPageAction);
+
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
     connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -271,6 +274,8 @@ void BitcoinGUI::createActions()
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(gotoAddressBookPage()));
+    connect(skinsPageAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(skinsPageAction, SIGNAL(triggered()), this, SLOT(gotoSkinsPage()));
 
     quitAction = new QAction(QIcon(":/icons/quit"), tr("E&xit"), this);
     quitAction->setToolTip(tr("Quit application"));
@@ -353,7 +358,7 @@ void BitcoinGUI::createMenuBar()
     settings->addAction(optionsAction);
 
     QMenu *wallet = appMenuBar->addMenu(tr("&Wallet"));
-     wallet->addAction(backupWalletAction);
+    wallet->addAction(backupWalletAction);
     wallet->addSeparator();
     wallet->addAction(encryptWalletAction);
     wallet->addAction(changePassphraseAction);
@@ -382,6 +387,7 @@ void BitcoinGUI::createToolBars()
     toolbar->addAction(receiveCoinsAction);
     toolbar->addAction(historyAction);
     toolbar->addAction(addressBookAction);
+	toolbar->addAction(skinsPageAction);
 
     QToolBar *toolbar2 = addToolBar(tr("Actions toolbar"));
     toolbar2->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -767,6 +773,15 @@ void BitcoinGUI::gotoAddressBookPage()
     connect(exportAction, SIGNAL(triggered()), addressBookPage, SLOT(exportClicked()));
 }
 
+void BitcoinGUI::gotoSkinsPage()
+{
+    skinsPageAction->setChecked(true);
+    centralWidget->setCurrentWidget(skinsPage);
+
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+
 void BitcoinGUI::gotoReceiveCoinsPage()
 {
     receiveCoinsAction->setChecked(true);
@@ -1101,7 +1116,7 @@ void BitcoinGUI::splashMessage(const std::string &message, bool quickSleep)
 {
   if(splashref)
   {
-    splashref->showMessage(QString::fromStdString(message), Qt::AlignVCenter|Qt::AlignHCenter, QColor(255,40,55));
+    splashref->showMessage(QString::fromStdString(message), Qt::AlignBottom|Qt::AlignHCenter, QColor(128, 16, 64));
     QApplication::instance()->processEvents();
 	if (quickSleep) {
 		Sleep(50);
