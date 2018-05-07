@@ -47,7 +47,7 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
     <message>
         <location filename="../forms/addressbookpage.ui" line="+14"/>
         <source>Address Book</source>
-        <translation>Rubrica Indirizzi</translation>
+        <translation>Rubrica</translation>
     </message>
     <message>
         <location line="+22"/>
@@ -400,7 +400,7 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
     <message>
         <location line="+5"/>
         <source>&amp;Address Book</source>
-        <translation>&amp;Rubrica indirizzi</translation>
+        <translation>&amp;Rubrica</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -2558,8 +2558,8 @@ Indirizzo: %4
     </message>
     <message>
         <location line="+1"/>
-        <source>[DO NOT close, wait until 100%%]</source>
-        <translation>[NON CHIUDERE fino a che arriva al 100%%]</translation>
+        <source>[do not interrupt]</source>
+        <translation>[non interrompere]</translation>
     </message>
     <message>
         <location line="-43"/>
