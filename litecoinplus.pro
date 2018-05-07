@@ -141,7 +141,7 @@ HEADERS += src/qt/bitcoingui.h \
     src/walletdb.h \
     src/script.h \
     src/init.h \
-    src/irc.h \
+	src/qt/skinspage.h \
     src/mruset.h \
     src/json/json_spirit_writer_template.h \
     src/json/json_spirit_writer.h \
@@ -183,7 +183,10 @@ HEADERS += src/qt/bitcoingui.h \
     src/qt/rpcconsole.h \
     src/version.h \
     src/netbase.h \
-    src/clientversion.h
+    src/clientversion.h \
+	src/qt/trafficgraphwidget.h \
+	src/qt/bantablemodel.h \
+	src/qt/peertablemodel.h
 
 SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/transactiontablemodel.cpp \
@@ -207,7 +210,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/main.cpp \
     src/init.cpp \
     src/net.cpp \
-    src/irc.cpp \
+	src/qt/skinspage.cpp \
     src/checkpoints.cpp \
     src/addrman.cpp \
     src/db.cpp \
@@ -250,7 +253,11 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/scrypt-x86.S \
     src/scrypt-x86_64.S \
     src/scrypt_mine.cpp \
-    src/pbkdf2.cpp
+    src/pbkdf2.cpp \
+	src/qt/trafficgraphwidget.cpp \
+	src/qt/bantablemodel.cpp \
+	src/qt/peertablemodel.cpp
+
 
 RESOURCES += \
     src/qt/bitcoin.qrc
@@ -261,6 +268,7 @@ FORMS += \
     src/qt/forms/addressbookpage.ui \
     src/qt/forms/signverifymessagedialog.ui \
     src/qt/forms/aboutdialog.ui \
+	src/qt/forms/skinspage.ui \
     src/qt/forms/editaddressdialog.ui \
     src/qt/forms/transactiondescdialog.ui \
     src/qt/forms/overviewpage.ui \

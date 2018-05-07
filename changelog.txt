@@ -1,3 +1,20 @@
+***** Version 3.2.0.1-devel
+- Bootstrap import file speed improved by a factory of 10-12 times
+- Bootstrap import with progress in % (with one decimal progress shown, xx.x%)
+- Network Traffic tab addition in the Help / Debug page
+- Peers tab addition in the Help / Debug page
+- Peers control with manual commands (disconnect, temporary ban)
+   * (ban table is not stored on disk at this time, if mess up simply restart the Wallet)
+- Added backup DNSSEED at startup, better handle rare cases where the first node is full
+- Fixed some missing Italian translations
+- Fixed the "Address Seen by Peer" in internal structure, is now used correctly
+- Merged all changes from original repository
+   * New splash screen
+   * CSS Style set
+- Changed font color of loading messaage (blue pastel, more readable and soft)
+- Changed font color of ZAP Wallet message (dark red pastel, more readable and less harsh)
+
+
 ***** Version 3.1.0.0 [release version]
 - Changed from beta to release
 - Boost startup speed by a factor of 15-20 times
