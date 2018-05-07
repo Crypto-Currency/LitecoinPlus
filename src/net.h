@@ -24,17 +24,32 @@ class CNode;
 class CBlockIndex;
 extern int nBestHeight;
 
+extern bool fRelayTxes;
 
 
 inline unsigned int ReceiveBufferSize() { return 1000*GetArg("-maxreceivebuffer", 5*1000); }
 inline unsigned int SendBufferSize() { return 1000*GetArg("-maxsendbuffer", 1*1000); }
 
+
 void AddOneShot(std::string strDest);
 bool RecvLine(SOCKET hSocket, std::string& strLine);
 bool GetMyExternalIP(CNetAddr& ipRet);
 void AddressCurrentlyConnected(const CService& addr);
+
+// NOTE: When adjusting this, update rpcnet:setban's help ("24h")
+static const unsigned int DEFAULT_MISBEHAVING_BANTIME = 60 * 60 * 24;  // Default 24-hour ban
+
+typedef int NodeId;
+
+extern NodeId nLastNodeId;
+extern CCriticalSection cs_nLastNodeId;
+
 CNode* FindNode(const CNetAddr& ip);
+CNode* FindNode(const CSubNet& subNet);
+CNode* FindNode(const std::string& addrName);
 CNode* FindNode(const CService& ip);
+CNode* FindNode(const NodeId id); //TODO: Remove this
+
 CNode* ConnectNode(CAddress addrConnect, const char *strDest = NULL, int64 nTimeout=0);
 void MapPort();
 unsigned short GetListenPort();
@@ -48,7 +63,6 @@ enum
     LOCAL_IF,     // address a local interface listens on
     LOCAL_BIND,   // address explicit bound to
     LOCAL_UPNP,   // address reported by UPnP
-    LOCAL_IRC,    // address reported by IRC (deprecated)
     LOCAL_HTTP,   // address reported by whatismyip.com and similar
     LOCAL_MANUAL, // address explicitly specified (-externalip=)
 
@@ -66,7 +80,6 @@ bool GetLocal(CService &addr, const CNetAddr *paddrPeer = NULL);
 bool IsReachable(const CNetAddr &addr);
 void SetReachable(enum Network net, bool fFlag = true);
 CAddress GetLocalAddress(const CNetAddr *paddrPeer = NULL);
-
 
 enum
 {
@@ -128,27 +141,100 @@ extern CCriticalSection cs_mapRelay;
 extern std::map<CInv, int64> mapAlreadyAskedFor;
 
 
-
+typedef std::map<std::string, uint64_t> mapMsgCmdSize; //command, total bytes
 
 class CNodeStats
 {
 public:
-    uint64 nServices;
-    int64 nLastSend;
-    int64 nLastRecv;
-    int64 nTimeConnected;
+    NodeId nodeid;
+    uint64_t nServices;
+    bool fRelayTxes;
+    int64_t nLastSend;
+    int64_t nLastRecv;
+	int64_t nLastRecvMicro;
+    int64_t nTimeConnected;
+    int64_t nTimeOffset;
     std::string addrName;
     int nVersion;
-    std::string strSubVer;
-    bool fInbound;
-    int64 nReleaseTime;
-    int nStartingHeight;
+    int64_t nReleaseTime;
     int nMisbehavior;
+    // strSubVer is whatever byte array we read from the wire. However, this field is intended
+    // to be printed out, displayed to humans in various forms and so on. So we sanitize it and
+    // store the sanitized version in cleanSubVer. The original should be used when dealing with
+    // the network or wire types and the cleaned string used when displayed or logged.
+    std::string strSubVer, cleanSubVer;
+    bool fInbound;
+    int nStartingHeight;
+    uint64_t nSendBytes;
+    mapMsgCmdSize mapSendBytesPerMsgCmd;
+    uint64_t nRecvBytes;
+    mapMsgCmdSize mapRecvBytesPerMsgCmd;
+    bool fWhitelisted;
+    double dPingTime;
+    double dPingWait;
+    double dPingMin;
+    std::string addrLocal;
 };
 
+typedef enum BanReason
+{
+    BanReasonUnknown          = 0,
+    BanReasonNodeMisbehaving  = 1,
+    BanReasonManuallyAdded    = 2
+} BanReason;
 
+class CBanEntry
+{
+public:
+    static const int CURRENT_VERSION=1;
+    int nVersion;
+    int64_t nCreateTime;
+    int64_t nBanUntil;
+    uint8_t banReason;
+	CAddress addrSeenByPeer;
 
+    CBanEntry()
+    {
+        SetNull();
+    }
 
+    CBanEntry(int64_t nCreateTimeIn)
+    {
+        SetNull();
+        nCreateTime = nCreateTimeIn;
+    }
+
+    IMPLEMENT_SERIALIZE
+	(
+        READWRITE(this->nVersion);
+        nVersion = this->nVersion;
+        READWRITE(nCreateTime);
+        READWRITE(nBanUntil);
+        READWRITE(banReason);
+	)
+
+    void SetNull()
+    {
+        nVersion = CBanEntry::CURRENT_VERSION;
+        nCreateTime = 0;
+        nBanUntil = 0;
+        banReason = BanReasonUnknown;
+    }
+
+    std::string banReasonToString()
+    {
+        switch (banReason) {
+        case BanReasonNodeMisbehaving:
+            return "node misbehaving";
+        case BanReasonManuallyAdded:
+            return "manually added";
+        default:
+            return "unknown";
+        }
+    }
+};
+
+typedef std::map<CSubNet, CBanEntry> banmap_t;
 
 /** Information about a peer */
 class CNode
@@ -163,15 +249,38 @@ public:
     CCriticalSection cs_vRecv;
     int64 nLastSend;
     int64 nLastRecv;
+	int64_t nLastRecvMicro; 
     int64 nLastSendEmpty;
     int64 nTimeConnected;
+
+    int64_t nTimeOffset;
+    uint64_t nSendBytes;
+    uint64_t nRecvBytes;
+    bool fWhitelisted; // This peer can bypass DoS banning.
+    // Ping time measurement:
+    // The pong reply we're expecting, or 0 if no pong expected.
+    uint64_t nPingNonceSent;
+    // Time (in usec) the last ping was sent, or 0 if no ping was ever sent.
+    int64_t nPingUsecStart;
+    // Last measured round-trip time.
+    int64_t nPingUsecTime;
+    // Best measured round-trip time.
+    int64_t nMinPingUsecTime;
+    // Whether a ping is requested.
+    bool fPingQueued;
+
     int nHeaderStart;
     unsigned int nMessageStart;
     CAddress addr;
     std::string addrName;
     CService addrLocal;
+	CAddress addrSeenByPeer;
     int nVersion;
-    std::string strSubVer;
+    // strSubVer is whatever byte array we read from the wire. However, this field is intended
+    // to be printed out, displayed to humans in various forms and so on. So we sanitize it and
+    // store the sanitized version in cleanSubVer. The original should be used when dealing with
+    // the network or wire types and the cleaned string used when displayed or logged.
+    std::string strSubVer, cleanSubVer;
     bool fOneShot;
     bool fClient;
     bool fInbound;
@@ -179,14 +288,19 @@ public:
     bool fSuccessfullyConnected;
     bool fDisconnect;
     CSemaphoreGrant grantOutbound;
+    NodeId id;
 protected:
     int nRefCount;
 
+    mapMsgCmdSize mapSendBytesPerMsgCmd;
+    mapMsgCmdSize mapRecvBytesPerMsgCmd;
+
     // Denial-of-service detection/prevention
     // Key is IP address, value is banned-until-time
-    static std::map<CNetAddr, int64> setBanned;
+    static banmap_t setBanned;
     static CCriticalSection cs_setBanned;
     int nMisbehavior;
+    static bool setBannedIsDirty;
 
 public:
     int64 nReleaseTime;
@@ -204,6 +318,17 @@ public:
     std::set<uint256> setKnown;
     uint256 hashCheckpointKnown; // ppcoin: known sent sync-checkpoint
 
+	// by Simone: for peers show
+    static void SweepBanned();
+    static bool BannedSetIsDirty();
+    static void SetBannedSetDirty(bool dirty=true);
+
+	// by Simone: for network chart
+    static void RecordBytesRecv(uint64_t bytes);
+    static void RecordBytesSent(uint64_t bytes);
+    static uint64_t GetTotalBytesRecv();
+    static uint64_t GetTotalBytesSent();
+
     // inventory based relay
     mruset<CInv> setInventoryKnown;
     std::vector<CInv> vInventoryToSend;
@@ -214,8 +339,15 @@ public:
     {
         nServices = 0;
         hSocket = hSocketIn;
-        nLastSend = 0;
-        nLastRecv = 0;
+		nLastSend = 0;
+		nLastRecv = 0;
+		nSendBytes = 0;
+		nRecvBytes = 0;
+		nTimeOffset = 0;
+		addrName = addrNameIn == "" ? addr.ToStringIPPort() : addrNameIn;
+		nVersion = 0;
+		strSubVer = "";
+		nLastRecvMicro = 0;
         nLastSendEmpty = GetTime();
         nTimeConnected = GetTime();
         nHeaderStart = -1;
@@ -240,6 +372,18 @@ public:
         nMisbehavior = 0;
         hashCheckpointKnown = 0;
         setInventoryKnown.max_size(SendBufferSize() / 1000);
+		nPingNonceSent = 0;
+		nPingUsecStart = 0;
+		nPingUsecTime = 0;
+		fPingQueued = false;
+		nMinPingUsecTime = 999 * 1000000;		// 999 seconds
+    	nTimeOffset = 0;
+		addrSeenByPeer = CAddress(CService("0.0.0.0", 0), nLocalServices);
+
+		{
+		    LOCK(cs_nLastNodeId);
+		    id = nLastNodeId++;
+		}
 
         // Be shy and don't send version until we hear
         if (!fInbound)
@@ -256,10 +400,20 @@ public:
     }
 
 private:
+    // By Simone: Network usage totals
+    static CCriticalSection cs_totalBytesRecv;
+    static CCriticalSection cs_totalBytesSent;
+    static uint64_t nTotalBytesRecv;
+    static uint64_t nTotalBytesSent;
+
     CNode(const CNode&);
     void operator=(const CNode&);
 public:
 
+
+    NodeId GetId() const {
+      return id;
+    }
 
     int GetRefCount()
     {
@@ -622,6 +776,11 @@ public:
     void Cleanup();
 
 
+    static void Ban(const CNetAddr &ip, const BanReason &banReason, int64_t bantimeoffset = 0, bool sinceUnixEpoch = false);
+    static void Ban(const CSubNet &subNet, const BanReason &banReason, int64_t bantimeoffset = 0, bool sinceUnixEpoch = false);
+    static bool Unban(const CNetAddr &ip);
+    static bool Unban(const CSubNet &ip);
+
     // Denial-of-service detection/prevention
     // The idea is to detect peers that are behaving
     // badly and disconnect/ban them, but do it in a
@@ -638,13 +797,26 @@ public:
     // new code.
     static void ClearBanned(); // needed for unit testing
     static bool IsBanned(CNetAddr ip);
-    bool Misbehaving(int howmuch); // 1 == a little, 100 == a lot
+    static bool IsBanned(CSubNet subnet);
+    static void GetBanned(banmap_t &banmap);
+    static void SetBanned(const banmap_t &banmap);
     void copyStats(CNodeStats &stats);
 };
 
 
 
 
+
+/** Access to the banlist database (banlist.dat) */
+class CBanDB
+{
+private:
+    boost::filesystem::path pathBanlist;
+public:
+    CBanDB();
+    bool Write(const banmap_t& banSet);
+    bool Read(banmap_t& banSet);
+};
 
 
 
