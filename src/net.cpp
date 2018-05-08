@@ -273,7 +273,7 @@ void AdvertiseLocal(CNode *pnode)
         }
         if (addrLocal.IsRoutable())
         {
-            printf("AdvertiseLocal: advertising address %s\n", addrLocal.ToString());
+            printf("AdvertiseLocal: advertising address %s\n", addrLocal.ToString().c_str());
             pnode->PushAddress(addrLocal);
         }
     }
@@ -647,7 +647,7 @@ static void DumpBanlist()
     if (!CNode::BannedSetIsDirty())
         return;
 
-    int64_t nStart = GetTimeMillis();
+//    int64_t nStart = GetTimeMillis();
 
     CBanDB bandb;
     banmap_t banmap;
