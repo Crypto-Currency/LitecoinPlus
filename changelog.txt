@@ -11,8 +11,11 @@
 - Merged all changes from original repository
    * New splash screen
    * CSS Style set
-- Changed font color of loading messaage (blue pastel, more readable and soft)
-- Changed font color of ZAP Wallet message (dark red pastel, more readable and less harsh)
+   * Themes management page
+   * Set of basic themes
+- Changed font color of loading messaage (light blue pastel, more readable and soft)
+- Changed font color of ZAP Wallet message (light red pastel, more readable and less harsh)
+- Removed the Export button from Overview page, placed the Themes button there instead
 
 
 ***** Version 3.1.0.0 [release version]
