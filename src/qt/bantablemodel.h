@@ -13,6 +13,10 @@
 class ClientModel;
 class BanTablePriv;
 
+QT_BEGIN_NAMESPACE
+class QTimer;
+QT_END_NAMESPACE
+
 struct CCombinedBan {
     CSubNet subnet;
     CBanEntry banEntry;
@@ -68,6 +72,7 @@ private:
     ClientModel *clientModel;
     QStringList columns;
     BanTablePriv *priv;
+    QTimer *timer;
 };
 
 #endif // BITCOIN_QT_BANTABLEMODEL_H
