@@ -16,6 +16,7 @@
 - Changed font color of loading messaage (light blue pastel, more readable and soft)
 - Changed font color of ZAP Wallet message (light red pastel, more readable and less harsh)
 - Removed the Export button from Overview page, placed the Themes button there instead
+- Removed all compiling warnings (except for bantablemodel.cpp and peertablemodel.cpp)
 
 
 ***** Version 3.1.0.0 [release version]
