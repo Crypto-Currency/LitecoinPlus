@@ -197,7 +197,6 @@ uint256 GetRandHash()
 
 
 
-
 static FILE* fileout = NULL;
 
 inline int OutputDebugStringF(const char* pszFormat, ...)
@@ -482,20 +481,6 @@ static const long hextable[] =
 	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 	-1, -1, -1, -1, -1, -1
 };
-
-
-long hex2long(const char* hexString)
-{
-	long ret = 0; 
-
-	while (*hexString && ret >= 0) 
-	{
-		ret = (ret << 4) | hextable[*hexString++];
-	}
-
-	return ret; 
-}
-
 
 
 bool IsHex(const string& str)
