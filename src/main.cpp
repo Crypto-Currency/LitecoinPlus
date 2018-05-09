@@ -175,18 +175,15 @@ int nPreferredDownload = 0;
 CNodeState *State(NodeId pnode) {
     map<NodeId, CNodeState>::iterator it = mapNodeState.find(pnode);
     if (it == mapNodeState.end())
-	{
-		/*LOCK(cs_main);
-		CNodeState &state = mapNodeState.insert(std::make_pair(pnode, CNodeState())).first->second;
-		CNode *cnode = FindNode(pnode);
-		state.name = cnode->addrName;
-		state.address = cnode->addr;
-        return &state;*/
-
-		return NULL;
-
-	}
+        return NULL;
     return &it->second;
+}
+
+void InitializeNode(NodeId nodeid, const CNode *pnode) {
+    LOCK(cs_main);
+    CNodeState &state = mapNodeState.insert(std::make_pair(nodeid, CNodeState())).first->second;
+    state.name = pnode->addrName;
+    state.address = pnode->addr;
 }
 
 void FinalizeNode(NodeId nodeid) {
@@ -3742,14 +3739,6 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 
     else if (strCommand == "pong")
     {
-
-		// debug by Simone
-		if (pfrom->GetId() == 1)
-		{
-			Misbehaving(pfrom->GetId(), 25);
-		}
-
-
         int64_t pingUsecEnd = pfrom->nLastRecvMicro;
         uint64_t nonce = 0;
         size_t nAvail = vRecv.in_avail();
@@ -4050,6 +4039,22 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
                 pto->PushMessage("addr", vAddr);
         }
 
+		// by Simone: new automatic banning logic
+        CNodeState &state = *State(pto->GetId());
+        if (state.fShouldBan) {
+            if (pto->fWhitelisted)
+                printf("Warning: not punishing whitelisted peer %s!\n", pto->addr.ToString().c_str());
+            else {
+                pto->fDisconnect = true;
+                if (pto->addr.IsLocal())
+                    printf("Warning: not banning local peer %s!\n", pto->addr.ToString().c_str());
+                else
+                {
+                    CNode::Ban(pto->addr, BanReasonNodeMisbehaving);
+                }
+            }
+            state.fShouldBan = false;
+        }
 
         //
         // Message: inventory

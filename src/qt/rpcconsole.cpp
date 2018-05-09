@@ -20,14 +20,6 @@
 #include <QUrl>
 #endif
 
-/*#include <QTime>
-#include <QTimer>
-#include <QThread>
-#include <QTextEdit>
-#include <QKeyEvent>
-#include <QUrl>
-#include <QScrollBar>*/
-
 #include <openssl/crypto.h>
 
 // TODO: make it possible to filter out categories (esp debug messages when implemented)
@@ -670,6 +662,7 @@ void RPCConsole::updateNodeDetail(const CNodeCombinedStats *stats)
         // Ban score is init to 0
         ui->peerBanScore->setText(QString("%1").arg(stats->nodeStateStats.nMisbehavior));
 
+	/* by Simone: temporary disable this as don't know if have this info or not
         // Sync height is init to -1
         if (stats->nodeStateStats.nSyncHeight > -1)
             ui->peerSyncHeight->setText(QString("%1").arg(stats->nodeStateStats.nSyncHeight));
@@ -681,6 +674,7 @@ void RPCConsole::updateNodeDetail(const CNodeCombinedStats *stats)
             ui->peerCommonHeight->setText(QString("%1").arg(stats->nodeStateStats.nCommonHeight));
         else
             ui->peerCommonHeight->setText(tr("Unknown"));
+	*/
     }
 
     ui->detailWidget->show();
@@ -698,8 +692,9 @@ void RPCConsole::showEvent(QShowEvent *event)
     if (!clientModel || !clientModel->getPeerTableModel())
         return;
 
-    // start PeerTableModel auto refresh
+    // start Peer/BanTableModel auto refresh
     clientModel->getPeerTableModel()->startAutoRefresh();
+    clientModel->getBanTableModel()->startAutoRefresh();
 }
 
 void RPCConsole::hideEvent(QHideEvent *event)
@@ -709,8 +704,9 @@ void RPCConsole::hideEvent(QHideEvent *event)
     if (!clientModel || !clientModel->getPeerTableModel())
         return;
 
-    // stop PeerTableModel auto refresh
+    // stop Peer/BanTableModel auto refresh
     clientModel->getPeerTableModel()->stopAutoRefresh();
+    clientModel->getBanTableModel()->stopAutoRefresh();
 }
 
 void RPCConsole::showPeersTableContextMenu(const QPoint& point)
