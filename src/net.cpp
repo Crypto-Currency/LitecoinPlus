@@ -92,6 +92,79 @@ unsigned short GetListenPort()
     return (unsigned short)(GetArg("-port", GetDefaultPort()));
 }
 
+extern void InitializeNode(NodeId nodeid, const CNode *pnode);
+extern void FinalizeNode(NodeId nodeid);
+
+CNode::CNode(SOCKET hSocketIn, CAddress addrIn, std::string addrNameIn, bool fInboundIn) :
+	vSend(SER_NETWORK, MIN_PROTO_VERSION),
+	vRecv(SER_NETWORK, MIN_PROTO_VERSION)
+{
+    nServices = 0;
+    hSocket = hSocketIn;
+	nLastSend = 0;
+	nLastRecv = 0;
+	nSendBytes = 0;
+	nRecvBytes = 0;
+	nTimeOffset = 0;
+	addrName = addrNameIn == "" ? addr.ToStringIPPort() : addrNameIn;
+	nVersion = 0;
+	strSubVer = "";
+	nLastRecvMicro = 0;
+    nLastSendEmpty = GetTime();
+    nTimeConnected = GetTime();
+    nHeaderStart = -1;
+    nMessageStart = -1;
+    addr = addrIn;
+    addrName = addrNameIn == "" ? addr.ToStringIPPort() : addrNameIn;
+    nVersion = 0;
+    strSubVer = "";
+    fOneShot = false;
+    fClient = false; // set by version message
+    fInbound = fInboundIn;
+    fNetworkNode = false;
+    fSuccessfullyConnected = false;
+    fDisconnect = false;
+    nRefCount = 0;
+    nReleaseTime = 0;
+    hashContinue = 0;
+    pindexLastGetBlocksBegin = 0;
+    hashLastGetBlocksEnd = 0;
+    nStartingHeight = -1;
+    fGetAddr = false;
+    nMisbehavior = 0;
+    hashCheckpointKnown = 0;
+    setInventoryKnown.max_size(SendBufferSize() / 1000);
+	nPingNonceSent = 0;
+	nPingUsecStart = 0;
+	nPingUsecTime = 0;
+	fPingQueued = false;
+	nMinPingUsecTime = 999 * 1000000;		// 999 seconds
+	nTimeOffset = 0;
+	addrSeenByPeer = CAddress(CService("0.0.0.0", 0), nLocalServices);
+
+	{
+	    LOCK(cs_nLastNodeId);
+	    id = nLastNodeId++;
+	}
+
+	InitializeNode(id, this);
+
+    // Be shy and don't send version until we hear
+    if (!fInbound)
+        PushVersion();
+}
+
+CNode::~CNode()
+{
+	FinalizeNode(id);
+    if (hSocket != INVALID_SOCKET)
+    {
+        closesocket(hSocket);
+        hSocket = INVALID_SOCKET;
+    }
+}
+
+
 void CNode::PushGetBlocks(CBlockIndex* pindexBegin, uint256 hashEnd)
 {
     // Filter out duplicate requests
@@ -273,7 +346,7 @@ void AdvertiseLocal(CNode *pnode)
         }
         if (addrLocal.IsRoutable())
         {
-            printf("AdvertiseLocal: advertising address %s\n", addrLocal.ToString());
+            printf("AdvertiseLocal: advertising address %s\n", addrLocal.ToString().c_str());
             pnode->PushAddress(addrLocal);
         }
     }
@@ -608,8 +681,6 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, int64 nTimeout)
     }
 }
 
-extern void FinalizeNode(NodeId nodeid);
-
 void CNode::CloseSocketDisconnect()
 {
     fDisconnect = true;
@@ -619,7 +690,6 @@ void CNode::CloseSocketDisconnect()
         closesocket(hSocket);
         hSocket = INVALID_SOCKET;
         vRecv.clear();
-//		FinalizeNode(id);		// by Simone: destroy additional state objects from main.cpp
     }
 }
 
@@ -647,14 +717,14 @@ static void DumpBanlist()
     if (!CNode::BannedSetIsDirty())
         return;
 
-    int64_t nStart = GetTimeMillis();
-
     CBanDB bandb;
     banmap_t banmap;
     CNode::SetBannedSetDirty(false);
     CNode::GetBanned(banmap);
     if (!bandb.Write(banmap))
         CNode::SetBannedSetDirty(true);
+
+    //int64_t nStart = GetTimeMillis();
 
     //LogPrint("net", "Flushed %d banned node ips/subnets to banlist.dat  %dms\n",
     //   banmap.size(), GetTimeMillis() - nStart);
@@ -788,7 +858,7 @@ void CNode::SweepBanned()
         {
             setBanned.erase(it++);
             setBannedIsDirty = true;
-            //LogPrint("net", "%s: Removed banned node ip/subnet from banlist.dat: %s\n", __func__, subNet.ToString());
+            printf("%s: Removed banned node ip/subnet from banlist.dat: %s\n", __func__, subNet.ToString().c_str());
         }
         else
             ++it;

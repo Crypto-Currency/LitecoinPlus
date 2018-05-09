@@ -335,69 +335,9 @@ public:
     CCriticalSection cs_inventory;
     std::multimap<int64, CInv> mapAskFor;
 
-    CNode(SOCKET hSocketIn, CAddress addrIn, std::string addrNameIn = "", bool fInboundIn=false) : vSend(SER_NETWORK, MIN_PROTO_VERSION), vRecv(SER_NETWORK, MIN_PROTO_VERSION)
-    {
-        nServices = 0;
-        hSocket = hSocketIn;
-		nLastSend = 0;
-		nLastRecv = 0;
-		nSendBytes = 0;
-		nRecvBytes = 0;
-		nTimeOffset = 0;
-		addrName = addrNameIn == "" ? addr.ToStringIPPort() : addrNameIn;
-		nVersion = 0;
-		strSubVer = "";
-		nLastRecvMicro = 0;
-        nLastSendEmpty = GetTime();
-        nTimeConnected = GetTime();
-        nHeaderStart = -1;
-        nMessageStart = -1;
-        addr = addrIn;
-        addrName = addrNameIn == "" ? addr.ToStringIPPort() : addrNameIn;
-        nVersion = 0;
-        strSubVer = "";
-        fOneShot = false;
-        fClient = false; // set by version message
-        fInbound = fInboundIn;
-        fNetworkNode = false;
-        fSuccessfullyConnected = false;
-        fDisconnect = false;
-        nRefCount = 0;
-        nReleaseTime = 0;
-        hashContinue = 0;
-        pindexLastGetBlocksBegin = 0;
-        hashLastGetBlocksEnd = 0;
-        nStartingHeight = -1;
-        fGetAddr = false;
-        nMisbehavior = 0;
-        hashCheckpointKnown = 0;
-        setInventoryKnown.max_size(SendBufferSize() / 1000);
-		nPingNonceSent = 0;
-		nPingUsecStart = 0;
-		nPingUsecTime = 0;
-		fPingQueued = false;
-		nMinPingUsecTime = 999 * 1000000;		// 999 seconds
-    	nTimeOffset = 0;
-		addrSeenByPeer = CAddress(CService("0.0.0.0", 0), nLocalServices);
-
-		{
-		    LOCK(cs_nLastNodeId);
-		    id = nLastNodeId++;
-		}
-
-        // Be shy and don't send version until we hear
-        if (!fInbound)
-            PushVersion();
-    }
-
-    ~CNode()
-    {
-        if (hSocket != INVALID_SOCKET)
-        {
-            closesocket(hSocket);
-            hSocket = INVALID_SOCKET;
-        }
-    }
+	// constructor / destructor
+    CNode(SOCKET hSocketIn, CAddress addrIn, std::string addrNameIn = "", bool fInboundIn=false);
+    ~CNode();
 
 private:
     // By Simone: Network usage totals
