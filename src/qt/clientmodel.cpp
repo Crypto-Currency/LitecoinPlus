@@ -18,8 +18,8 @@ double GetPoSKernelPS(const CBlockIndex* blockindex = NULL);
 extern unsigned int nStakeTargetSpacing;
 
 ClientModel::ClientModel(OptionsModel *optionsModel, QObject *parent) :
-    QObject(parent), optionsModel(optionsModel),
-    cachedNumBlocks(0), cachedNumBlocksOfPeers(0), pollTimer(0), banTableModel(0), peerTableModel(0)
+    QObject(parent), optionsModel(optionsModel), banTableModel(0), peerTableModel(0),
+    cachedNumBlocks(0), cachedNumBlocksOfPeers(0), pollTimer(0)
 
 {
     numBlocksAtStartup = -1;

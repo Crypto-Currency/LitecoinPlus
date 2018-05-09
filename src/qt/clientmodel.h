@@ -63,9 +63,9 @@ private:
     int cachedNumBlocks;
     int cachedNumBlocksOfPeers;
 
-    int numBlocksAtStartup;
-
     QTimer *pollTimer;
+
+    int numBlocksAtStartup;
 
     void subscribeToCoreSignals();
     void unsubscribeFromCoreSignals();

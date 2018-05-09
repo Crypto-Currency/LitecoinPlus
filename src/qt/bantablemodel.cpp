@@ -10,10 +10,8 @@
 
 #include "sync.h"
 
-#include <QDebug>
 #include <QList>
 #include <QTimer>
-
 bool BannedNodeLessThan::operator()(const CCombinedBan& left, const CCombinedBan& right) const
 {
     const CCombinedBan* pLeft = &left;
@@ -37,14 +35,14 @@ bool BannedNodeLessThan::operator()(const CCombinedBan& left, const CCombinedBan
 class BanTablePriv
 {
 public:
-    /** Local cache of peer information */
+    // Local cache of peer information
     QList<CCombinedBan> cachedBanlist;
-    /** Column to sort nodes by */
+    // Column to sort nodes by
     int sortColumn;
-    /** Order (ascending or descending) to sort nodes by */
+    /// Order (ascending or descending) to sort nodes by
     Qt::SortOrder sortOrder;
 
-    /** Pull a full list of banned nodes from CNode into our cache */
+    /// Pull a full list of banned nodes from CNode into our cache
     void refreshBanlist()
     {
         banmap_t banMap;
