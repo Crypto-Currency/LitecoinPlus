@@ -1,16 +1,44 @@
-/* desc= "default skin: light gold background with darker gold circles", vers="1.1"  */
+/* desc= "default skin: dark blue background with lightening", vers="1.1"  */
 
 /* first line is looked at to get the skin description - don't forget the 's */
+
 
 QMainWindow
 {
   border-image: url(:/images/background) 0 0 0 0 stretch stretch;
 }
 
+QWidget
+{
+  background-color: rgba(197,219,246,10);
+  color: back;
+}
+
 QMenuBar::item
 {
   background-color: transparent;
 }
+
+QMenu
+{
+  padding: 2px 10px 2px 10px;
+  border:2px solid rgb(255,233,142);
+}
+
+QMenu::item:selected
+{
+  background-color:rgb(2,115,67);
+  background-color:lightblue;
+  color white;
+}
+
+QMenu#scrollArea
+{
+  padding: 2px 10px 2px 10px;
+  background-color:rgb(10,10,10);
+  border:2px solid rgb(255,233,142);
+}
+
 
 QToolButton:!hover
 {
@@ -73,8 +101,8 @@ QPushButton
 
 QLabel
 {
-  border-image: url('') 0 0 0 0 stretch stretch; /* make it null */
-  background-color:rgba(125,125,125,0); /* makes text background transparent */
+  border-image: url('') 0 0 0 0 stretch stretch;
+  background-color:rgba(125,125,125,0);
   color:black; 
 }
 
@@ -87,24 +115,28 @@ QMenu
 
 QLabel
 {
-  background-color:rgba(255,255,255,0); /* makes text background transparent */
+  background-color:rgba(255,255,255,0);
   color:white; 
 }
 
 /* Amount box in send coins */
 QDoubleSpinBox
 {
-  border-image: url(''); /* make it null */
+  color:black;
+}
+
+/* All combo boxes */
+QComboBox
+{
   background-color:rgb(197,219,246);
   color:black;
 }
 
-QComboBox
+/* BitcoinUnits boxes */
+QComboBox#BitcoinUnits
 {
-/*  padding: 2px 10px 10px 10px; */
-  background-color:rgb(197,219,246);
+  background-color:white;
   color:black;
-/*  border:2px rgb(219,182,62); */
 }
 
 QHeaderView::section
@@ -115,8 +147,8 @@ QHeaderView::section
 QTableView
 {
   alternate-background-color: rgba(100,110,125,50);
-  background-color: rgba(197,219,246,150);
-  border: 1px solid rgb(220,220,220);            /*  border color here  */
+  background-color: rgba(197,219,246,50);
+  border: 1px solid rgb(220,220,220);
 }
 
 QTableView::item:selected
