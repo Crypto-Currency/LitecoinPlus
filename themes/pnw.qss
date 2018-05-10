@@ -5,7 +5,7 @@
 
 QMainWindow
 {
-  border-image: url(skins/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
+  border-image: url(themes/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
 }
 
 QWidget
@@ -21,7 +21,7 @@ QMenuBar::item
 
 QMenu
 {
-  border-image: url(skins/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
+  border-image: url(themes/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
   padding: 2px 10px 2px 10px;
   border:2px solid rgb(255,233,142);
 }
@@ -31,6 +31,11 @@ QMenu::item:selected
   background-color:rgb(2,115,67);
   background-color:lightblue;
   color white;
+}
+
+QMenu::item:disabled
+{
+  color: lightgrey;
 }
 
 QMenu#scrollArea
@@ -65,7 +70,7 @@ QMenu#scrollArea
 
 #RPCConsole
 {
-  border-image: url(skins/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
+  border-image: url(themes/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
 }
 
 #tabWidget
@@ -152,7 +157,7 @@ QListView
 
 QStatusBar
 {
-  border-image: url(skins/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
+  border-image: url(themes/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
   background-color:rgb(100,100,200);
   color:white;
 }
@@ -205,7 +210,7 @@ QPushButton#scrollArea
 QToolTip
 {
   background-color:rgb(10,10,10);
-  border-image: url(skins/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
+  border-image: url(themes/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
   color:white;
   border: 2px solid rgb(255,233,142);
 }
