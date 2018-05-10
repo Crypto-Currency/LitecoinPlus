@@ -224,7 +224,9 @@ void SkinsPage::showFiles(const QStringList &files)
 //qDebug() <<tr("index of x= %1 e=%2").arg(x).arg(e);
 
     QTableWidgetItem *descriptionItem = new QTableWidgetItem(desc);
+	descriptionItem->setFlags(descriptionItem->flags() ^ Qt::ItemIsEditable);
     QTableWidgetItem *versionItem = new QTableWidgetItem(vers);
+	versionItem->setFlags(versionItem->flags() ^ Qt::ItemIsEditable);
 
     fcount++;
     int row = filesTable->rowCount();
@@ -323,12 +325,13 @@ void SkinsPage::loadSettings()
  
 void SkinsPage::loadSkin()
 {
-  QFile styleFile(inipath+"/"+inifname);
-  styleFile.open(QFile::ReadOnly);
-  QByteArray bytes = styleFile.readAll();
-  QString newStyleSheet(bytes);
-  QApplication *app = (QApplication*)QApplication::instance();
-  app->setStyleSheet(newStyleSheet);
+	QFile styleFile(inipath+"/"+inifname);
+	styleFile.open(QFile::ReadOnly);
+	QByteArray bytes = styleFile.readAll();
+	QString newStyleSheet(bytes);
+	QApplication *app = (QApplication*)QApplication::instance();
+	app->setStyleSheet(NULL);
+	app->setStyleSheet(newStyleSheet);
 }
 
 void SkinsPage::resizeEvent(QResizeEvent* event)
