@@ -2,6 +2,7 @@
 
 /* first line is looked at to get the skin description - don't forget the 's */
 
+
 QMainWindow
 {
   background-color:rgb(10,10,10);
@@ -20,8 +21,14 @@ QMenuBar::item
 
 /* change just the frames named (use# for names) frame */
 /* QFrame would change ALL the frames including the ones around all labels, boxes ...  */
-#frame, #frame_2, #frameCoinControl, #scrollArea, #SendCoinsEntry
+#frame, #frame_2, #frameCoinControl, #scrollArea
 {
+  border: 1px solid rgb(219,182,62);
+}
+
+#SendCoinsEntry
+{
+  background-color:rgba(25,25,25,100);
   border: 1px solid rgb(219,182,62);
 }
 
