@@ -191,7 +191,6 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
     progressBar->setAlignment(Qt::AlignCenter);
     progressBar->setVisible(false);
 
-
     statusBar()->addWidget(progressBarLabel);
     statusBar()->addWidget(progressBar);
     statusBar()->addPermanentWidget(frameBlocks);
@@ -260,7 +259,7 @@ void BitcoinGUI::createActions()
     addressBookAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     tabGroup->addAction(addressBookAction);
 
-    skinsPageAction = new QAction(QIcon(":/icons/address-book"), tr("&Skins Page"), this);
+    skinsPageAction = new QAction(QIcon(":/icons/gears"), tr("&Themes"), this);
     skinsPageAction->setToolTip(tr("Change the look of your wallet"));
     skinsPageAction->setCheckable(true);
     skinsPageAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
@@ -393,7 +392,8 @@ void BitcoinGUI::createToolBars()
 
     QToolBar *toolbar2 = addToolBar(tr("Actions toolbar"));
     toolbar2->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    toolbar2->addAction(exportAction);
+	toolbar2->addAction(skinsPageAction);
+//    toolbar2->addAction(exportAction);
 }
 
 void BitcoinGUI::setClientModel(ClientModel *clientModel)
@@ -1118,7 +1118,7 @@ void BitcoinGUI::splashMessage(const std::string &message, bool quickSleep)
 {
   if(splashref)
   {
-    splashref->showMessage(QString::fromStdString(message), Qt::AlignVCenter|Qt::AlignHCenter, QColor(255,40,55));
+    splashref->showMessage(QString::fromStdString(message), Qt::AlignBottom|Qt::AlignHCenter, QColor(0xfce2cc));
     QApplication::instance()->processEvents();
 	if (quickSleep) {
 		Sleep(50);

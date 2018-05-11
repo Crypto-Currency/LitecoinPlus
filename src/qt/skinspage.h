@@ -25,6 +25,7 @@ public:
 
 private slots:
   void browse();
+  void reset();
   void find();
   void openFileOfItem(int row, int column);
   void optionChanged();
@@ -47,7 +48,6 @@ private:
 
   boost::filesystem::path IniFile;
   QString inipath,inifname;
-  bool inib1,inib2,inib3;
 //  QDesktopWidget fSize;
   QMainWindow fSize;
 
@@ -59,6 +59,7 @@ private:
   QLabel *directoryLabel;
   QLabel *filesFoundLabel;
   QPushButton *browseButton;
+  QPushButton *resetButton;
   QPushButton *findButton;
   QTableWidget *filesTable;
   QDir currentDir;

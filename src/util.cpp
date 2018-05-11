@@ -197,7 +197,6 @@ uint256 GetRandHash()
 
 
 
-
 static FILE* fileout = NULL;
 
 inline int OutputDebugStringF(const char* pszFormat, ...)
@@ -482,20 +481,6 @@ static const long hextable[] =
 	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 	-1, -1, -1, -1, -1, -1
 };
-
-
-long hex2long(const char* hexString)
-{
-	long ret = 0; 
-
-	while (*hexString && ret >= 0) 
-	{
-		ret = (ret << 4) | hextable[*hexString++];
-	}
-
-	return ret; 
-}
-
 
 
 bool IsHex(const string& str)
@@ -1221,6 +1206,13 @@ void ShrinkDebugFile()
 
 
 
+int64_t GetTimeMicros()
+{
+    int64_t now = (boost::posix_time::microsec_clock::universal_time() -
+                   boost::posix_time::ptime(boost::gregorian::date(1970,1,1))).total_microseconds();
+    assert(now > 0);
+    return now;
+}
 
 
 

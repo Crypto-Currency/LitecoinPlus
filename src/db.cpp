@@ -977,7 +977,7 @@ bool CTxDB::LoadBlockIndexGuts()
 			if (boost->isBoosted) {
 				sprintf(pString, _("Fast load (%d%%)...").c_str(), progress);
 			} else {
-				sprintf(pString, (_("Building index (SLOW, %d%%)...") + "\n" + _("[DO NOT close, wait until 100%%]")).c_str(), progress);
+				sprintf(pString, (_("Building index (SLOW, %d%%)...") + "   " + _("[do not interrupt]")).c_str(), progress);
 			}
 #ifdef QT_GUI
 			uiInterface.InitMessage(pString);

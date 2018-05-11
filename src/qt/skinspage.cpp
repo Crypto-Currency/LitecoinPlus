@@ -25,6 +25,7 @@ SkinsPage::SkinsPage(QWidget *parent) : QWidget(parent), ui(new Ui::SkinsPage)
   ui->setupUi(this);
   browseButton = createButton(tr("&Browse..."), SLOT(browse()));
   findButton = createButton(tr("&Find"), SLOT(find()));
+  resetButton = createButton(tr("&Reset to none"), SLOT(reset()));
 
 // load settings - do before connecting signals or loading will trigger optionchanged
   QSettings settings("LitecoinPlus", "settings");
@@ -32,10 +33,6 @@ SkinsPage::SkinsPage(QWidget *parent) : QWidget(parent), ui(new Ui::SkinsPage)
 //  IniFile = GetDataDir() / "skins.ini";
   loadSettings();
   loadSkin();
-
-  connect(ui->CB1, SIGNAL(toggled(bool)), this, SLOT(optionChanged()));
-  connect(ui->CB2, SIGNAL(toggled(bool)), this, SLOT(optionChanged()));
-  connect(ui->CB3, SIGNAL(toggled(bool)), this, SLOT(optionChanged()));
 
   fileComboBox = createComboBox(tr("*"));
   textComboBox = createComboBox();
@@ -73,6 +70,12 @@ SkinsPage::SkinsPage(QWidget *parent) : QWidget(parent), ui(new Ui::SkinsPage)
   ui->mainLayout->addWidget(filesTable, 3, 0, 1, 3);
   ui->mainLayout->addWidget(filesFoundLabel, 4, 0, 1, 2);
   ui->mainLayout->addWidget(findButton, 4, 2);
+  ui->mainLayout->addWidget(resetButton, 5, 2);
+
+  ui->moreThemes->setText("<a href=\"http://litecoinplus.co/themes/\">Click here to download more themes!</a>");
+  ui->moreThemes->setTextFormat(Qt::RichText);
+  ui->moreThemes->setTextInteractionFlags(Qt::TextBrowserInteraction);
+  ui->moreThemes->setOpenExternalLinks(true);
 
   //force find
   find();
@@ -91,6 +94,14 @@ void SkinsPage::browse()
   inipath=directory;
   // save settings
   saveSettings();
+}
+
+void SkinsPage::reset()
+{
+	QApplication *app = (QApplication*)QApplication::instance();
+	app->setStyleSheet(NULL);
+	inifname = "";
+	saveSettings();
 }
 
 void SkinsPage::find()
@@ -213,7 +224,9 @@ void SkinsPage::showFiles(const QStringList &files)
 //qDebug() <<tr("index of x= %1 e=%2").arg(x).arg(e);
 
     QTableWidgetItem *descriptionItem = new QTableWidgetItem(desc);
+	descriptionItem->setFlags(descriptionItem->flags() ^ Qt::ItemIsEditable);
     QTableWidgetItem *versionItem = new QTableWidgetItem(vers);
+	versionItem->setFlags(versionItem->flags() ^ Qt::ItemIsEditable);
 
     fcount++;
     int row = filesTable->rowCount();
@@ -263,6 +276,7 @@ void SkinsPage::createFilesTable()
 
   filesTable->setColumnWidth(0,160);// last column get resized automatically by qt
   filesTable->setColumnWidth(2,100);
+  filesTable->setColumnWidth(1,250);
   filesTable->setColumnWidth(1,260);
   filesTable->verticalHeader()->hide();
   filesTable->setShowGrid(false);
@@ -297,9 +311,6 @@ void SkinsPage::saveSettings()
   QSettings settings("LitecoinPlus", "settings");
   settings.setValue("path", inipath);
   settings.setValue("filename", inifname);
-  settings.setValue("BackgroundImg", ui->CB1->isChecked());
-  settings.setValue("RoundCorners", ui->CB2->isChecked());
-  settings.setValue("CB3", ui->CB3->isChecked());
 //QMessageBox::information(this,tr("saveSettings:"),tr("=%1").arg(IniFile.string().c_str()));
 //qDebug() << "saving IniFile path:" <<IniFile.string().c_str();
 }
@@ -309,27 +320,19 @@ void SkinsPage::loadSettings()
   QSettings settings("LitecoinPlus", "settings");
   inipath=settings.value("path", "").toString();
   inifname=settings.value("filename", "").toString();
-  inib1=settings.value("BackgroundImg", false).toBool();
-  inib2=settings.value("RoundCorners", false).toBool();
-  inib3=settings.value("CB3", false).toBool();
-  if(inib1)
-    ui->CB1->setCheckState(Qt::Checked);
-  if(inib2)
-    ui->CB2->setCheckState(Qt::Checked);
-  if(inib3)
-    ui->CB3->setCheckState(Qt::Checked);
 //QMessageBox::information(this,tr("loadSettings:"),tr("path=%1, filename=%2").arg(inipath).arg(inifname));
 //qDebug() << "loading IniFile path:" <<IniFile.string().c_str();
 }
  
 void SkinsPage::loadSkin()
 {
-  QFile styleFile(inipath+"/"+inifname);
-  styleFile.open(QFile::ReadOnly);
-  QByteArray bytes = styleFile.readAll();
-  QString newStyleSheet(bytes);
-  QApplication *app = (QApplication*)QApplication::instance();
-  app->setStyleSheet(newStyleSheet);
+	QFile styleFile(inipath+"/"+inifname);
+	styleFile.open(QFile::ReadOnly);
+	QByteArray bytes = styleFile.readAll();
+	QString newStyleSheet(bytes);
+	QApplication *app = (QApplication*)QApplication::instance();
+	app->setStyleSheet(NULL);
+	app->setStyleSheet(newStyleSheet);
 }
 
 void SkinsPage::resizeEvent(QResizeEvent* event)

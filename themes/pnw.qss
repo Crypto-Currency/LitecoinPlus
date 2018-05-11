@@ -1,0 +1,274 @@
+/*desc="Pacific NW:Inspired from living in Seattle area",vers="1.2"*/
+
+/* first line is looked at to get the skin description */
+
+
+QMainWindow
+{
+  border-image: url(themes/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
+}
+
+QWidget
+{
+  background-color: rgba(90,90,110,50);
+  color: back;
+}
+
+QMenuBar::item
+{
+  background-color: transparent;
+}
+
+QMenu
+{
+  border-image: url(themes/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
+  padding: 2px 10px 2px 10px;
+  border:2px solid rgb(255,233,142);
+}
+
+QMenu::item:selected
+{
+  background-color:rgb(2,115,67);
+  background-color:lightblue;
+  color white;
+}
+
+QMenu::item:disabled
+{
+  color: lightgrey;
+}
+
+QMenu#scrollArea
+{
+  padding: 2px 10px 2px 10px;
+  background-color:rgb(10,10,10);
+  border:2px solid rgb(255,233,142);
+}
+
+
+
+
+/* change just the frames named (use# for names) frame */
+/* QFrame would change ALL the frames including the ones around all labels, boxes ...  */
+#frame, #frame_2, #frameCoinControl, #scrollArea
+{
+  border: 1px solid grey;
+}
+
+#SendCoinsEntry
+{
+  background-color: rgba(200,200,200,50);
+  border: 1px solid grey;
+}
+
+/* frame 3 is the anoying partial frame on coin control, */
+/* around "clear selection | list mode | tree mode" */
+#frame_3
+{
+  border: 1px solid black;
+}
+
+#RPCConsole
+{
+  border-image: url(themes/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
+}
+
+#tabWidget
+{
+  background-color:rgba(100,110,125,25);
+  color: green;
+}
+#tab_info
+{
+  background-color:rgba(100,110,125,50);
+  color:red;
+  border-color:rgb(200,200,200);
+}
+
+QTabBar::tab
+{
+  padding: 10px 10px 10px 10px;
+  background-color:rgba(25,25,25,100);
+  color:black;
+  border-color:rgb(200,200,200);
+}
+
+QTabBar::tab::selected
+{
+  padding: 10px 10px 10px 10px;
+  background-color:rgba(225,225,225,100);
+  color:darkblue;
+  border-color:rgb(200,200,200);
+}
+
+QLabel
+{
+  border-image: url('') 0 0 0 0 stretch stretch;
+  background-color:rgba(125,125,125,0);
+  color:black; 
+}
+
+/* send coins 'pay to' and 'label' */
+QValidatedLineEdit
+{
+  border-image: url('');
+  border 1px solid grey;  
+  background-color:rgb(125,125,125);
+  color:white; 
+}
+
+QLineEdit
+{
+  border-image: url('');
+  border 1px solid grey;  
+  background-color:rgb(125,125,125);
+  color:white; 
+}
+
+/* Amount box in send coins */
+QDoubleSpinBox
+{
+  border-image: url('');
+  background-color:rgb(125,125,125);
+}
+
+QRadioButton
+{
+  border-image: url('');
+  background-color:rgba(125,125,125,0);
+}
+
+QCheckBox
+{
+  border-image: url('');
+  background-color:rgba(125,125,125,0);
+}
+
+QComboBox
+{
+  background-color:rgb(125,125,125);
+  border:2px rgb(255,233,142);
+}
+
+QListView
+{
+  background-color:transparent;
+}
+
+QStatusBar
+{
+  border-image: url(themes/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
+  background-color:rgb(100,100,200);
+  color:white;
+}
+
+QToolButton:!hover
+{
+  background-color:lightgrey;
+  color:black;
+  border-style:outset;
+  border-width:2px;
+  border-color:darkgrey;
+  border-radius:10px
+}  
+
+QToolButton:hover
+{
+  background-color:rgb(100,110,125);
+  color:black; border-style: outset;
+  border-width: 2px;
+  border-radius: 10px;
+  border-color: darkgrey
+} 
+
+QPushButton
+{
+  background-color:lightgrey;
+  color:black;
+  border-style:outset;
+  border-width:4px;
+  border-color:darkgrey;
+  border-radius:10px
+}
+
+QPushButton:hover
+{
+  background-color:rgb(100,110,125);
+  color:black; border-style: outset;
+  border-width: 2px;
+  border-radius: 10px;
+  border-color: darkgrey
+}
+
+QPushButton#scrollArea
+{
+  padding: 2px 10px 2px 10px;
+  background-color:rgb(10,10,10);
+  border:2px solid rgb(255,233,142);
+}
+
+QToolTip
+{
+  background-color:rgb(10,10,10);
+  border-image: url(themes/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
+  color:white;
+  border: 2px solid rgb(255,233,142);
+}
+
+QTabBar::tab
+{
+  padding: 10px 10px 10px 10px;
+  background-color:rgba(25,25,25,100);
+  color:white;
+  border-color:rgb(200,200,200);
+}
+
+QTabBar::tab::selected
+{
+  padding: 10px 10px 10px 10px;
+  background-color:rgba(225,225,225,100);
+  color:darkblue;
+  border-color:rgb(200,200,200);
+}
+
+QProgressBar
+{
+  background-color: #e8e8e8;
+  border: 1px solid grey;
+  border-radius: 7px;
+  padding: 1px;
+  text-align: center;
+  color: #3292ee;
+}
+
+QProgressBar::chunk
+{
+  background: QLinearGradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #010e43, stop: 1 grey);
+  border-radius: 7px;
+  margin: 0px;
+}
+
+QTableView
+{
+  alternate-background-color: rgba(90,90,90,50);
+  background-color: rgba(200,200,200,50);
+  selection-background-color: rgb(200,100,0);
+  color red;
+}
+
+QHeaderView::section
+{
+  background-color:lightgrey;
+}
+
+QTableView::item:selected
+{
+  color:black;
+  background-color:lightblue;
+}
+
+QTableView::item:focus
+{
+  color:black;
+}
+

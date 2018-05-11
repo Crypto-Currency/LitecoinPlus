@@ -1751,25 +1751,21 @@ Value zapwallettxes(const Array& params, bool fHelp)
   std::vector<CWalletTx> vWtx;
   Object result;
 
-  char *mess="Zapping all transactions from wallet ...\n";
-  printf(mess); // to debug.log
+  printf("Zapping all transactions from wallet ...\n"); // to debug.log
 
   pwalletMain = new CWallet("wallet.dat");
   DBErrors nZapWalletRet = pwalletMain->ZapWalletTx(vWtx);
   if (nZapWalletRet != DB_LOAD_OK)
   {
-    mess="Error loading wallet.dat: Wallet corrupted\n";
-    printf(mess);
-    return(mess);
+    printf("Error loading wallet.dat: Wallet corrupted\n");
+    return("Error loading wallet.dat: Wallet corrupted\n");
   }
 
   delete pwalletMain;
   pwalletMain = NULL;
 
-  mess="Loading wallet...\n";
-  printf(mess);
+  printf("Loading wallet...\n");
 
-  int64 nStart = GetTimeMillis();
   bool fFirstRun = true;
   pwalletMain = new CWallet("wallet.dat");
 
@@ -1779,40 +1775,33 @@ Value zapwallettxes(const Array& params, bool fHelp)
   {
     if (nLoadWalletRet == DB_CORRUPT)
     {
-      mess="Error loading wallet.dat: Wallet corrupted\n";
-      printf(mess);
-      return(mess);
+      printf("Error loading wallet.dat: Wallet corrupted\n");
+      return("Error loading wallet.dat: Wallet corrupted\n");
     }
     else if (nLoadWalletRet == DB_NONCRITICAL_ERROR)
     {
-      mess="Warning: error reading wallet.dat! All keys read correctly, but transaction data or address book entries might be missing or incorrect.\n";
-      printf(mess);
+      printf("Warning: error reading wallet.dat! All keys read correctly, but transaction data or address book entries might be missing or incorrect.\n");
     }
     else if (nLoadWalletRet == DB_TOO_NEW)
     {
-      mess="Error loading wallet.dat: Wallet requires newer version of LitecoinPlus\n";
-      printf(mess);
-      return(mess);
+      printf("Error loading wallet.dat: Wallet requires newer version of LitecoinPlus\n");
+      return("Error loading wallet.dat: Wallet requires newer version of LitecoinPlus\n");
     }
     else if (nLoadWalletRet == DB_NEED_REWRITE)
     {
-      mess="Wallet needed to be rewritten: restart LitecoinPlus to complete\n";
-      printf(mess);
-      return(mess);
+      printf("Wallet needed to be rewritten: restart LitecoinPlus to complete\n");
+      return("Wallet needed to be rewritten: restart LitecoinPlus to complete\n");
     }
     else
     {
-      mess="Unknown error loading wallet.dat\n";
-      printf(mess);
-      return(mess);
+      printf("Unknown error loading wallet.dat\n");
+      return("Unknown error loading wallet.dat\n");
     } 
   }
   
-  mess="Wallet loaded...\n";
-  printf(mess);
+  printf("Wallet loaded...\n");
 
-  mess="Loaded lables...\n";
-  printf(mess);
+  printf("Loaded lables...\n");
 
   // Restore wallet transaction metadata
   BOOST_FOREACH(const CWalletTx& wtxOld, vWtx)
@@ -1833,16 +1822,12 @@ Value zapwallettxes(const Array& params, bool fHelp)
       copyTo->WriteToDisk();
     }
   }
-  mess="scanning for transactions...\n";
-  printf(mess);
+  printf("scanning for transactions...\n");
 
   pwalletMain->ScanForWalletTransactions(pindexGenesisBlock, true);
   pwalletMain->ReacceptWalletTransactions();
-  mess="Please restart your wallet.\n";
-  printf(mess);
+  printf("Please restart your wallet.\n");
 
-  mess="Zap Wallet Finished.\nPlease restart your wallet for changes to take effect.\n";
-
-  return (mess);
+  return ("Zap Wallet Finished.\nPlease restart your wallet for changes to take effect.\n");
 }
 

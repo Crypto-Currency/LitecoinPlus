@@ -183,7 +183,10 @@ HEADERS += src/qt/bitcoingui.h \
     src/qt/rpcconsole.h \
     src/version.h \
     src/netbase.h \
-    src/clientversion.h
+    src/clientversion.h \
+	src/qt/trafficgraphwidget.h \
+	src/qt/bantablemodel.h \
+	src/qt/peertablemodel.h
 
 SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/transactiontablemodel.cpp \
@@ -250,7 +253,11 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/scrypt-x86.S \
     src/scrypt-x86_64.S \
     src/scrypt_mine.cpp \
-    src/pbkdf2.cpp
+    src/pbkdf2.cpp \
+	src/qt/trafficgraphwidget.cpp \
+	src/qt/bantablemodel.cpp \
+	src/qt/peertablemodel.cpp
+
 
 RESOURCES += \
     src/qt/bitcoin.qrc
