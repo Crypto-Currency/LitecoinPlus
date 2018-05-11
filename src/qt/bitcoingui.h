@@ -79,7 +79,7 @@ private:
 
     OverviewPage *overviewPage;
     QWidget *transactionsPage;
-	SkinsPage *skinsPage;
+    SkinsPage *skinsPage;
     AddressBookPage *addressBookPage;
     AddressBookPage *receiveCoinsPage;
     SendCoinsDialog *sendCoinsPage;
@@ -98,7 +98,7 @@ private:
     QAction *quitAction;
     QAction *sendCoinsAction;
     QAction *addressBookAction;
-	QAction *skinsPageAction;
+    QAction *skinsPageAction;
     QAction *signMessageAction;
     QAction *verifyMessageAction;
     QAction *aboutAction;

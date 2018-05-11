@@ -92,6 +92,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     setWindowTitle(tr("LitecoinPlus - Wallet  ")+QString::fromStdString(CLIENT_BUILD));
 //  setStyleSheet("");
 //    statusBar()->setStyleSheet("QToolTip {background-color:rgb(255,233,142); color:black; border: 2px solid grey;}");
+
 #ifndef Q_OS_MAC
     qApp->setWindowIcon(QIcon(":icons/bitcoin"));
     setWindowIcon(QIcon(":icons/bitcoin"));
@@ -132,7 +133,7 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
 
     signVerifyMessageDialog = new SignVerifyMessageDialog(this);
 
-	skinsPage = new SkinsPage(this);
+    skinsPage = new SkinsPage(this);
 
     centralWidget = new QStackedWidget(this);
     centralWidget->addWidget(overviewPage);
@@ -140,7 +141,7 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
     centralWidget->addWidget(addressBookPage);
     centralWidget->addWidget(receiveCoinsPage);
     centralWidget->addWidget(sendCoinsPage);
-	centralWidget->addWidget(skinsPage);
+    centralWidget->addWidget(skinsPage);
     setCentralWidget(centralWidget);
 
     // Create status bar
@@ -387,6 +388,7 @@ void BitcoinGUI::createToolBars()
     toolbar->addAction(receiveCoinsAction);
     toolbar->addAction(historyAction);
     toolbar->addAction(addressBookAction);
+    toolbar->addAction(skinsPageAction);
 
     QToolBar *toolbar2 = addToolBar(tr("Actions toolbar"));
     toolbar2->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);

@@ -10,6 +10,11 @@
     <height>447</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>Ubuntu</family>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
