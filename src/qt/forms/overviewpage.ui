@@ -226,21 +226,17 @@
      <item>
       <widget class="QWidget" name="widget" native="true">
        <layout class="QVBoxLayout" name="verticalLayout_6">
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="margin">
+         <number>0</number>
+        </property>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <property name="spacing">
+           <number>1</number>
+          </property>
           <item>
            <spacer name="horizontalSpacer_3">
             <property name="orientation">
@@ -274,12 +270,6 @@
             <property name="toolTip">
              <string> Click to go to Litecoin Plus Home page. </string>
             </property>
-            <property name="styleSheet">
-             <string notr="true">QPushButton{background-color:transparent}</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
             <property name="icon">
              <iconset resource="../bitcoin.qrc">
               <normaloff>:/images/backg</normaloff>
@@ -311,34 +301,8 @@
           </item>
          </layout>
         </item>
-        <item>
-         <spacer name="verticalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
        </layout>
       </widget>
-     </item>
-     <item>
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </item>
@@ -395,9 +359,6 @@
         </item>
         <item>
          <widget class="QListView" name="listTransactions">
-          <property name="styleSheet">
-           <string notr="true">QListView { background: transparent; }</string>
-          </property>
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>

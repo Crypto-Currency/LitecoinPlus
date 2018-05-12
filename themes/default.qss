@@ -12,7 +12,7 @@ QWidget
 {
   background-color: rgba(25,25,25,80);
 /*  background-color: transparent; */
-  color: back;
+  color: black;
 }
 
 QMenuBar::item
@@ -57,6 +57,12 @@ QMenu#scrollArea
 /* on the network traffic tab */
 #groupBox
 {
+  color: white;
+}
+
+#CoinControlDialog
+{
+  border-image: url(:/images/background) 0 0 0 0 stretch stretch;
   color: white;
 }
 
@@ -108,17 +114,14 @@ QTabBar::tab
 {
   padding: 10px 10px 10px 10px;
   background-color:rgba(25,25,25,80);
-  background-color:#010e43;
   color:white;
-  border-color:rgb(200,200,200);
 }
 
 QTabBar::tab:selected, QTabBar::tab:hover
 {
   padding: 10px 10px 10px 10px;
-  background-color:rgba(225,225,225,100);
+  background-color:rgba(225,225,225,80);
   color:darkblue;
-  border-color:rgb(200,200,200);
 }
 
 QLabel
@@ -154,6 +157,7 @@ QRadioButton
 {
   border-image: url('');
   background-color:rgba(125,125,125,0);
+  color: white;
 }
 
 QCheckBox
@@ -167,7 +171,7 @@ QCheckBox
 QComboBox
 {
   background-color:rgb(197,219,246);
-  color:black;
+  color: black;
 }
 
 QListView
@@ -177,8 +181,8 @@ QListView
 
 QStatusBar
 {
-  background-color:#010e43;
-  color: liteblue;
+/*  background-color: rgba(25,25,25,60); */
+  color: darkgrey;
 }
 
 QToolButton:!hover
@@ -202,16 +206,28 @@ QToolButton:hover
 
 QPushButton
 {
-  padding: 2px 10px 2px 10px;
   background-color:rgb(197,219,246);
-  color:black;
-  border-style: outset;
+  color:black; border-style: outset;
+  padding: 2px 10px 2px 10px;
   border-width: 2px;
   border-radius: 10px;
+  border-color: darkgrey
+}
+
+
+QPushButton#HomeButton
+{
+  background-color:transparent;
+  border-color: transparent;
+}
+
+QPushButton#HomeButton:focus
+{ /* removes square around logo */
+  background-color:transparent;
   border-color: darkgrey;
 }
 
-QPushButton:hover
+QPushButton#HomeButton:hover
 {
   background-color:rgb(100,110,125);
   color:black; border-style: outset;
@@ -261,7 +277,8 @@ QTableView
 
 QHeaderView::section
 {
-  background-color:lightblue;
+  background-color: blue;
+  color:black;
 }
 
 QTableView::item:selected
@@ -275,3 +292,8 @@ QTableView::item:focus
   color:black;
 }
 
+QScrollBar:horizontal
+{
+  border: solid grey;
+  background: blue;
+}
