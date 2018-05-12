@@ -10,7 +10,8 @@ QMainWindow
 
 QWidget
 {
-  background-color: rgba(197,219,246,80);
+  background-color: rgba(25,25,25,80);
+/*  background-color: transparent; */
   color: back;
 }
 
@@ -47,8 +48,23 @@ QMenu#scrollArea
   border:2px solid rgb(255,233,142);
 }
 
+/* rpc console */
+#messagesWidget
+{
+  color: white;
+}
 
+/* on the network traffic tab */
+#groupBox
+{
+  color: white;
+}
 
+#OptionsDialog
+{
+  border-image: url(:/images/background) 0 0 0 0 stretch stretch;
+  color: white;
+}
 
 /* change just the frames named (use# for names) frame */
 /* QFrame would change ALL the frames including the ones around all labels, boxes ...  */
@@ -70,17 +86,24 @@ QMenu#scrollArea
   border: 1px solid blue;
 }
 
-QTabWidget::pane
-{/* The tab widget frame */
-  border-top: 2px solid transparent;
-blue;
-}
-
-QTabWidget::tab-bar
+#RPCConsole
 {
-  left: 5px; /* move to the right by 5px */
+  border-image: url(:/images/background) 0 0 0 0 stretch stretch;
+  color: white;
 }
 
+#tab_console
+{
+  color: white;
+}
+
+QTabWidget::pane
+{ /* The tab widget frame */
+  border-top: 2px solid transparent;
+}
+
+/* Style the tab using the tab sub-control. Note that
+    it reads QTabBar _not_ QTabWidget */
 QTabBar::tab
 {
   padding: 10px 10px 10px 10px;
@@ -137,6 +160,7 @@ QCheckBox
 {
   border-image: url('');
   background-color:rgba(125,125,125,0);
+  color: white;
 }
 
 
