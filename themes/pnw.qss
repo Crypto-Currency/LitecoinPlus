@@ -11,7 +11,7 @@ QMainWindow
 QWidget
 {
   background-color: rgba(90,90,110,50);
-  color: back;
+  color: black;
 }
 
 QMenuBar::item
@@ -28,7 +28,6 @@ QMenu
 
 QMenu::item:selected
 {
-  background-color:rgb(2,115,67);
   background-color:lightblue;
   color white;
 }
@@ -68,32 +67,15 @@ QMenu#scrollArea
   border: 1px solid black;
 }
 
-#RPCConsole
-{
-  border-image: url(themes/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
-}
-
-#tabWidget
-{
-  background-color:rgba(100,110,125,25);
-  color: green;
-}
-#tab_info
-{
-  background-color:rgba(100,110,125,50);
-  color:red;
-  border-color:rgb(200,200,200);
-}
-
 QTabBar::tab
 {
   padding: 10px 10px 10px 10px;
   background-color:rgba(25,25,25,100);
-  color:black;
+  color:white;
   border-color:rgb(200,200,200);
 }
 
-QTabBar::tab::selected
+QTabBar::tab:selected, QTabBar::tab:hover
 {
   padding: 10px 10px 10px 10px;
   background-color:rgba(225,225,225,100);
@@ -213,22 +195,6 @@ QToolTip
   border-image: url(themes/images/pnw-background.jpg) 0 0 0 0 stretch stretch;
   color:white;
   border: 2px solid rgb(255,233,142);
-}
-
-QTabBar::tab
-{
-  padding: 10px 10px 10px 10px;
-  background-color:rgba(25,25,25,100);
-  color:white;
-  border-color:rgb(200,200,200);
-}
-
-QTabBar::tab::selected
-{
-  padding: 10px 10px 10px 10px;
-  background-color:rgba(225,225,225,100);
-  color:darkblue;
-  border-color:rgb(200,200,200);
 }
 
 QProgressBar

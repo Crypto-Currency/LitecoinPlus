@@ -19,6 +19,31 @@ QMenuBar::item
   background-color: transparent;
 }
 
+QMenu
+{
+  padding: 2px 10px 2px 10px;
+  background-color:rgb(10,10,10);
+  border:2px solid rgb(255,233,142);
+}
+
+QMenu#scrollArea
+{
+  padding: 2px 10px 2px 10px;
+  background-color:rgb(125,125,125);
+  border:2px solid black;
+}
+
+QMenu::item:selected, QMenu::item:hover
+{
+  background-color:grey;
+  color black;
+}
+
+QMenu::item:disabled
+{
+  color: grey;
+}
+
 /* change just the frames named (use# for names) frame */
 /* QFrame would change ALL the frames including the ones around all labels, boxes ...  */
 #frame, #frame_2, #frameCoinControl, #scrollArea
@@ -47,7 +72,7 @@ QTabBar::tab
   border-color:rgb(200,200,200);
 }
 
-QTabBar::tab::selected
+QTabBar::tab::selected, QTabBar::tab:hover
 {
   padding: 10px 10px 10px 10px;
   background-color:rgba(225,225,225,100); /* make background opaque */
@@ -117,20 +142,6 @@ QLabel
 {
   background-color:rgba(255,255,255,0); /* makes text background transparent */
   color:white; 
-}
-
-QMenu
-{
-  padding: 2px 10px 2px 10px;
-  background-color:rgb(10,10,10);
-  border:2px solid rgb(255,233,142);
-}
-
-QMenu#scrollArea
-{
-  padding: 2px 10px 2px 10px;
-  background-color:rgb(125,125,125);
-  border:2px solid black;
 }
 
 QPushButton#scrollArea
