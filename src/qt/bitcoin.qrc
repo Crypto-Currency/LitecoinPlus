@@ -43,11 +43,12 @@
         <file alias="qrcode">res/icons/qrcode.png</file>
         <file alias="debugwindow">res/icons/debugwindow.png</file>
         <file alias="gears">res/icons/gear.png</file>
+        <file alias="dusting">res/icons/dusting.png</file>
     </qresource>
     <qresource prefix="/images">
         <file alias="about">res/images/about.png</file>
         <file alias="splash">res/images/splash1.png</file>
-        <file alias="background">res/images/background.png</file>
+		<file alias="background">res/images/background.png</file>
         <file alias="backg">res/images/wallet.png</file>
     </qresource>
     <qresource prefix="/movies">
@@ -55,6 +56,7 @@
     </qresource>
     <qresource prefix="/translations">
         <file alias="en">locale/bitcoin_en.qm</file>
+        <file alias="es">locale/bitcoin_es.qm</file>
         <file alias="it">locale/bitcoin_it.qm</file>
         <file alias="ru">locale/bitcoin_ru.qm</file>
     </qresource>
