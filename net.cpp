@@ -456,7 +456,7 @@ bool GetMyExternalIP2(const CService& addrConnect, const char* pszGet, const cha
             {
                 if (!RecvLine(hSocket, strLine))
                 {
-                    closesocket(hSocket);
+                    CloseSocket(hSocket);
                     return false;
                 }
                 if (pszKeyword == NULL)
@@ -467,7 +467,7 @@ bool GetMyExternalIP2(const CService& addrConnect, const char* pszGet, const cha
                     break;
                 }
             }
-            closesocket(hSocket);
+            CloseSocket(hSocket);
             if (strLine.find("<") != string::npos)
                 strLine = strLine.substr(0, strLine.find("<"));
             strLine = strLine.substr(strspn(strLine.c_str(), " \t\n\r"));
@@ -685,7 +685,7 @@ void CNode::CloseSocketDisconnect()
     if (hSocket != INVALID_SOCKET)
     {
         printf("disconnecting node %s\n", addrName.c_str());
-        closesocket(hSocket);
+        CloseSocket(hSocket);
         hSocket = INVALID_SOCKET;
         vRecv.clear();
     }
@@ -1119,13 +1119,13 @@ void ThreadSocketHandler2(void* parg)
                 {
                     LOCK(cs_setservAddNodeAddresses);
                     if (!setservAddNodeAddresses.count(addr))
-                        closesocket(hSocket);
+                        CloseSocket(hSocket);
                 }
             }
             else if (CNode::IsBanned(addr))
             {
                 printf("connection from %s dropped (banned)\n", addr.ToString().c_str());
-                closesocket(hSocket);
+                CloseSocket(hSocket);
             }
             else
             {
@@ -2261,10 +2261,10 @@ public:
         // Close sockets
         BOOST_FOREACH(CNode* pnode, vNodes)
             if (pnode->hSocket != INVALID_SOCKET)
-                closesocket(pnode->hSocket);
+                CloseSocket(pnode->hSocket);
         BOOST_FOREACH(SOCKET hListenSocket, vhListenSocket)
             if (hListenSocket != INVALID_SOCKET)
-                if (closesocket(hListenSocket) == SOCKET_ERROR)
+                if (!CloseSocket(hListenSocket))
                     printf("closesocket(hListenSocket) failed with error %d\n", WSAGetLastError());
 
 #ifdef WIN32
