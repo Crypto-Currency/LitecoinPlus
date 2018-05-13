@@ -255,7 +255,6 @@ bool RecvLine(SOCKET hSocket, string& strLine)
         int nBytes = recv(hSocket, &c, 1, 0);
         if (nBytes > 0)
         {
-			CNode::RecordBytesRecv(nBytes);
             if (c == '\n')
                 continue;
             if (c == '\r')
@@ -446,7 +445,6 @@ bool GetMyExternalIP2(const CService& addrConnect, const char* pszGet, const cha
         return error("GetMyExternalIP() : connection to %s failed", addrConnect.ToString().c_str());
 
     send(hSocket, pszGet, strlen(pszGet), MSG_NOSIGNAL);
-	CNode::RecordBytesSent(strlen(pszGet));
 
     string strLine;
     while (RecvLine(hSocket, strLine))
