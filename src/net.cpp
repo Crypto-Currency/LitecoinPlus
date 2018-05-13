@@ -35,6 +35,7 @@ void ThreadMapPort2(void* parg);
 #endif
 void ThreadDNSAddressSeed2(void* parg);
 bool OpenNetworkConnection(const CAddress& addrConnect, CSemaphoreGrant *grantOutbound = NULL, const char *strDest = NULL, bool fOneShot = false);
+extern bool CloseSocket(SOCKET& hSocket);
 
 
 struct LocalServiceInfo {
@@ -480,7 +481,7 @@ bool GetMyExternalIP2(const CService& addrConnect, const char* pszGet, const cha
             return true;
         }
     }
-    closesocket(hSocket);
+    CloseSocket(hSocket);
     return error("GetMyExternalIP() : connection closed");
 }
 
@@ -604,7 +605,6 @@ CNode* FindNode(const CService& addr)
     return NULL;
 }
 
-//TODO: This is used in only one place in main, and should be removed
 CNode* FindNode(const NodeId nodeid)
 {
     LOCK(cs_vNodes);
