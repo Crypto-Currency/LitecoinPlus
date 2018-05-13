@@ -3993,24 +3993,28 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
         if (!IsInitialBlockDownload() && (GetTime() - nLastRebroadcast > 24 * 60 * 60))
         {
             {
-                LOCK(cs_vNodes);
-                BOOST_FOREACH(CNode* pnode, vNodes)
-                {
-                    // Periodically clear setAddrKnown to allow refresh broadcasts
-                    if (nLastRebroadcast)
-                        pnode->setAddrKnown.clear();
+				// by Simone: all a TRY LOCK, not a LOCK....
+		        TRY_LOCK(cs_vNodes, lockNodes);
+		        if (lockNodes)
+		        {
+		            BOOST_FOREACH(CNode* pnode, vNodes)
+		            {
+		                // Periodically clear setAddrKnown to allow refresh broadcasts
+		                if (nLastRebroadcast)
+		                    pnode->setAddrKnown.clear();
 
-                    // Rebroadcast our address
-                    if (!fNoListen)
-                    {
-                        CAddress addr = GetLocalAddress(&pnode->addr);
-                        if (addr.IsRoutable())
-                            pnode->PushAddress(addr);
-                    }
-                }
-            }
-            AdvertiseLocal(pto);
-            nLastRebroadcast = GetTime();
+		                // Rebroadcast our address
+		                if (!fNoListen)
+		                {
+		                    CAddress addr = GetLocalAddress(&pnode->addr);
+		                    if (addr.IsRoutable())
+		                        pnode->PushAddress(addr);
+		                }
+		            }
+		        }
+		        AdvertiseLocal(pto);
+		        nLastRebroadcast = GetTime();
+			}
         }
 
         //
