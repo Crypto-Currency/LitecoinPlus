@@ -2339,10 +2339,18 @@ bool CBlock::AcceptBlock(bool lessAggressive)
 		int nBlockEstimate = Checkpoints::GetTotalBlocksEstimate();
 		if (hashBestChain == hash)
 		{
-		    LOCK(cs_vNodes);
-		    BOOST_FOREACH(CNode* pnode, vNodes)
-		        if (nBestHeight > (pnode->nStartingHeight != -1 ? pnode->nStartingHeight - 2000 : nBlockEstimate))
-		            pnode->PushInventory(CInv(MSG_BLOCK, hash));
+            {
+				// by Simone: use TRY LOCK, not a LOCK....
+		        TRY_LOCK(cs_vNodes, lockStatus);
+		        if (lockStatus)
+		        {
+				    BOOST_FOREACH(CNode* pnode, vNodes)
+					{
+				        if (nBestHeight > (pnode->nStartingHeight != -1 ? pnode->nStartingHeight - 2000 : nBlockEstimate))
+				            pnode->PushInventory(CInv(MSG_BLOCK, hash));
+					}
+				}
+			}
 		}
 
 		// ppcoin: check pending sync-checkpoint
