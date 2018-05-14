@@ -2438,7 +2438,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock, bool lessAggressive)
 		if (!CheckProofOfStake(pblock->vtx[1], pblock->nBits, hashProofOfStake))
 		{
 		    printf("WARNING: ProcessBlock(): check proof-of-stake failed for block %s\n", hash.ToString().c_str());
-		    return false; // do not error here as we expect this during initial block download
+		    return true; // do not error here as we expect this during initial block download
 		}
 		if (!mapProofOfStake.count(hash)) // add to mapProofOfStake
 		    mapProofOfStake.insert(make_pair(hash, hashProofOfStake));
@@ -2495,7 +2495,9 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock, bool lessAggressive)
             // ppcoin: getblocks may not obtain the ancestor block rejected
             // earlier by duplicate-stake check so we ask for it again directly
             if (!IsInitialBlockDownload())
+			{
                 pfrom->AskFor(CInv(MSG_BLOCK, WantedByOrphan(pblock2)));
+			}
         }
         return true;
     }
@@ -3523,9 +3525,11 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         {
             // Relay
             pfrom->hashCheckpointKnown = checkpoint.hashCheckpoint;
-            LOCK(cs_vNodes);
-            BOOST_FOREACH(CNode* pnode, vNodes)
-                checkpoint.RelayTo(pnode);
+			{
+		        LOCK(cs_vNodes);
+		        BOOST_FOREACH(CNode* pnode, vNodes)
+		            checkpoint.RelayTo(pnode);
+			}
         }
     }
 
@@ -3843,7 +3847,10 @@ bool ProcessMessages(CNode* pfrom)
 {
     CDataStream& vRecv = pfrom->vRecv;
     if (vRecv.empty())
+	{
         return true;
+	}
+
     //if (fDebug)
     //    printf("ProcessMessages(%u bytes)\n", vRecv.size());
 
@@ -3858,6 +3865,7 @@ bool ProcessMessages(CNode* pfrom)
 
     loop
     {
+
         // Don't bother if send buffer is too full to respond anyway
         if (pfrom->vSend.size() >= SendBufferSize())
             break;
@@ -3966,194 +3974,197 @@ extern void AdvertiseLocal(CNode *pnode);
 
 bool SendMessages(CNode* pto, bool fSendTrickle)
 {
-    TRY_LOCK(cs_main, lockMain);
-    if (lockMain) {
+	{
+		TRY_LOCK(cs_main, lockMain);
+		if (lockMain) {
 
-        // Don't send anything until we get their version message
-        if (pto->nVersion == 0)
-            return true;
+		    // Don't send anything until we get their version message
+		    if (pto->nVersion == 0)
+		        return true;
 
-        // Keep-alive ping. We send a nonce of zero because we don't use it anywhere
-        // right now.
-		if (pto->nPingNonceSent == 0 && pto->nPingUsecStart + PING_INTERVAL * 1000000 < GetTimeMicros()) {
-            uint64 nonce = 0;
-            while (nonce == 0) {
-                GetRandBytes((unsigned char*)&nonce, sizeof(nonce));
-            }
-            pto->fPingQueued = false;
-            pto->nPingUsecStart = GetTimeMicros();
-            if (pto->nVersion > BIP0031_VERSION) {
-                pto->nPingNonceSent = nonce;
-                pto->PushMessage("ping", nonce);
-            } else {
-                // Peer is too old to support ping command with nonce, pong will never arrive.
-                pto->nPingNonceSent = 0;
-                pto->PushMessage("ping");
-			}
-        }
+		    // Keep-alive ping. We send a nonce of zero because we don't use it anywhere
+		    // right now.
+			if (pto->nPingNonceSent == 0 && pto->nPingUsecStart + PING_INTERVAL * 1000000 < GetTimeMicros()) {
+		        uint64 nonce = 0;
+		        while (nonce == 0) {
+		            GetRandBytes((unsigned char*)&nonce, sizeof(nonce));
+		        }
+		        pto->fPingQueued = false;
+		        pto->nPingUsecStart = GetTimeMicros();
+		        if (pto->nVersion > BIP0031_VERSION) {
+		            pto->nPingNonceSent = nonce;
+		            pto->PushMessage("ping", nonce);
+		        } else {
+		            // Peer is too old to support ping command with nonce, pong will never arrive.
+		            pto->nPingNonceSent = 0;
+		            pto->PushMessage("ping");
+				}
+		    }
 
-        // Resend wallet transactions that haven't gotten in a block yet
-        ResendWalletTransactions();
+		    // Resend wallet transactions that haven't gotten in a block yet
+		    ResendWalletTransactions();
 
-        // Address refresh broadcast
-        static int64 nLastRebroadcast;
+		    // Address refresh broadcast
+		    static int64 nLastRebroadcast;
 
-        if (!IsInitialBlockDownload() && (GetTime() - nLastRebroadcast > 24 * 60 * 60))
-        {
-            {
-				// by Simone: all a TRY LOCK, not a LOCK....
-		        TRY_LOCK(cs_vNodes, lockNodes);
-		        if (lockNodes)
+		    if (!IsInitialBlockDownload() && (GetTime() - nLastRebroadcast > 24 * 60 * 60))
+		    {
 		        {
-		            BOOST_FOREACH(CNode* pnode, vNodes)
-		            {
-		                // Periodically clear setAddrKnown to allow refresh broadcasts
-		                if (nLastRebroadcast)
-		                    pnode->setAddrKnown.clear();
+					// by Simone: all a TRY LOCK, not a LOCK....
+				    TRY_LOCK(cs_vNodes, lockNodes);
+				    if (lockNodes)
+				    {
+				        BOOST_FOREACH(CNode* pnode, vNodes)
+				        {
+				            // Periodically clear setAddrKnown to allow refresh broadcasts
+				            if (nLastRebroadcast)
+				                pnode->setAddrKnown.clear();
 
-		                // Rebroadcast our address
-		                if (!fNoListen)
+				            // Rebroadcast our address
+				            if (!fNoListen)
+				            {
+				                CAddress addr = GetLocalAddress(&pnode->addr);
+				                if (addr.IsRoutable())
+				                    pnode->PushAddress(addr);
+				            }
+				        }
+				    }
+				    AdvertiseLocal(pto);
+				    nLastRebroadcast = GetTime();
+				}
+		    }
+
+		    //
+		    // Message: addr
+		    //
+		    if (fSendTrickle)
+		    {
+		        vector<CAddress> vAddr;
+		        vAddr.reserve(pto->vAddrToSend.size());
+		        BOOST_FOREACH(const CAddress& addr, pto->vAddrToSend)
+		        {
+		            // returns true if wasn't already contained in the set
+		            if (pto->setAddrKnown.insert(addr).second)
+		            {
+		                vAddr.push_back(addr);
+		                // receiver rejects addr messages larger than 1000
+		                if (vAddr.size() >= 1000)
 		                {
-		                    CAddress addr = GetLocalAddress(&pnode->addr);
-		                    if (addr.IsRoutable())
-		                        pnode->PushAddress(addr);
+		                    pto->PushMessage("addr", vAddr);
+		                    vAddr.clear();
 		                }
 		            }
 		        }
-		        AdvertiseLocal(pto);
-		        nLastRebroadcast = GetTime();
-			}
-        }
+		        pto->vAddrToSend.clear();
+		        if (!vAddr.empty())
+		            pto->PushMessage("addr", vAddr);
+		    }
 
-        //
-        // Message: addr
-        //
-        if (fSendTrickle)
-        {
-            vector<CAddress> vAddr;
-            vAddr.reserve(pto->vAddrToSend.size());
-            BOOST_FOREACH(const CAddress& addr, pto->vAddrToSend)
-            {
-                // returns true if wasn't already contained in the set
-                if (pto->setAddrKnown.insert(addr).second)
-                {
-                    vAddr.push_back(addr);
-                    // receiver rejects addr messages larger than 1000
-                    if (vAddr.size() >= 1000)
-                    {
-                        pto->PushMessage("addr", vAddr);
-                        vAddr.clear();
-                    }
-                }
-            }
-            pto->vAddrToSend.clear();
-            if (!vAddr.empty())
-                pto->PushMessage("addr", vAddr);
-        }
+			// by Simone: new automatic banning logic
+		    CNodeState &state = *State(pto->GetId());
+		    if (state.fShouldBan) {
+		        if (pto->fWhitelisted)
+		            printf("Warning: not punishing whitelisted peer %s!\n", pto->addr.ToString().c_str());
+		        else {
+		            pto->fDisconnect = true;
+		            if (pto->addr.IsLocal())
+		                printf("Warning: not banning local peer %s!\n", pto->addr.ToString().c_str());
+		            else
+		            {
+		                CNode::Ban(pto->addr, BanReasonNodeMisbehaving);
+		            }
+		        }
+		        state.fShouldBan = false;
+		    }
 
-		// by Simone: new automatic banning logic
-        CNodeState &state = *State(pto->GetId());
-        if (state.fShouldBan) {
-            if (pto->fWhitelisted)
-                printf("Warning: not punishing whitelisted peer %s!\n", pto->addr.ToString().c_str());
-            else {
-                pto->fDisconnect = true;
-                if (pto->addr.IsLocal())
-                    printf("Warning: not banning local peer %s!\n", pto->addr.ToString().c_str());
-                else
-                {
-                    CNode::Ban(pto->addr, BanReasonNodeMisbehaving);
-                }
-            }
-            state.fShouldBan = false;
-        }
+		    //
+		    // Message: inventory
+		    //
+		    vector<CInv> vInv;
+		    vector<CInv> vInvWait;
+		    {
+		        LOCK(pto->cs_inventory);
+		        vInv.reserve(pto->vInventoryToSend.size());
+		        vInvWait.reserve(pto->vInventoryToSend.size());
+		        BOOST_FOREACH(const CInv& inv, pto->vInventoryToSend)
+		        {
+		            if (pto->setInventoryKnown.count(inv))
+		                continue;
 
-        //
-        // Message: inventory
-        //
-        vector<CInv> vInv;
-        vector<CInv> vInvWait;
-        {
-            LOCK(pto->cs_inventory);
-            vInv.reserve(pto->vInventoryToSend.size());
-            vInvWait.reserve(pto->vInventoryToSend.size());
-            BOOST_FOREACH(const CInv& inv, pto->vInventoryToSend)
-            {
-                if (pto->setInventoryKnown.count(inv))
-                    continue;
+		            // trickle out tx inv to protect privacy
+		            if (inv.type == MSG_TX && !fSendTrickle)
+		            {
+		                // 1/4 of tx invs blast to all immediately
+		                static uint256 hashSalt;
+		                if (hashSalt == 0)
+		                    hashSalt = GetRandHash();
+		                uint256 hashRand = inv.hash ^ hashSalt;
+		                hashRand = Hash(BEGIN(hashRand), END(hashRand));
+		                bool fTrickleWait = ((hashRand & 3) != 0);
 
-                // trickle out tx inv to protect privacy
-                if (inv.type == MSG_TX && !fSendTrickle)
-                {
-                    // 1/4 of tx invs blast to all immediately
-                    static uint256 hashSalt;
-                    if (hashSalt == 0)
-                        hashSalt = GetRandHash();
-                    uint256 hashRand = inv.hash ^ hashSalt;
-                    hashRand = Hash(BEGIN(hashRand), END(hashRand));
-                    bool fTrickleWait = ((hashRand & 3) != 0);
+		                // always trickle our own transactions
+		                if (!fTrickleWait)
+		                {
+		                    CWalletTx wtx;
+		                    if (GetTransaction(inv.hash, wtx))
+		                        if (wtx.fFromMe)
+		                            fTrickleWait = true;
+		                }
 
-                    // always trickle our own transactions
-                    if (!fTrickleWait)
-                    {
-                        CWalletTx wtx;
-                        if (GetTransaction(inv.hash, wtx))
-                            if (wtx.fFromMe)
-                                fTrickleWait = true;
-                    }
+		                if (fTrickleWait)
+		                {
+		                    vInvWait.push_back(inv);
+		                    continue;
+		                }
+		            }
 
-                    if (fTrickleWait)
-                    {
-                        vInvWait.push_back(inv);
-                        continue;
-                    }
-                }
-
-                // returns true if wasn't already contained in the set
-                if (pto->setInventoryKnown.insert(inv).second)
-                {
-                    vInv.push_back(inv);
-                    if (vInv.size() >= 1000)
-                    {
-                        pto->PushMessage("inv", vInv);
-                        vInv.clear();
-                    }
-                }
-            }
-            pto->vInventoryToSend = vInvWait;
-        }
-        if (!vInv.empty())
-            pto->PushMessage("inv", vInv);
+		            // returns true if wasn't already contained in the set
+		            if (pto->setInventoryKnown.insert(inv).second)
+		            {
+		                vInv.push_back(inv);
+		                if (vInv.size() >= 1000)
+		                {
+		                    pto->PushMessage("inv", vInv);
+		                    vInv.clear();
+		                }
+		            }
+		        }
+		        pto->vInventoryToSend = vInvWait;
+		    }
+		    if (!vInv.empty())
+		        pto->PushMessage("inv", vInv);
 
 
-        //
-        // Message: getdata
-        //
-        vector<CInv> vGetData;
-        int64 nNow = GetTime() * 1000000;
-        CTxDB txdb("r");
-        while (!pto->mapAskFor.empty() && (*pto->mapAskFor.begin()).first <= nNow)
-        {
-            const CInv& inv = (*pto->mapAskFor.begin()).second;
-            if (!AlreadyHave(txdb, inv))
-            {
-                if (fDebugNet)
-                    printf("sending getdata: %s\n", inv.ToString().c_str());
-                vGetData.push_back(inv);
-                if (vGetData.size() >= 1000)
-                {
-                    pto->PushMessage("getdata", vGetData);
-                    vGetData.clear();
-                }
-                mapAlreadyAskedFor[inv] = nNow;
-            }
-            pto->mapAskFor.erase(pto->mapAskFor.begin());
-        }
-        if (!vGetData.empty())
-            pto->PushMessage("getdata", vGetData);
+		    //
+		    // Message: getdata
+		    //
+		    vector<CInv> vGetData;
+		    int64 nNow = GetTime() * 1000000;
+		    CTxDB txdb("r");
+		    while (!pto->mapAskFor.empty() && (*pto->mapAskFor.begin()).first <= nNow)
+		    {
+		        const CInv& inv = (*pto->mapAskFor.begin()).second;
+		        if (!AlreadyHave(txdb, inv))
+		        {
+		            if (fDebugNet)
+		                printf("sending getdata: %s\n", inv.ToString().c_str());
+		            vGetData.push_back(inv);
+		            if (vGetData.size() >= 1000)
+		            {
+		                pto->PushMessage("getdata", vGetData);
+		                vGetData.clear();
+		            }
+		            mapAlreadyAskedFor[inv] = nNow;
+		        }
+		        pto->mapAskFor.erase(pto->mapAskFor.begin());
+		    }
+		    if (!vGetData.empty())
+		        pto->PushMessage("getdata", vGetData);
 
-    }
-    return true;
+		}
+		return true;
+	}
+	return false;
 }
 
 
