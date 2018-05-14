@@ -1273,15 +1273,10 @@ bool IsInitialBlockDownload()
 {
     if (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate())
         return true;
-    static int64 nLastUpdate;
-    static CBlockIndex* pindexLastBest;
-    if (pindexBest != pindexLastBest)
-    {
-        pindexLastBest = pindexBest;
-        nLastUpdate = GetTime();
-    }
-    return (GetTime() - nLastUpdate < 10 &&
-            pindexBest->GetBlockTime() < GetTime() - 24 * 60 * 60);
+
+	// by Simone: removed delta on previous bestIndex and decreased delta from 1 day to 5 minutes, enough !
+	bool res = (pindexBest->GetBlockTime() < GetTime() - 5 * 60);
+    return (res);
 }
 
 void static InvalidChainFound(CBlockIndex* pindexNew)

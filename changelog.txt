@@ -3,6 +3,10 @@
 - Theme page: Added the "Reset to none" button, and save settings
 - Theme page: Removed 3 checkboxes and related settings
 - Theme page: Read-only row items, double click the row just selects the theme
+- Added autocompleter to Debug / Console CLI
+= Solved rare freezes during initial blockchain download
+= Solved pausing during initial blockchain download
+= Fixed function that report blockchain out of sync, for many different parts of wallet
 
 
 ***** Version 3.2.0.1-devel
