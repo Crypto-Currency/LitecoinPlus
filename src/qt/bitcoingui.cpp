@@ -392,7 +392,6 @@ void BitcoinGUI::createToolBars()
 
     QToolBar *toolbar2 = addToolBar(tr("Actions toolbar"));
     toolbar2->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-	toolbar2->addAction(skinsPageAction);
 //    toolbar2->addAction(exportAction);
 }
 

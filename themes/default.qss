@@ -1,4 +1,4 @@
-/* desc= "default skin: dark blue background with lightening", vers="1.1"  */
+/* desc= "default skin: dark blue background with lightening - by Spidersbox", vers="1.1"  */
 
 /* first line is looked at to get the skin description - don't forget the 's */
 
@@ -8,28 +8,40 @@ QMainWindow
   border-image: url(:/images/background) 0 0 0 0 stretch stretch;
 }
 
+QDialog
+{
+  border-image: url(:/images/background) 0 0 0 0 stretch stretch;
+}
+
 QWidget
 {
-  background-color: rgba(197,219,246,10);
-  color: back;
+  background-color: rgba(25,25,25,80);
+  color: black;
 }
 
 QMenuBar::item
 {
   background-color: transparent;
+  color: white;
 }
+
 
 QMenu
 {
-  padding: 2px 10px 2px 10px;
-  border:2px solid rgb(255,233,142);
+  background-color:#112b63;
+  color: white;
+  border: 2px solid grey;
 }
 
-QMenu::item:selected
+QMenu::item:selected, QMenu::item:Hover
 {
-  background-color:rgb(2,115,67);
-  background-color:lightblue;
+  background-color:liteblue;
   color white;
+}
+
+QMenu::item:disabled
+{
+  color: grey;
 }
 
 QMenu#scrollArea
@@ -39,6 +51,153 @@ QMenu#scrollArea
   border:2px solid rgb(255,233,142);
 }
 
+/* rpc console */
+#messagesWidget
+{
+  color: white;
+}
+
+/* on the network traffic tab */
+#groupBox
+{
+  color: white;
+}
+
+#CoinControlDialog
+{
+  border-image: url(:/images/background) 0 0 0 0 stretch stretch;
+  color: white;
+}
+
+#OptionsDialog
+{
+  border-image: url(:/images/background) 0 0 0 0 stretch stretch;
+  color: white;
+}
+
+/* change just the frames named (use# for names) frame */
+/* QFrame would change ALL the frames including the ones around all labels, boxes ...  */
+#frame, #frame_2, #frameCoinControl, #scrollArea
+{
+  border: 1px solid grey;
+}
+
+#SendCoinsEntry
+{
+  background-color: rgba(200,200,200,50);
+  border: 1px solid grey;
+}
+
+/* frame 3 is the anoying partial frame on coin control, */
+/* around "clear selection | list mode | tree mode" */
+#frame_3
+{
+  border: 1px solid blue;
+}
+
+#RPCConsole
+{
+  border-image: url(:/images/background) 0 0 0 0 stretch stretch;
+  color: white;
+}
+
+#tab_console
+{
+  color: white;
+}
+
+QTabWidget::pane
+{ /* The tab widget frame */
+  border-top: 2px solid transparent;
+  outline: none;
+}
+
+QTabBar:focus
+{/* remove focus outline on tab */
+  outline: none;
+}
+
+/* Style the tab using the tab sub-control. Note that
+    it reads QTabBar _not_ QTabWidget */
+QTabBar::tab
+{
+  padding: 10px 10px 10px 10px;
+  background-color:rgba(25,25,25,80);
+  color:white;
+  outline: none;
+}
+
+QTabBar::tab:selected, QTabBar::tab:hover
+{
+  padding: 10px 10px 10px 10px;
+  background-color:rgba(225,225,225,80);
+  color:darkblue;
+}
+
+QLabel
+{
+  background-color:rgba(255,255,255,0);
+  color:white; 
+}
+
+
+QLineEdit
+{
+  border-image: url('');
+  border 1px solid grey;  
+  background-color:rgb(125,125,125);
+  color:white; 
+}
+
+QRadioButton
+{
+  border-image: url('');
+  background-color:rgba(125,125,125,0);
+  color: white;
+}
+
+QCheckBox
+{
+  border-image: url('');
+  background-color:rgba(125,125,125,0);
+  color: white;
+}
+
+
+QComboBox
+{
+  background-color:rgb(197,219,246);
+  background-color:rgb(125,125,125);
+  border 1px solid grey;  
+  color: white;
+}
+
+/* Amount box in send coins */
+QDoubleSpinBox
+{
+  background-color:rgb(125,125,125);
+  border 1px solid grey;  
+  color:white;
+}
+
+/* send coins 'pay to' and 'label' */
+QValidatedLineEdit
+{
+  border 1px solid grey;  
+  background-color:rgb(125,125,125);
+  color:white; 
+}
+
+QListView
+{
+  background-color:transparent;
+}
+
+QStatusBar
+{
+/*  background-color: rgba(25,25,25,60); */
+  color: darkgrey;
+}
 
 QToolButton:!hover
 {
@@ -59,12 +218,65 @@ QToolButton:hover
   border-color: darkgrey
 } 
 
-QToolTip
+QPushButton
 {
   background-color:rgb(197,219,246);
-  color:black;
+  color:black; border-style: outset;
+  padding: 2px 10px 2px 10px;
+  border-width: 2px;
+  border-radius: 10px;
+  border-color: darkgrey
+}
+
+QPushButton:hover
+{
+  background-color:rgb(100,110,125);
+  color:black; border-style: outset;
+  border-width: 2px;
+  border-radius: 10px;
+  border-color: darkgrey
+} 
+
+QPushButton#HomeButton
+{
+  background-color:transparent;
+  border-color: transparent;
+}
+
+QPushButton#HomeButton:focus
+{ /* removes square around logo */
+  background-color:transparent;
+  border-color: darkgrey;
+}
+QPushButton#HomeButton:!focus
+{ /* removes square around logo */
+  background-color:transparent;
+  border-color: darkgrey;
+}
+
+QPushButton#HomeButton:hover
+{
+  background-color:rgb(100,110,125);
+  color:black; border-style: outset;
+  border-width: 2px;
+  border-radius: 10px;
+  border-color: darkgrey
+}
+
+QPushButton#scrollArea
+{
+  padding: 2px 10px 2px 10px;
+  background-color:rgb(10,10,10);
+  border:2px solid rgb(255,233,142);
+}
+
+QToolTip
+{
+  background-color:#112b63;
+  color:#aecbe9;
   border: 2px solid grey;
 } 
+
 
 QProgressBar
 {
@@ -83,72 +295,17 @@ QProgressBar::chunk
   margin: 0px;
 }
 
-QStatusBar
-{
-  background-color:rgb(197,219,246)
-}
-
-QPushButton
-{
-  padding: 2px 10px 2px 10px;
-  background-color:rgb(197,219,246);
-  color:black;
-  border-style: outset;
-  border-width: 2px;
-  border-radius: 10px;
-  border-color: darkgrey;
-}
-
-QLabel
-{
-  border-image: url('') 0 0 0 0 stretch stretch;
-  background-color:rgba(125,125,125,0);
-  color:black; 
-}
-
-QMenu
-{
-  padding: 2px 10px 2px 10px;
-  background-color:rgb(235,227,181);
-  border:2px solid grey;
-}
-
-QLabel
-{
-  background-color:rgba(255,255,255,0);
-  color:white; 
-}
-
-/* Amount box in send coins */
-QDoubleSpinBox
-{
-  color:black;
-}
-
-/* All combo boxes */
-QComboBox
-{
-  background-color:rgb(197,219,246);
-  color:black;
-}
-
-/* BitcoinUnits boxes */
-QComboBox#BitcoinUnits
-{
-  background-color:white;
-  color:black;
-}
-
-QHeaderView::section
-{
-  background-color:lightblue;
-}
-
 QTableView
 {
   alternate-background-color: rgba(100,110,125,50);
   background-color: rgba(197,219,246,50);
   border: 1px solid rgb(220,220,220);
+}
+
+QHeaderView::section
+{
+  background-color: blue;
+  color:black;
 }
 
 QTableView::item:selected
@@ -162,8 +319,19 @@ QTableView::item:focus
   color:black;
 }
 
-QTableView QTableCornerButton::section
+QScrollBar:horizontal
 {
-   background: rgba(100,110,125,50);
+  border: solid grey;
+  background: blue;
+}
+
+#line
+{
+  background-color: green;
+}
+
+#line_2
+{
+  background-color: red;
 }
 
