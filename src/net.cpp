@@ -1903,8 +1903,8 @@ void ThreadMessageHandler2(void* parg)
 
         // Poll the connected nodes for messages*/
         CNode* pnodeTrickle = NULL;
-        if (!vNodesCopy.empty())
-        	pnodeTrickle = vNodesCopy[GetRand(vNodesCopy.size())];
+        //if (!vNodesCopy.empty())
+        //	pnodeTrickle = vNodesCopy[GetRand(vNodesCopy.size())];
         BOOST_FOREACH(CNode* pnode, vNodesCopy)
         {
             // Receive messages
