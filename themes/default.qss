@@ -8,10 +8,14 @@ QMainWindow
   border-image: url(:/images/background) 0 0 0 0 stretch stretch;
 }
 
+QDialog
+{
+  border-image: url(:/images/background) 0 0 0 0 stretch stretch;
+}
+
 QWidget
 {
   background-color: rgba(25,25,25,80);
-/*  background-color: transparent; */
   color: black;
 }
 
@@ -25,7 +29,6 @@ QMenuBar::item
 QMenu
 {
   background-color:#112b63;
-  color:#aecbe9;
   color: white;
   border: 2px solid grey;
 }
@@ -106,6 +109,12 @@ QMenu#scrollArea
 QTabWidget::pane
 { /* The tab widget frame */
   border-top: 2px solid transparent;
+  outline: none;
+}
+
+QTabBar:focus
+{/* remove focus outline on tab */
+  outline: none;
 }
 
 /* Style the tab using the tab sub-control. Note that
@@ -115,6 +124,7 @@ QTabBar::tab
   padding: 10px 10px 10px 10px;
   background-color:rgba(25,25,25,80);
   color:white;
+  outline: none;
 }
 
 QTabBar::tab:selected, QTabBar::tab:hover
@@ -130,14 +140,6 @@ QLabel
   color:white; 
 }
 
-/* send coins 'pay to' and 'label' */
-QValidatedLineEdit
-{
-  border-image: url('');
-  border 1px solid grey;  
-  background-color:rgb(125,125,125);
-  color:white; 
-}
 
 QLineEdit
 {
@@ -145,12 +147,6 @@ QLineEdit
   border 1px solid grey;  
   background-color:rgb(125,125,125);
   color:white; 
-}
-
-/* Amount box in send coins */
-QDoubleSpinBox
-{
-  color:black;
 }
 
 QRadioButton
@@ -171,7 +167,25 @@ QCheckBox
 QComboBox
 {
   background-color:rgb(197,219,246);
-  color: black;
+  background-color:rgb(125,125,125);
+  border 1px solid grey;  
+  color: white;
+}
+
+/* Amount box in send coins */
+QDoubleSpinBox
+{
+  background-color:rgb(125,125,125);
+  border 1px solid grey;  
+  color:white;
+}
+
+/* send coins 'pay to' and 'label' */
+QValidatedLineEdit
+{
+  border 1px solid grey;  
+  background-color:rgb(125,125,125);
+  color:white; 
 }
 
 QListView
@@ -214,6 +228,14 @@ QPushButton
   border-color: darkgrey
 }
 
+QPushButton:hover
+{
+  background-color:rgb(100,110,125);
+  color:black; border-style: outset;
+  border-width: 2px;
+  border-radius: 10px;
+  border-color: darkgrey
+} 
 
 QPushButton#HomeButton
 {
@@ -222,6 +244,11 @@ QPushButton#HomeButton
 }
 
 QPushButton#HomeButton:focus
+{ /* removes square around logo */
+  background-color:transparent;
+  border-color: darkgrey;
+}
+QPushButton#HomeButton:!focus
 { /* removes square around logo */
   background-color:transparent;
   border-color: darkgrey;

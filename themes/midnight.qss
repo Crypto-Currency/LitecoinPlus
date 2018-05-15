@@ -8,6 +8,11 @@ QMainWindow
   background-color:rgb(10,10,10);
 }
 
+QDialog
+{
+  background-color:rgb(10,10,10);
+}
+
 QWidget
 {
   background-color:rgb(10,10,10);
@@ -19,18 +24,13 @@ QMenuBar::item
   background-color: transparent;
 }
 
+
+
 QMenu
 {
   padding: 2px 10px 2px 10px;
   background-color:rgb(10,10,10);
   border:2px solid rgb(255,233,142);
-}
-
-QMenu#scrollArea
-{
-  padding: 2px 10px 2px 10px;
-  background-color:rgb(125,125,125);
-  border:2px solid black;
 }
 
 QMenu::item:selected, QMenu::item:hover
@@ -42,6 +42,13 @@ QMenu::item:selected, QMenu::item:hover
 QMenu::item:disabled
 {
   color: grey;
+}
+
+QMenu#scrollArea
+{
+  padding: 2px 10px 2px 10px;
+  background-color:rgb(125,125,125);
+  border:2px solid black;
 }
 
 /* change just the frames named (use# for names) frame */
@@ -64,6 +71,17 @@ QMenu::item:disabled
   border: 1px solid black;
 }
 
+QTabWidget::pane
+{ /* The tab widget frame */
+  border-top: 2px solid transparent;
+  outline: none;
+}
+
+QTabBar:focus
+{/* remove focus outline on tab */
+  outline: none;
+}
+
 QTabBar::tab
 {
   padding: 10px 10px 10px 10px;
@@ -78,6 +96,12 @@ QTabBar::tab::selected, QTabBar::tab:hover
   background-color:rgba(225,225,225,100); /* make background opaque */
   color:darkblue;
   border-color:rgb(200,200,200);
+}
+
+QLabel
+{
+  background-color:rgba(255,255,255,0); /* makes text background transparent */
+  color:white; 
 }
 
 QStatusBar
@@ -97,11 +121,21 @@ QToolButton:!hover
 
 QToolButton:hover
 {
-  background-color:rgb(10,10,10);
+  background-color:rgb(100,100,100);
   color:white; border-style: outset;
   border-width: 2px;
   border-radius: 10px;
   border-color: rgb(255,233,142);
+}
+
+QToolButton:!hover
+{
+  background-color:rgb(10,10,10);
+  color:white; border-style: outset;
+  padding: 2px 10px 2px 10px;
+  border-width:2px;
+  border-color:rgb(255,233,142);
+  border-radius:10px;
 }
 
 QToolTip
@@ -114,10 +148,12 @@ QToolTip
 QProgressBar
 {
   background-color: #e8e8e8;
+  background-color: darkYellow;
   border: 1px solid grey;
   border-radius: 7px;
   padding: 1px;
   text-align: center;
+  color: rgb(255,233,142);
 }
 
 QProgressBar::chunk
@@ -138,10 +174,39 @@ QPushButton
   border-color: rgb(255,233,142);
 }
 
-QLabel
+QPushButton:hover
 {
-  background-color:rgba(255,255,255,0); /* makes text background transparent */
-  color:white; 
+  background-color:rgb(100,100,100);
+  color: white; border-style: outset;
+  border-width: 2px;
+  border-radius: 10px;
+  border-color: rgb(255,233,142);
+} 
+
+QPushButton#HomeButton
+{
+  background-color:transparent;
+  border-color: transparent;
+}
+
+QPushButton#HomeButton:focus
+{ /* removes square around logo */
+  background-color:transparent;
+  border-color: darkgrey;
+}
+QPushButton#HomeButton:!focus
+{ /* removes square around logo */
+  background-color:transparent;
+  border-color: darkgrey;
+}
+
+QPushButton#HomeButton:hover
+{
+  background-color:rgb(100,110,125);
+  color:black; border-style: outset;
+  border-width: 2px;
+  border-radius: 10px;
+  border-color: darkgrey
 }
 
 QPushButton#scrollArea
@@ -161,7 +226,6 @@ QDoubleSpinBox
 
 QComboBox
 {
-/*  padding: 2px 10px 10px 10px; */
   background-color:rgb(50,50,50);
 /*  border:2px rgb(219,182,62); */
 }
@@ -184,5 +248,22 @@ QTreeWidget
 QHeaderView::section
 {
   background-color:rgb(10,10,10);
+}
+
+QScrollBar:horizontal
+{
+  border: solid grey;
+  background: black;
+  color: black;
+}
+
+#line
+{
+  background-color: green;
+}
+
+#line_2
+{
+  background-color: red;
 }
 
