@@ -29,6 +29,7 @@
 #include "bitcoinrpc.h"
 #include "version.h"
 #include "skinspage.h"
+#include "dustinggui.h"
 
 #ifdef Q_OS_MAC
 #include "macdockiconhandler.h"
@@ -43,7 +44,6 @@
 #include <QVBoxLayout>
 #include <QToolBar>
 #include <QStatusBar>
-#include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QLocale>
@@ -67,6 +67,18 @@ extern int64 nLastCoinStakeSearchInterval;
 extern unsigned int nStakeTargetSpacing;
 static QSplashScreen *splashref;
 extern BitcoinGUI *guiref;
+
+// added by Simone
+ClickableLabel::ClickableLabel(QWidget* parent, Qt::WindowFlags f)
+    : QLabel(parent) {
+    
+}
+
+ClickableLabel::~ClickableLabel() {}
+
+void ClickableLabel::mousePressEvent(QMouseEvent* event) {
+    emit clicked();
+}
 
 // by Simone: used for progress around the code
 // ATTENTION: be sure to be in the same thread when calling this one, is not like the ui_interface one
@@ -92,7 +104,6 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     setWindowTitle(tr("LitecoinPlus - Wallet  ")+QString::fromStdString(CLIENT_BUILD));
 //  setStyleSheet("");
 //    statusBar()->setStyleSheet("QToolTip {background-color:rgb(255,233,142); color:black; border: 2px solid grey;}");
-
 #ifndef Q_OS_MAC
     qApp->setWindowIcon(QIcon(":icons/bitcoin"));
     setWindowIcon(QIcon(":icons/bitcoin"));
@@ -133,7 +144,8 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
 
     signVerifyMessageDialog = new SignVerifyMessageDialog(this);
 
-    skinsPage = new SkinsPage(this);
+	skinsPage = new SkinsPage(this);
+	dustingPage = new DustingGui(this);
 
     centralWidget = new QStackedWidget(this);
     centralWidget->addWidget(overviewPage);
@@ -141,7 +153,8 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
     centralWidget->addWidget(addressBookPage);
     centralWidget->addWidget(receiveCoinsPage);
     centralWidget->addWidget(sendCoinsPage);
-    centralWidget->addWidget(skinsPage);
+	centralWidget->addWidget(skinsPage);
+	centralWidget->addWidget(dustingPage);
     setCentralWidget(centralWidget);
 
     // Create status bar
@@ -155,10 +168,13 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
     QHBoxLayout *frameBlocksLayout = new QHBoxLayout(frameBlocks);
     frameBlocksLayout->setContentsMargins(3,0,3,0);
     frameBlocksLayout->setSpacing(3);
+    labelOnlineIcon = new ClickableLabel();
     labelEncryptionIcon = new QLabel();
     labelMintingIcon = new QLabel();
     labelConnectionsIcon = new QLabel();
     labelBlocksIcon = new QLabel();
+    frameBlocksLayout->addStretch();
+    frameBlocksLayout->addWidget(labelOnlineIcon);
     frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelEncryptionIcon);
     frameBlocksLayout->addStretch();
@@ -169,9 +185,16 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
     frameBlocksLayout->addWidget(labelBlocksIcon);
     frameBlocksLayout->addStretch();
 
+    // Set online/offline pixmap
+    labelOnlineIcon->setPixmap(QIcon(":/icons/net_online").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+    labelOnlineIcon->setEnabled(true);
+	connect(labelOnlineIcon, SIGNAL(clicked()), this, SLOT(labelOnlineClicked()));
+	onlineLabelMsg(netOffline);
+
     // Set minting pixmap
-    labelMintingIcon->setPixmap(QIcon(":/icons/staking_on").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+    labelMintingIcon->setPixmap(QIcon(":/icons/staking_on").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
     labelMintingIcon->setEnabled(false);
+
     // Add timer to update minting icon
     QTimer *timerMintingIcon = new QTimer(labelMintingIcon);
     timerMintingIcon->start(MODEL_UPDATE_DELAY);
@@ -225,6 +248,62 @@ BitcoinGUI::~BitcoinGUI()
 #endif
 }
 
+// by Simone: label to control online/offline status
+void BitcoinGUI::onlineLabelMsg(bool sts)
+{
+	QString tooltip;
+	if (sts)
+	{
+		tooltip = tr("The wallet is now OFFLINE");
+		tooltip += "<br><br>";
+		tooltip += "Click this icon to bring it online.";
+	}
+	else
+	{
+		tooltip = tr("The wallet is now ONLINE");
+		tooltip += "<br><br>";
+		tooltip += "Click this icon to bring it offline.";
+	}
+	labelOnlineIcon->setToolTip(tooltip);
+}
+
+void BitcoinGUI::labelOnlineClicked()
+{
+	// ask before going offline
+	if (!netOffline)
+	{
+		QString strMessage = tr("The wallet will now go OFFLINE, meaning that syncing and staking will stop. Are you sure ?");
+		QMessageBox::StandardButton retval = QMessageBox::question(
+		      this, tr("Confirm offline action"), strMessage,
+		      QMessageBox::Yes|QMessageBox::Cancel, QMessageBox::Yes);
+		if (retval == QMessageBox::Cancel)
+		{
+			return;
+		}
+	}
+
+	// toggle the net status and save result
+	bool res = setOnlineStatus(netOffline);
+
+	// put the proper image & stuff
+	if (res)
+	{
+		labelOnlineIcon->setPixmap(QIcon(":/icons/net_offline").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+		labelBlocksIcon->hide();
+        overviewPage->showOutOfSyncWarning(true);
+	}
+	else
+	{
+		labelOnlineIcon->setPixmap(QIcon(":/icons/net_online").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+        progressBarLabel->setText("");
+        progressBarLabel->setVisible(false);
+        labelBlocksIcon->setMovie(syncIconMovie);
+		labelBlocksIcon->show();
+        syncIconMovie->start();
+	}
+	onlineLabelMsg(res);
+}
+
 void BitcoinGUI::createActions()
 {
     QActionGroup *tabGroup = new QActionGroup(this);
@@ -259,11 +338,18 @@ void BitcoinGUI::createActions()
     addressBookAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     tabGroup->addAction(addressBookAction);
 
+
     skinsPageAction = new QAction(QIcon(":/icons/gears"), tr("&Themes"), this);
     skinsPageAction->setToolTip(tr("Change the look of your wallet"));
     skinsPageAction->setCheckable(true);
     skinsPageAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
     tabGroup->addAction(skinsPageAction);
+
+    dustingPageAction = new QAction(QIcon(":/icons/dusting"), tr("&Dusting"), this);
+    dustingPageAction->setToolTip(tr("Monitor the dusting of your wallet"));
+    dustingPageAction->setCheckable(true);
+    dustingPageAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
+    tabGroup->addAction(dustingPageAction);
 
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
@@ -277,6 +363,8 @@ void BitcoinGUI::createActions()
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(gotoAddressBookPage()));
     connect(skinsPageAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(skinsPageAction, SIGNAL(triggered()), this, SLOT(gotoSkinsPage()));
+    connect(dustingPageAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(dustingPageAction, SIGNAL(triggered()), this, SLOT(gotoDustingPage()));
 
     quitAction = new QAction(QIcon(":/icons/quit"), tr("E&xit"), this);
     quitAction->setToolTip(tr("Quit application"));
@@ -388,11 +476,11 @@ void BitcoinGUI::createToolBars()
     toolbar->addAction(receiveCoinsAction);
     toolbar->addAction(historyAction);
     toolbar->addAction(addressBookAction);
-    toolbar->addAction(skinsPageAction);
 
     QToolBar *toolbar2 = addToolBar(tr("Actions toolbar"));
     toolbar2->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-//    toolbar2->addAction(exportAction);
+	toolbar2->addAction(skinsPageAction);
+    toolbar2->addAction(dustingPageAction);
 }
 
 void BitcoinGUI::setClientModel(ClientModel *clientModel)
@@ -452,6 +540,7 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
         receiveCoinsPage->setModel(walletModel->getAddressTableModel());
         sendCoinsPage->setModel(walletModel);
         signVerifyMessageDialog->setModel(walletModel);
+        dustingPage->setModel(walletModel);
 
         setEncryptionStatus(walletModel->getEncryptionStatus());
         connect(walletModel, SIGNAL(encryptionStatusChanged(int)), this, SLOT(setEncryptionStatus(int)));
@@ -778,6 +867,15 @@ void BitcoinGUI::gotoSkinsPage()
 {
     skinsPageAction->setChecked(true);
     centralWidget->setCurrentWidget(skinsPage);
+
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+
+void BitcoinGUI::gotoDustingPage()
+{
+    dustingPageAction->setChecked(true);
+    centralWidget->setCurrentWidget(dustingPage);
 
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);

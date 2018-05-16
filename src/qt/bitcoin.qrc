@@ -44,6 +44,8 @@
         <file alias="debugwindow">res/icons/debugwindow.png</file>
         <file alias="gears">res/icons/gear.png</file>
         <file alias="dusting">res/icons/dusting.png</file>
+        <file alias="net_offline">res/icons/net-offline.png</file>
+        <file alias="net_online">res/icons/net-online.png</file>
     </qresource>
     <qresource prefix="/images">
         <file alias="about">res/images/about.png</file>
