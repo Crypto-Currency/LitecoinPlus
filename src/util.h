@@ -158,6 +158,10 @@ extern bool fNoListen;
 extern bool fLogTimestamps;
 extern bool fReopenDebugLog;
 
+// by Simone: net offline status
+extern bool netOffline;
+bool setOnlineStatus(bool online);
+
 void RandAddSeed();
 void RandAddSeedPerfmon();
 int ATTR_WARN_PRINTF(1,2) OutputDebugStringF(const char* pszFormat, ...);
@@ -532,7 +536,6 @@ inline uint160 Hash160(const std::vector<unsigned char>& vch)
     return hash2;
 }
 
-
 /** Median filter over a stream of values.
  * Returns the median of the last N numbers
  */
@@ -542,14 +545,26 @@ private:
     std::vector<T> vValues;
     std::vector<T> vSorted;
     unsigned int nSize;
+	T iniValue;
+
 public:
     CMedianFilter(unsigned int size, T initial_value):
         nSize(size)
     {
         vValues.reserve(size);
         vValues.push_back(initial_value);
+		iniValue = initial_value;
         vSorted = vValues;
     }
+
+    void clear()
+	{
+		for (unsigned int i = 0; i < nSize; i++)
+		{
+			vValues.push_back(iniValue);
+		}
+        vSorted = vValues;
+	}
 
     void input(T value)
     {

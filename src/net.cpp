@@ -1092,10 +1092,18 @@ void ThreadSocketHandler2(void* parg)
 #else
             struct sockaddr sockaddr;
 #endif
+
             socklen_t len = sizeof(sockaddr);
             SOCKET hSocket = accept(hListenSocket, (struct sockaddr*)&sockaddr, &len);
             CAddress addr;
             int nInbound = 0;
+
+			// by Simone: if we are offline, don't accept any new connection
+			if (netOffline)
+			{
+				CloseSocket(hSocket);
+				continue;
+			}
 
             if (hSocket != INVALID_SOCKET)
                 if (!addr.SetSockAddr((const struct sockaddr*)&sockaddr))
@@ -1830,6 +1838,12 @@ void ThreadOpenAddedConnections2(void* parg)
 // if successful, this moves the passed grant to the constructed node
 bool OpenNetworkConnection(const CAddress& addrConnect, CSemaphoreGrant *grantOutbound, const char *strDest, bool fOneShot)
 {
+	// by Simone: if net is offline, do nothing
+	if (netOffline)
+	{
+		return false;
+	}
+
     //
     // Initiate outbound network connection
     //
@@ -1893,6 +1907,13 @@ void ThreadMessageHandler2(void* parg)
     SetThreadPriority(THREAD_PRIORITY_BELOW_NORMAL);
     while (!fShutdown)
     {
+		// by Simone: if net is offline, do nothing
+		if (netOffline)
+		{
+			Sleep(500);
+			continue;
+		}
+
         vector<CNode*> vNodesCopy;
         {
             LOCK(cs_vNodes);
@@ -1915,6 +1936,8 @@ void ThreadMessageHandler2(void* parg)
             }
             if (fShutdown)
                 return;
+			if (netOffline)
+				continue;
 
             // Send messages
             {
@@ -1924,6 +1947,8 @@ void ThreadMessageHandler2(void* parg)
             }
             if (fShutdown)
                 return;
+			if (netOffline)
+				continue;
         }
 
 		{

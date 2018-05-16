@@ -108,6 +108,7 @@ private:
     std::map<std::string, const CRPCCommand*> mapCommands;
 public:
     CRPCTable();
+	std::vector<std::string> listCommands() const;
     const CRPCCommand* operator[](std::string name) const;
     std::string help(std::string name) const;
 

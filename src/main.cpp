@@ -56,7 +56,8 @@ uint256 hashBestChain = 0;
 CBlockIndex* pindexBest = NULL;
 int64 nTimeBestReceived = 0;
 
-CMedianFilter<int> cPeerBlockCounts(5, 0); // Amount of blocks that other nodes claim to have
+// by Simone, use just a single value....
+int cPeerBlockCounts = 0;
 
 map<uint256, CBlock*> mapOrphanBlocks;
 multimap<uint256, CBlock*> mapOrphanBlocksByPrev;
@@ -1266,7 +1267,7 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits)
 // Return maximum amount of blocks that other nodes claim to have
 int GetNumBlocksOfPeers()
 {
-    return std::max(cPeerBlockCounts.median(), Checkpoints::GetTotalBlocksEstimate());
+	return cPeerBlockCounts;
 }
 
 bool IsInitialBlockDownload()
@@ -2983,6 +2984,40 @@ bool LoadExternalBlockFile(FILE* fileIn)
 }
 
 
+// by Simone: function management to bring the wallet ONLINE and OFFLINE (default always start online)
+bool netOffline = false;
+
+// sets the status of the net to online or offline (basically like a toggle)
+bool setOnlineStatus(bool online)
+{
+	// check if we are bringing it online or offline
+	if (!online)
+	{
+        {
+			// use TRY_LOCK, as it might be used in a GUI, worst case they will retry
+	        TRY_LOCK(cs_vNodes, lockStatus);
+	        if (lockStatus)
+	        {
+			    BOOST_FOREACH(CNode* pnode, vNodes)
+				{
+			        pnode->fDisconnect = true;
+				}
+			}
+			else
+			{
+				netOffline = false;
+				return netOffline;
+			}
+			cPeerBlockCounts = 0;
+		}
+	}
+
+	// if we arrive here, adjust the flag
+	netOffline = !online;
+
+	// return the final status
+	return netOffline;
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -3261,7 +3296,11 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 
         printf("receive version message: version %d, blocks=%d, us=%s, them=%s, peer=%s\n", pfrom->nVersion, pfrom->nStartingHeight, addrMe.ToString().c_str(), addrFrom.ToString().c_str(), pfrom->addr.ToString().c_str());
 
-        cPeerBlockCounts.input(pfrom->nStartingHeight);
+        if (pfrom->nStartingHeight > cPeerBlockCounts)
+		{
+			cPeerBlockCounts = pfrom->nStartingHeight; 
+		}
+
 
         // ppcoin: ask for pending sync-checkpoint if any
         if (!IsInitialBlockDownload())
