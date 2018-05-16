@@ -277,7 +277,6 @@ void SkinsPage::createFilesTable()
   filesTable->setColumnWidth(0,160);// last column get resized automatically by qt
   filesTable->setColumnWidth(2,100);
   filesTable->setColumnWidth(1,250);
-  filesTable->setColumnWidth(1,260);
   filesTable->verticalHeader()->hide();
   filesTable->setShowGrid(false);
 

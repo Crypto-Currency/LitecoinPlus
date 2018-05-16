@@ -125,6 +125,7 @@ private:
 
     QMenu *peersTableContextMenu;
     QMenu *banTableContextMenu;
+    QCompleter *autoCompleter;
 
     void startExecutor();
 	static QString FormatBytes(quint64 bytes);

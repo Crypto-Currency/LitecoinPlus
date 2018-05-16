@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QSystemTrayIcon>
+#include <QDialog>
+#include <QLabel>
 
 #include "util.h" // for uint64
 
@@ -13,6 +15,7 @@ class TransactionView;
 class OverviewPage;
 class AddressBookPage;
 class SkinsPage;
+class DustingGui;
 class SendCoinsDialog;
 class SignVerifyMessageDialog;
 class Notificator;
@@ -27,17 +30,33 @@ class QModelIndex;
 class QProgressBar;
 class QStackedWidget;
 class QUrl;
+class QDialog;
 QT_END_NAMESPACE
 
+// added by Simone
+class ClickableLabel : public QLabel { 
+    Q_OBJECT 
 
-/** by Simone: "Shutdown" window */
+public:
+    explicit ClickableLabel(QWidget* parent = 0, Qt::WindowFlags f = Qt::WindowFlags());
+    ~ClickableLabel();
+
+signals:
+    void clicked();
+
+protected:
+    void mousePressEvent(QMouseEvent* event);
+
+};
+
+// by Simone: "Shutdown" window
 class ShutdownWindow : public QWidget
 {
 	Q_OBJECT
 
 public:
-    explicit ShutdownWindow(QWidget *parent=0, Qt::WindowFlags f=0);
-    static QWidget *showShutdownWindow(Qt::WindowFlags f);
+    ShutdownWindow(QWidget *parent=0, Qt::WindowFlags = Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint);
+    void showShutdownWindow();
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -79,12 +98,14 @@ private:
 
     OverviewPage *overviewPage;
     QWidget *transactionsPage;
-    SkinsPage *skinsPage;
+	SkinsPage *skinsPage;
+	DustingGui *dustingPage;
     AddressBookPage *addressBookPage;
     AddressBookPage *receiveCoinsPage;
     SendCoinsDialog *sendCoinsPage;
     SignVerifyMessageDialog *signVerifyMessageDialog;
 
+    ClickableLabel *labelOnlineIcon;
     QLabel *labelEncryptionIcon;
     QLabel *labelMintingIcon;
     QLabel *labelConnectionsIcon;
@@ -98,7 +119,8 @@ private:
     QAction *quitAction;
     QAction *sendCoinsAction;
     QAction *addressBookAction;
-    QAction *skinsPageAction;
+	QAction *skinsPageAction;
+	QAction *dustingPageAction;
     QAction *signMessageAction;
     QAction *verifyMessageAction;
     QAction *aboutAction;
@@ -136,6 +158,8 @@ private:
     /** Create system tray (notification) icon */
     void createTrayIcon();
 
+	// handle online label message in a common way
+	void onlineLabelMsg(bool sts);
 
 public slots:
 
@@ -166,6 +190,9 @@ public slots:
     void handleURI(QString strURI);
 
 private slots:
+	// by Simone: label online clicked, will set to go offline
+	void labelOnlineClicked();
+
     /** Switch to overview (home) page */
     void gotoOverviewPage();
     /** Switch to history (transactions) page */
@@ -174,6 +201,8 @@ private slots:
     void gotoAddressBookPage();
     /** Switch to skins page */
     void gotoSkinsPage();
+    /** Switch to skins page */
+    void gotoDustingPage();
     /** Switch to receive coins page */
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */

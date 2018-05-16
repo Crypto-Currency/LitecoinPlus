@@ -111,6 +111,36 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabDusting">
+      <attribute name="title">
+       <string>&amp;Dusting</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_Window">
+       <item>
+        <widget class="QCheckBox" name="enableAutoDusting">
+         <property name="toolTip">
+          <string>When you enable this functionality, and the wallet is staking the system will automatically run Dusting Control at the indicated period, to ensure that all blocks are packed into one. When this function is enabled, you don't need to manually use Coin Control functions, the wallet software does this automatically for you.</string>
+         </property>
+         <property name="text">
+          <string>&amp;Enable auto-dusting of Wallet</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_Dusting">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tabNetwork">
       <attribute name="title">
        <string>&amp;Network</string>

@@ -53,23 +53,22 @@ ShutdownWindow::ShutdownWindow(QWidget *parent, Qt::WindowFlags f):
 {
     QVBoxLayout *layout = new QVBoxLayout();
 	QLabel *l = new QLabel();
-	l->setText("LitecoinPlus: do NOT shutdown the computer until this window disappears");
+	setWindowTitle(tr("LitecoinPlus"));
+	QString s = tr("LitecoinPlus Wallet is shutting down, please wait...") + "<br><br>" + tr("DO NOT shutdown the computer until this window disappears");
+	l->setText(s);
+	//l->setStyleSheet("QLabel { background-color : grey; color : black; }");
+	setStyleSheet("QWidget { background-color : lightgrey; color: black; }");
     layout->addWidget(l);
     setLayout(layout);
 }
-QWidget* ShutdownWindow::showShutdownWindow(Qt::WindowFlags f)
+void ShutdownWindow::showShutdownWindow()
 {
-    // Show a simple window indicating shutdown status
-    QWidget *shutdownWindow = new ShutdownWindow(0, f);
-    shutdownWindow->setWindowTitle("Do NOT shutdown your PC until this window disappears");
-
     // Center shutdown window in the screen
 	QRect screenGeometry = QApplication::desktop()->screenGeometry();
-	int x = (screenGeometry.width() - shutdownWindow->width()) / 2;
-	int y = (screenGeometry.height() - shutdownWindow->height()) / 2;
-	shutdownWindow->move(x, y);
-    shutdownWindow->show();
-    return shutdownWindow;
+	int x = (screenGeometry.width() - width()) / 2;
+	int y = (screenGeometry.height() - height()) / 2;
+	move(x, y);
+    show();
 }
 
 void ShutdownWindow::closeEvent(QCloseEvent *event)
@@ -261,6 +260,7 @@ int main(int argc, char *argv[])
 
         BitcoinGUI window;
         guiref = &window;
+		ShutdownWindow sdw;
         if(AppInit2())
         {
             {
@@ -294,9 +294,10 @@ int main(int argc, char *argv[])
                 app.exec();
 
 				// by Simone: shutdown Window
-				ShutdownWindow::showShutdownWindow(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint);
+				sdw.showShutdownWindow();
 				app.processEvents();
 				Sleep(100);
+				app.processEvents();
 
                 window.hide();
                 window.setClientModel(0);

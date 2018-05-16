@@ -97,11 +97,10 @@ void ClientModel::updateTimer()
     int newNumBlocks = getNumBlocks();
     int newNumBlocksOfPeers = getNumBlocksOfPeers();
 
-    if(cachedNumBlocks != newNumBlocks || cachedNumBlocksOfPeers != newNumBlocksOfPeers)
+    if ((cachedNumBlocks != newNumBlocks) || (cachedNumBlocksOfPeers != newNumBlocksOfPeers))
     {
         cachedNumBlocks = newNumBlocks;
         cachedNumBlocksOfPeers = newNumBlocksOfPeers;
-
         emit numBlocksChanged(newNumBlocks, newNumBlocksOfPeers);
     }
     Q_EMIT bytesChanged(getTotalBytesRecv(), getTotalBytesSent());

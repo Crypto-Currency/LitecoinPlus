@@ -215,6 +215,18 @@ RPCConsole::RPCConsole(QWidget *parent) :
     // set OpenSSL version label
     ui->openSSLVersion->setText(SSLeay_version(SSLEAY_VERSION));
 
+	//Setup autocomplete and attach it
+	QStringList wordList;
+	std::vector<std::string> commandList = tableRPC.listCommands();
+	for (size_t i = 0; i < commandList.size(); ++i)
+	{
+		wordList << commandList[i].c_str();
+	}
+
+	autoCompleter = new QCompleter(wordList, this);
+	ui->lineEdit->setCompleter(autoCompleter);
+	autoCompleter->popup()->installEventFilter(this);
+
     startExecutor();
 
 	// by Simone: stuff for network chart
@@ -245,6 +257,14 @@ bool RPCConsole::eventFilter(QObject* obj, QEvent *event)
             if(obj == ui->lineEdit)
             {
                 QApplication::postEvent(ui->messagesWidget, new QKeyEvent(*keyevt));
+                return true;
+            }
+            break;
+        case Qt::Key_Return:
+        case Qt::Key_Enter:
+            // forward these events to lineEdit
+            if(obj == autoCompleter->popup()) {
+                QApplication::postEvent(ui->lineEdit, new QKeyEvent(*keyevt));
                 return true;
             }
             break;
