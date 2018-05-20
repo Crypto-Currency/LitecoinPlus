@@ -173,11 +173,22 @@ QComboBox
 }
 
 /* Amount box in send coins */
+/*QDoubleSpinBox
+*/
+QValueComboBox
+{
+  background-color:rgb(125,125,125);
+  background-color: red;
+  border 4px solid blue;  
+  color:green;
+}
+
 QDoubleSpinBox
 {
   background-color:rgb(125,125,125);
+  background-color: red;
   border 1px solid grey;  
-  color:white;
+  color:green;
 }
 
 /* send coins 'pay to' and 'label' */
@@ -300,6 +311,7 @@ QTableView
   alternate-background-color: rgba(100,110,125,50);
   background-color: rgba(197,219,246,50);
   border: 1px solid rgb(220,220,220);
+  color: lightblue;
 }
 
 QHeaderView::section

@@ -227,7 +227,6 @@ QDoubleSpinBox
 QComboBox
 {
   background-color:rgb(50,50,50);
-/*  border:2px rgb(219,182,62); */
 }
 
 QTableView

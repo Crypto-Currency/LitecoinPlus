@@ -1,4 +1,4 @@
-BottleCaps               ICON    "pixmaps/litecoinplus.ico"
+LitecoinPlus          ICON    "pixmaps/litecoinplus.ico"
 
 #include "wx/msw/wx.rc"
 

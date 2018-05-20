@@ -16,16 +16,24 @@
 #include <boost/filesystem.hpp>
 #include <string>
 #include <QMainWindow>
+#include "ui_interface.h"
+#include <QVector>
+#include <QRegExp>
 
 #include <QDebug>
 using namespace std;
 
+
 SkinsPage::SkinsPage(QWidget *parent) : QWidget(parent), ui(new Ui::SkinsPage)
 {
+  
   ui->setupUi(this);
   browseButton = createButton(tr("&Browse..."), SLOT(browse()));
   findButton = createButton(tr("&Find"), SLOT(find()));
   resetButton = createButton(tr("&Reset to none"), SLOT(reset()));
+
+// connect download button
+  connect(ui->downloadButton, SIGNAL(released()), this, SLOT(getlist()));
 
 // load settings - do before connecting signals or loading will trigger optionchanged
   QSettings settings("LitecoinPlus", "settings");
@@ -71,11 +79,6 @@ SkinsPage::SkinsPage(QWidget *parent) : QWidget(parent), ui(new Ui::SkinsPage)
   ui->mainLayout->addWidget(filesFoundLabel, 4, 0, 1, 2);
   ui->mainLayout->addWidget(findButton, 4, 2);
   ui->mainLayout->addWidget(resetButton, 5, 2);
-
-  ui->moreThemes->setText("<a href=\"http://litecoinplus.co/themes/\">Click here to download more themes!</a>");
-  ui->moreThemes->setTextFormat(Qt::RichText);
-  ui->moreThemes->setTextInteractionFlags(Qt::TextBrowserInteraction);
-  ui->moreThemes->setOpenExternalLinks(true);
 
   //force find
   find();
@@ -221,7 +224,6 @@ void SkinsPage::showFiles(const QStringList &files)
         vers=line.mid(x,e);
       }
     }
-//qDebug() <<tr("index of x= %1 e=%2").arg(x).arg(e);
 
     QTableWidgetItem *descriptionItem = new QTableWidgetItem(desc);
 	descriptionItem->setFlags(descriptionItem->flags() ^ Qt::ItemIsEditable);
@@ -272,7 +274,6 @@ void SkinsPage::createFilesTable()
   QStringList labels;
   labels << tr("Filename") << tr("Description") << tr("Version");
   filesTable->setHorizontalHeaderLabels(labels);
-//  filesTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 
   filesTable->setColumnWidth(0,160);// last column get resized automatically by qt
   filesTable->setColumnWidth(2,100);
@@ -291,9 +292,6 @@ void SkinsPage::openFileOfItem(int row, int /* column */)
   inifname=item->text();
   saveSettings();
   loadSkin();
-//QMessageBox::information(this,tr("from getdatadir:"),tr("inipath=%1").arg(inifname));
-//QMessageBox::information(this,tr("Open File:"),tr("=%1").arg(inifname));
-//QDesktopServices::openUrl(QUrl::fromLocalFile(currentDir.absoluteFilePath(item->text())));
 }
 
 
@@ -310,8 +308,6 @@ void SkinsPage::saveSettings()
   QSettings settings("LitecoinPlus", "settings");
   settings.setValue("path", inipath);
   settings.setValue("filename", inifname);
-//QMessageBox::information(this,tr("saveSettings:"),tr("=%1").arg(IniFile.string().c_str()));
-//qDebug() << "saving IniFile path:" <<IniFile.string().c_str();
 }
 
 void SkinsPage::loadSettings()
@@ -319,8 +315,6 @@ void SkinsPage::loadSettings()
   QSettings settings("LitecoinPlus", "settings");
   inipath=settings.value("path", "").toString();
   inifname=settings.value("filename", "").toString();
-//QMessageBox::information(this,tr("loadSettings:"),tr("path=%1, filename=%2").arg(inipath).arg(inifname));
-//qDebug() << "loading IniFile path:" <<IniFile.string().c_str();
 }
  
 void SkinsPage::loadSkin()
@@ -338,4 +332,116 @@ void SkinsPage::resizeEvent(QResizeEvent* event)
 {
   int ww=width();
   filesTable->setColumnWidth(1,ww-278);
+}
+
+
+void SkinsPage::getlist()
+{
+  // create dir if not
+  QDir dir(qApp->applicationDirPath()+"/themes");
+  if (!dir.exists())
+    dir.mkpath(".");
+  
+  QDir imgdir(qApp->applicationDirPath()+"/themes/images");
+  if (!imgdir.exists())
+    imgdir.mkpath(".");
+
+  connect(&manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(getListFinished(QNetworkReply*)));
+
+  QNetworkRequest request;
+  request.setUrl(QUrl("http://litecoinplus.co/themes/list.txt"));
+  request.setRawHeader("User-Agent", "Wallet theme request");
+
+  manager.get(request);
+}
+
+void SkinsPage::getListFinished(QNetworkReply* reply)
+{
+  disconnect(&manager, SIGNAL(finished(QNetworkReply*)), 0, 0);  
+  connect(&manager, SIGNAL(finished(QNetworkReply*)), SLOT(downloadFinished(QNetworkReply*)));
+  QString pagelist=reply->readAll();
+  QStringList list = pagelist.split('\n');
+  QString line;
+
+  for(int i=0;i<list.count();i++)
+  {
+    line=list.at(i).toLocal8Bit().constData();
+    line.simplified(); // strip extra characters
+    line.replace("\r",""); // this one too
+    if(line.length())
+    {  
+      download("http://litecoinplus.co/themes/"+line);
+    } 
+  }
+}
+
+void SkinsPage::download(const QUrl &filename)
+{
+  QNetworkRequest request;//(filename);
+  request.setUrl(filename);
+  request.setRawHeader("User-Agent", "Wallet theme request");
+  QNetworkReply *reply = manager.get(request);
+  currentDownloads.append(reply);
+}
+
+void SkinsPage::downloadFinished(QNetworkReply *reply)
+{
+  //qDebug() << " downloadfinished called:\n reply = " <<reply->url();
+  QUrl url = reply->url();
+  if (reply->error())
+  {
+    fprintf(stderr, "Download of %s failed: %s\n",
+      url.toEncoded().constData(),
+      qPrintable(reply->errorString()));
+  }
+  else
+  {
+    if (isHttpRedirect(reply))
+    {
+      fputs("Request was redirected.\n", stderr);
+    }
+    else
+    {
+      QString filename = "." + url.path();
+      if (saveToDisk(filename, reply))
+      {
+        printf("Download of %s succeeded\n (saved to %s)\n",
+          url.toEncoded().constData(), qPrintable(filename));
+      }
+    }
+  }
+
+  currentDownloads.removeAll(reply);
+  reply->deleteLater();
+
+  if (currentDownloads.isEmpty()) 
+  {
+    // all downloads finished
+    //qDebug() << " done downloading.\n";
+    //force find
+    find();
+  }
+}
+
+bool SkinsPage::isHttpRedirect(QNetworkReply *reply)
+{
+    int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    return statusCode == 301 || statusCode == 302 || statusCode == 303
+           || statusCode == 305 || statusCode == 307 || statusCode == 308;
+}
+
+bool SkinsPage::saveToDisk(const QString &filename, QIODevice *data)
+{
+  QFile file(filename);
+  if (!file.open(QIODevice::WriteOnly))
+  {
+    fprintf(stderr, "Could not open %s for writing: %s\n",
+      qPrintable(filename), qPrintable(file.errorString()));
+    return false;
+  }
+
+  file.write(data->readAll());
+  file.close();
+
+  return true;
 }
