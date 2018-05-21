@@ -18,6 +18,7 @@
 #include <QNetworkReply>
 #include <QFile>
 #include <QStringList>
+#include <QTimer>
 
 namespace Ui
 {
@@ -47,11 +48,10 @@ private slots:
   void openFileOfItem(int row, int column);
   void optionChanged();
   void getlist();
-//  void ReadList();
-
-void getListFinished(QNetworkReply* reply);
-//void replyFinished(QNetworkReply* reply);
-void downloadFinished(QNetworkReply *reply);
+  bool netHandleError(QNetworkReply* reply, QString urlDownload);
+  void getListFinished(QNetworkReply* reply);
+  void downloadFinished(QNetworkReply *reply);
+  void networkTimeout();
 
 protected:
   void resizeEvent(QResizeEvent *event);
@@ -75,6 +75,7 @@ private:
 //  QDesktopWidget fSize;
   QMainWindow fSize;
 
+  QTimer *networkTimer;
   QComboBox *fileComboBox;
   QComboBox *textComboBox;
   QComboBox *directoryComboBox;
@@ -82,11 +83,20 @@ private:
   QLabel *textLabel;
   QLabel *directoryLabel;
   QLabel *filesFoundLabel;
+  QLabel *statusLabel;
   QPushButton *browseButton;
   QPushButton *resetButton;
   QPushButton *findButton;
   QTableWidget *filesTable;
   QDir currentDir;
+  QNetworkReply *reply;
+  QString latestNetError;
+  QString latestFileError;
+
+signals:
+  void error(const QString &title, const QString &message, bool modal);
+  void status(const QString &message);
+  void information(const QString &title, const QString &message);
 };
 
 #endif
