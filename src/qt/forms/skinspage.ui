@@ -23,7 +23,29 @@
     <layout class="QGridLayout" name="mainLayout"/>
    </item>
    <item>
-    <widget class="QLabel" name="moreThemes">
+    <widget class="QPushButton" name="downloadButton">
+     <property name="minimumSize">
+      <size>
+       <width>50</width>
+       <height>20</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>170</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>Download current themes</string>
+     </property>
+     <property name="text">
+      <string>&amp;Download Themes</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../bitcoin.qrc">
+       <normaloff>:/icons/gears</normaloff>:/icons/gears</iconset>
+     </property>
     </widget>
    </item>
   </layout>
