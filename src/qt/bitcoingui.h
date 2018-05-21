@@ -186,6 +186,10 @@ public slots:
       @param[in] nFeeRequired       the required fee
       @param[out] payFee            true to pay the fee, false to not pay the fee
     */
+
+	// by Simone, a simple info box without critical error icon...............................  and a status bar message
+    void information(const QString &title, const QString &message);
+    void status(const QString &message);
     void askFee(qint64 nFeeRequired, bool *payFee);
     void handleURI(QString strURI);
 

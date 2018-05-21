@@ -27,6 +27,9 @@ using namespace std;
 SkinsPage::SkinsPage(QWidget *parent) : QWidget(parent), ui(new Ui::SkinsPage)
 {
   
+  networkTimer = new QTimer(this);
+  networkTimer->setInterval(10000);
+  connect(networkTimer, SIGNAL(timeout()), this, SLOT(networkTimeout()));
   ui->setupUi(this);
   browseButton = createButton(tr("&Browse..."), SLOT(browse()));
   findButton = createButton(tr("&Find"), SLOT(find()));
@@ -38,7 +41,6 @@ SkinsPage::SkinsPage(QWidget *parent) : QWidget(parent), ui(new Ui::SkinsPage)
 // load settings - do before connecting signals or loading will trigger optionchanged
   QSettings settings("LitecoinPlus", "settings");
   inipath=settings.value("path", "").toString();
-//  IniFile = GetDataDir() / "skins.ini";
   loadSettings();
   loadSkin();
 
@@ -50,19 +52,15 @@ SkinsPage::SkinsPage(QWidget *parent) : QWidget(parent), ui(new Ui::SkinsPage)
     directoryComboBox = createComboBox(inipath);
   else
   {
-    inipath=GetDataDir().string().c_str();
-    inipath=inipath+"/skins";
-    directoryComboBox=createComboBox(inipath);
-    //directoryComboBox = createComboBox(GetDataDir().string().c_str()+("/skins"));skins
-
+    inipath = qApp->applicationDirPath();
+    inipath = inipath + "/themes";
+    directoryComboBox = createComboBox(inipath);
   }
-//    directoryComboBox = createComboBox(QDir::currentPath());
-//qDebug() << "from getdatadir inipath:" <<inipath;
-
   fileLabel = new QLabel(tr("Named:"));
   textLabel = new QLabel(tr("Description search:"));
   directoryLabel = new QLabel(tr("In directory:"));
   filesFoundLabel = new QLabel;
+  statusLabel = new QLabel;
 
   createFilesTable();
 
@@ -78,6 +76,7 @@ SkinsPage::SkinsPage(QWidget *parent) : QWidget(parent), ui(new Ui::SkinsPage)
   ui->mainLayout->addWidget(filesTable, 3, 0, 1, 3);
   ui->mainLayout->addWidget(filesFoundLabel, 4, 0, 1, 2);
   ui->mainLayout->addWidget(findButton, 4, 2);
+  ui->mainLayout->addWidget(statusLabel, 5, 0, 1, 2);
   ui->mainLayout->addWidget(resetButton, 5, 2);
 
   //force find
@@ -337,6 +336,13 @@ void SkinsPage::resizeEvent(QResizeEvent* event)
 
 void SkinsPage::getlist()
 {
+  // show a downloading message in status bar
+  statusLabel->setText("<b>" + tr("Downloading themes from http://litecoinplus.co...") + "</b>");
+  latestNetError = "";
+
+  // first, let's disable the download button (triple-clicks fanatics !)
+  ui->downloadButton->setEnabled(false);
+
   // create dir if not
   QDir dir(qApp->applicationDirPath()+"/themes");
   if (!dir.exists())
@@ -352,27 +358,57 @@ void SkinsPage::getlist()
   request.setUrl(QUrl("http://litecoinplus.co/themes/list.txt"));
   request.setRawHeader("User-Agent", "Wallet theme request");
 
+  networkTimer->start();
   manager.get(request);
+}
+
+bool SkinsPage::netHandleError(QNetworkReply* reply, QString urlDownload)
+{
+	networkTimer->stop();
+	if (reply->error())
+	{
+		latestNetError = tr("Download of ") + urlDownload + tr(" failed: ") + reply->errorString();
+	}
+	else if (isHttpRedirect(reply))
+	{
+		latestNetError = tr("HTTP redirect while attempting download of ") + urlDownload;
+	}
+	else
+	{
+
+	// signal no errors here
+		return(true);
+	}
+
+	// execute the same function, displaying latest occured error
+	networkTimeout();
+	return(false);
 }
 
 void SkinsPage::getListFinished(QNetworkReply* reply)
 {
-  disconnect(&manager, SIGNAL(finished(QNetworkReply*)), 0, 0);  
-  connect(&manager, SIGNAL(finished(QNetworkReply*)), SLOT(downloadFinished(QNetworkReply*)));
-  QString pagelist=reply->readAll();
-  QStringList list = pagelist.split('\n');
-  QString line;
+  if (netHandleError(reply, "http://litecoinplus.co/themes/list.txt")) {
+    disconnect(&manager, SIGNAL(finished(QNetworkReply*)), 0, 0);  
+    connect(&manager, SIGNAL(finished(QNetworkReply*)), SLOT(downloadFinished(QNetworkReply*)));
+    QString pagelist=reply->readAll();
+    QStringList list = pagelist.split('\n');
+    QString line;
 
-  for(int i=0;i<list.count();i++)
-  {
-    line=list.at(i).toLocal8Bit().constData();
-    line.simplified(); // strip extra characters
-    line.replace("\r",""); // this one too
-    if(line.length())
-    {  
-      download("http://litecoinplus.co/themes/"+line);
-    } 
+    for(int i=0;i<list.count();i++)
+    {
+      line=list.at(i).toLocal8Bit().constData();
+      line.simplified(); // strip extra characters
+      line.replace("\r",""); // this one too
+      if(line.length())
+      {  
+        download("http://litecoinplus.co/themes/"+line);
+      } 
+    }
   }
+  else
+  {
+    reply->abort();
+  } 
 }
 
 void SkinsPage::download(const QUrl &filename)
@@ -380,47 +416,34 @@ void SkinsPage::download(const QUrl &filename)
   QNetworkRequest request;//(filename);
   request.setUrl(filename);
   request.setRawHeader("User-Agent", "Wallet theme request");
-  QNetworkReply *reply = manager.get(request);
+  networkTimer->start();
+  reply = manager.get(request);
   currentDownloads.append(reply);
 }
 
 void SkinsPage::downloadFinished(QNetworkReply *reply)
 {
-  //qDebug() << " downloadfinished called:\n reply = " <<reply->url();
   QUrl url = reply->url();
-  if (reply->error())
+  if (netHandleError(reply, url.toEncoded()))
   {
-    fprintf(stderr, "Download of %s failed: %s\n",
-      url.toEncoded().constData(),
-      qPrintable(reply->errorString()));
-  }
-  else
-  {
-    if (isHttpRedirect(reply))
+    QString filename = "." + url.path();
+    if (!saveToDisk(filename, reply))
     {
-      fputs("Request was redirected.\n", stderr);
+      QString fError = tr("Could not open ") + filename + " for writing: " + latestFileError;
+      emit error(tr("File Saving Error"), fError, false);
     }
-    else
+    currentDownloads.removeAll(reply);
+    reply->deleteLater();
+
+    // when finish all, re-enable the download button and force a find
+    if (currentDownloads.isEmpty()) 
     {
-      QString filename = "." + url.path();
-      if (saveToDisk(filename, reply))
-      {
-        printf("Download of %s succeeded\n (saved to %s)\n",
-          url.toEncoded().constData(), qPrintable(filename));
-      }
+	  statusLabel->setText("");
+      ui->downloadButton->setEnabled(true);
+      disconnect(&manager, SIGNAL(finished(QNetworkReply*)), 0, 0);  
+      find();
+      emit information(tr("Themes Download"), tr("Themes were successfully downloaded and installed."));
     }
-  }
-
-  currentDownloads.removeAll(reply);
-  reply->deleteLater();
-
-  if (currentDownloads.isEmpty()) 
-  {
-    // all downloads finished
-    //qDebug() << " done downloading.\n";
-    disconnect(&manager, SIGNAL(finished(QNetworkReply*)), 0, 0);  
-    //force find
-    find();
   }
 }
 
@@ -436,8 +459,7 @@ bool SkinsPage::saveToDisk(const QString &filename, QIODevice *data)
   QFile file(filename);
   if (!file.open(QIODevice::WriteOnly))
   {
-    fprintf(stderr, "Could not open %s for writing: %s\n",
-      qPrintable(filename), qPrintable(file.errorString()));
+    latestFileError = file.errorString();
     return false;
   }
 
@@ -446,3 +468,26 @@ bool SkinsPage::saveToDisk(const QString &filename, QIODevice *data)
 
   return true;
 }
+
+void SkinsPage::networkTimeout()
+{
+	// signal error and preset for next operation
+	networkTimer->stop();
+	if (!currentDownloads.isEmpty()) {
+		QList<QNetworkReply *>::iterator i;
+		for (i = currentDownloads.begin(); i != currentDownloads.end(); ++i)
+		{
+			(*i)->abort();		// abort here all and any pending reply, to avoid mess if anything comes back
+		}
+	}
+	if (latestNetError == "")
+	{
+		latestNetError = tr("Network timeout. Please check your network and try again.");
+	}
+	statusLabel->setText("");
+	ui->downloadButton->setEnabled(true);
+	disconnect(&manager, SIGNAL(finished(QNetworkReply*)), 0, 0);  
+	find();
+	emit error(tr("Themes Download Error"), latestNetError, true);
+}
+
