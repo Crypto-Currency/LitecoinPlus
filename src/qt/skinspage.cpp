@@ -418,6 +418,7 @@ void SkinsPage::downloadFinished(QNetworkReply *reply)
   {
     // all downloads finished
     //qDebug() << " done downloading.\n";
+    disconnect(&manager, SIGNAL(finished(QNetworkReply*)), 0, 0);  
     //force find
     find();
   }

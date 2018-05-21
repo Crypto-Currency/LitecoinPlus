@@ -178,17 +178,15 @@ QComboBox
 QValueComboBox
 {
   background-color:rgb(125,125,125);
-  background-color: red;
   border 4px solid blue;  
-  color:green;
+  color: white;
 }
 
 QDoubleSpinBox
 {
   background-color:rgb(125,125,125);
-  background-color: red;
   border 1px solid grey;  
-  color:green;
+  color: white;
 }
 
 /* send coins 'pay to' and 'label' */
