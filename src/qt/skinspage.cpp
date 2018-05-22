@@ -343,12 +343,12 @@ void SkinsPage::getlist()
   // first, let's disable the download button (triple-clicks fanatics !)
   ui->downloadButton->setEnabled(false);
 
-  // create dir if not
-  QDir dir(qApp->applicationDirPath()+"/themes");
+  /*QDir dir(inipath + "/themes");
   if (!dir.exists())
-    dir.mkpath(".");
+    dir.mkpath(".");*/
   
-  QDir imgdir(qApp->applicationDirPath()+"/themes/images");
+  // create dir if not
+  QDir imgdir(inipath + "/images");
   if (!imgdir.exists())
     imgdir.mkpath(".");
 
@@ -426,7 +426,7 @@ void SkinsPage::downloadFinished(QNetworkReply *reply)
   QUrl url = reply->url();
   if (netHandleError(reply, url.toEncoded()))
   {
-    QString filename = "." + url.path();
+    QString filename = inipath + url.path().replace("/themes/","/");
     if (!saveToDisk(filename, reply))
     {
       QString fError = tr("Could not open ") + filename + " for writing: " + latestFileError;
