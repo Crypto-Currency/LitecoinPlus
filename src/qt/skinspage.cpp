@@ -343,12 +343,12 @@ void SkinsPage::getlist()
   // first, let's disable the download button (triple-clicks fanatics !)
   ui->downloadButton->setEnabled(false);
 
-  // create dir if not
-  QDir dir(inipath + "/themes");
+  /*QDir dir(inipath + "/themes");
   if (!dir.exists())
-    dir.mkpath(".");
+    dir.mkpath(".");*/
   
-  QDir imgdir(inipath + "/themes/images");
+  // create dir if not
+  QDir imgdir(inipath + "/images");
   if (!imgdir.exists())
     imgdir.mkpath(".");
 
