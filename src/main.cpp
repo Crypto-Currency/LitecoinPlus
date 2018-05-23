@@ -1111,23 +1111,23 @@ int64 GetProofOfWorkReward(int nHeight, int64 nFees, uint256 prevHash)
     {
       nSubsidy = 1.75 * COIN;
     }
-    else if(nHeight > POW_RESTART_BLOCK+400000)   
+    if(nHeight > 2000000)   
     {
       nSubsidy = 1.5 * COIN;
     }
-    else if(nHeight > POW_RESTART_BLOCK+600000)   
+    if(nHeight > 2200000)   
     {
       nSubsidy = 1.25 * COIN;
     }
-    else if(nHeight > POW_RESTART_BLOCK+800000)
+    if(nHeight > 2400000)
     {
       nSubsidy = 1 * COIN;
     }
-    else if(nHeight > POW_RESTART_BLOCK+1000000)   
+    if(nHeight > 2600000)   
     {
       nSubsidy = .75 * COIN;
     }
-    else if(nHeight > POW_RESTART_BLOCK+1200000)   
+    if(nHeight > 2800000)   
     {
       nSubsidy = .5 * COIN;
     }
