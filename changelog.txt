@@ -1,4 +1,9 @@
-***** Version 3.2.0.1-alpha
+***** Version 3.3.0.1-beta
+- Dusting completed and fully tested
+- Downloading themes from litecoinplus.co and auto-install
+- Add full error controll to themes download
+
+***** Version 3.2.0.2-alpha
 - Added wallet NET offline functionality, closing NET and staking
 - Fixed block count from peers at first connection after restart
 - Fixed interface updates when going online/offline then online again
