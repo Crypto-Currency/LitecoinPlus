@@ -450,16 +450,6 @@ bool AppInit2()
 
     std::string strDataDir = GetDataDir().string();
 
-//check for themes directory, and create if missing
-    if (!filesystem::exists(GetDataDir() / "themes"))
-    {
-      boost::filesystem::path temppath;
-      temppath = GetDataDir() / "themes";
-      filesystem::create_directory(temppath);
-      temppath = GetDataDir() / "themes/images";
-      filesystem::create_directory(temppath);
-    }
-
     // Make sure only a single Bitcoin process is using the data directory.
     boost::filesystem::path pathLockFile = GetDataDir() / ".lock";
     FILE* file = fopen(pathLockFile.string().c_str(), "a"); // empty lock file; created if it doesn't exist.
@@ -490,6 +480,7 @@ bool AppInit2()
     }
 #endif
 
+
     if (GetBoolArg("-shrinkdebugfile", !fDebug))
         ShrinkDebugFile();
     printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
@@ -499,6 +490,18 @@ bool AppInit2()
         printf("Startup time: %s\n", DateTimeStrFormat("%x %H:%M:%S", GetTime()).c_str());
     printf("Default data directory %s\n", GetDefaultDataDir().string().c_str());
     printf("Used data directory %s\n", strDataDir.c_str());
+    //check for themes directory, and create if missing
+    if (!filesystem::exists(GetDataDir() / "themes"))
+    {
+      boost::filesystem::path temppath;
+      temppath = GetDataDir() / "themes";
+      filesystem::create_directory(temppath);
+      printf("created themes directory %s\n", temppath.string().c_str());
+      temppath = GetDataDir() / "themes/images";
+      filesystem::create_directory(temppath);
+      printf("created themes directory %s\n", temppath.string().c_str());
+    }
+
     std::ostringstream strErrors;
 
     if (fDaemon)
