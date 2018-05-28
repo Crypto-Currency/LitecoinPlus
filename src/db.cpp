@@ -730,6 +730,11 @@ bool CTxDB::LoadBlockIndex()
     if (fRequestShutdown)
 		return true;
 
+    unsigned int tempcount=0;
+    unsigned int steptemp=0;
+    string tempmess;
+    string mess="calculating best chain...";
+    uiInterface.InitMessage(_(mess.c_str()));
     // Calculate bnChainTrust
     vector<pair<int, CBlockIndex*> > vSortedByHeight;
     vSortedByHeight.reserve(mapBlockIndex.size());
@@ -737,12 +742,28 @@ bool CTxDB::LoadBlockIndex()
     {
         CBlockIndex* pindex = item.second;
         vSortedByHeight.push_back(make_pair(pindex->nHeight, pindex));
+      tempcount++;
+      if(tempcount>=1000)
+      {
+//        steptemp ++;
+        tempmess="loading pairs / "+ boost::to_string(pindex);
+        uiInterface.InitMessage(_(tempmess.c_str()));
+        tempcount=0;
+      }
     }
     sort(vSortedByHeight.begin(), vSortedByHeight.end());
     BOOST_FOREACH(const PAIRTYPE(int, CBlockIndex*)& item, vSortedByHeight)
     {
         CBlockIndex* pindex = item.second;
         pindex->bnChainTrust = (pindex->pprev ? pindex->pprev->bnChainTrust : 0) + pindex->GetBlockTrust();
+      tempcount++;
+      if(tempcount>=10000)
+      {
+//        steptemp ++;
+        tempmess="calculating stake modifiers / "+ boost::to_string(pindex);
+        uiInterface.InitMessage(_(tempmess.c_str()));
+        tempcount=0;
+      }
         // ppcoin: calculate stake modifier checksum
         pindex->nStakeModifierChecksum = GetStakeModifierChecksum(pindex);
         if (!CheckStakeModifierCheckpoints(pindex->nHeight, pindex->nStakeModifierChecksum))
@@ -783,8 +804,18 @@ bool CTxDB::LoadBlockIndex()
     printf("Verifying last %i blocks at level %i\n", nCheckDepth, nCheckLevel);
     CBlockIndex* pindexFork = NULL;
     map<pair<unsigned int, unsigned int>, CBlockIndex*> mapBlockPos;
+
+
     for (CBlockIndex* pindex = pindexBest; pindex && pindex->pprev; pindex = pindex->pprev)
     {
+    tempcount++;
+    if(tempcount>=100)
+    {
+      steptemp ++;
+      tempmess=mess+" / "+ boost::to_string(pindex);
+      uiInterface.InitMessage(_(tempmess.c_str()));
+      tempcount=0;
+    }
         if (fRequestShutdown || pindex->nHeight < nBestHeight-nCheckDepth)
             break;
         CBlock block;
@@ -1044,6 +1075,7 @@ bool CTxDB::LoadBlockIndexGuts()
             return error("%s() : deserialize error", __PRETTY_FUNCTION__);
         }
     }
+    uiInterface.InitMessage(_("Fast Load done..."));
     pcursor1->close();
 	boost->Store();
 	delete boost;
