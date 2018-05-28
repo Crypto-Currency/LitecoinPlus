@@ -3,7 +3,7 @@
 
 //#include <QDialog>
 #include <QWidget>
-#include <QComboBox>
+//#include <QComboBox>
 #include <QTableWidget>
 #include <QDir>
 #include <QPushButton>
@@ -42,7 +42,7 @@ public:
     static bool isHttpRedirect(QNetworkReply *reply);
 
 private slots:
-  void browse();
+//  void browse();
   void reset();
   void find();
   void openFileOfItem(int row, int column);
@@ -61,7 +61,7 @@ private:
   QStringList findFiles(const QStringList &files, const QString &text);
   void showFiles(const QStringList &files);
   QPushButton *createButton(const QString &text, const char *member);
-  QComboBox *createComboBox(const QString &text = QString());
+//  QComboBox *createComboBox(const QString &text = QString());
 
 
   void createFilesTable();
@@ -76,17 +76,18 @@ private:
   QMainWindow fSize;
 
   QTimer *networkTimer;
-  QComboBox *fileComboBox;
-  QComboBox *textComboBox;
-  QComboBox *directoryComboBox;
-  QLabel *fileLabel;
-  QLabel *textLabel;
-  QLabel *directoryLabel;
+//  QComboBox *fileComboBox;
+//  QComboBox *textComboBox;
+//  QComboBox *directoryComboBox;
+//  QLabel *fileLabel;
+//  QLabel *textLabel;
+//  QLabel *directoryLabel;
   QLabel *filesFoundLabel;
   QLabel *statusLabel;
-  QPushButton *browseButton;
+//  QPushButton *browseButton;
   QPushButton *resetButton;
-  QPushButton *findButton;
+//  QPushButton *findButton;
+  QPushButton *downloadButton;
   QTableWidget *filesTable;
   QDir currentDir;
   QNetworkReply *reply;

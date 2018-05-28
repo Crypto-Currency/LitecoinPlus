@@ -1,4 +1,4 @@
-/* desc= "default skin: dark blue background with lightening - by Spidersbox", vers="1.1"  */
+/* desc= "default skin: dark blue background with lightening - by Spidersbox", vers="1.2"  */
 
 /* first line is looked at to get the skin description - don't forget the 's */
 
@@ -16,7 +16,12 @@ QDialog
 QWidget
 {
   background-color: rgba(25,25,25,80);
-  color: black;
+  color: white;
+}
+
+#LogoWidget
+{
+  background-color: transparent;
 }
 
 QMenuBar::item
@@ -197,11 +202,6 @@ QValidatedLineEdit
   color:white; 
 }
 
-QListView
-{
-  background-color:transparent;
-}
-
 QStatusBar
 {
 /*  background-color: rgba(25,25,25,60); */
@@ -304,18 +304,30 @@ QProgressBar::chunk
   margin: 0px;
 }
 
+QListView
+{
+  background-color:transparent;
+  color:lightblue; 
+}
+
 QTableView
 {
-  alternate-background-color: rgba(100,110,125,50);
-  background-color: rgba(197,219,246,50);
+/*  alternate-background-color: rgba(100,110,125,100); */
+/*  background-color: rgba(197,219,246,100); */
+
+  alternate-background-color: rgba(100,110,125,150);
+  background-color: rgba(25,25,25,100);
+  selection-background-color: rgba(100,100,200,100);
   border: 1px solid rgb(220,220,220);
   color: lightblue;
+  color:white;
 }
 
 QHeaderView::section
 {
   background-color: blue;
-  color:black;
+  font-weight: bold;
+  color:white;
 }
 
 QTableView::item:selected
@@ -326,7 +338,24 @@ QTableView::item:selected
 
 QTableView::item:focus
 {
-  color:black;
+  color:blue;
+  background-color:lightblue;
+}
+
+QTreeWidget
+{
+  alternate-background-color: rgba(100,110,125,150);
+  background-color: rgba(25,25,25,100);
+  selection-background-color: rgba(100,100,200,100);
+  border: 1px solid rgb(220,220,220);
+  color: lightblue;
+  color:white;
+}
+
+QTreeWidget::item::parent
+{
+  background-color: rgba(25,25,25,100);
+  color:white;
 }
 
 QScrollBar:horizontal
@@ -344,4 +373,3 @@ QScrollBar:horizontal
 {
   background-color: red;
 }
-
