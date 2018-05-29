@@ -85,8 +85,8 @@ qDebug() << "from settings inipath:" <<inipath;
   ui->mainLayout->addWidget(filesFoundLabel, 4, 0, 1, 2);
 //  ui->mainLayout->addWidget(findButton, 4, 2);
   ui->mainLayout->addWidget(statusLabel, 5, 0, 1, 2);
-  ui->mainLayout->addWidget(resetButton, 5, 2);
-  ui->mainLayout->addWidget(downloadButton, 5,0);
+  ui->mainLayout->addWidget(resetButton, 6, 2);
+  ui->mainLayout->addWidget(downloadButton, 6, 0);
   //force find
   find();
 }
