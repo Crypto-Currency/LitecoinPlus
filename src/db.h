@@ -218,12 +218,12 @@ protected:
         return (ret == 0);
     }
 
-    Dbc* GetCursor()
+    Dbc* GetCursor(u_int32_t flags = 0)
     {
         if (!pdb)
             return NULL;
         Dbc* pcursor = NULL;
-        int ret = pdb->cursor(NULL, &pcursor, 0);
+        int ret = pdb->cursor(NULL, &pcursor, flags);
         if (ret != 0)
             return NULL;
         return pcursor;
