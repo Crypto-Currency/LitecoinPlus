@@ -26,16 +26,36 @@ extern CClientUIInterface uiInterface;
 unsigned int nWalletDBUpdated;
 
 // by Simone: startup boost system (see LoadBlockIndexGuts() below)
-class hashList
+struct BoostBlockIndex {
+	uint256 hash;
+	uint256 hashPrev;
+	uint256 hashNext;
+	unsigned int nFile;
+	unsigned int nBlockPos;
+	int nHeight;
+	int64 nMint;
+	int64 nMoneySupply;
+	unsigned int nFlags;
+	uint64 nStakeModifier;
+	COutPoint prevoutStake;
+	unsigned int nStakeTime;
+	uint256 hashProofOfStake;
+	int nVersion;
+    uint256 hashMerkleRoot;
+	unsigned int nTime;
+	unsigned int nBits;
+	unsigned int nNonce;
+};
+
+class blockIndexList
 {
 protected:
 public:
-	hashList() {
-		this->hash = uint256(0);
-		this->nFile = 0;
-		this->nBlockPos = 0;
+	blockIndexList() {
+		nFile = 0;
+		nBlockPos = 0;
 	}
-	uint256 hash;
+	BoostBlockIndex block;
 	unsigned int nFile;
 	unsigned int nBlockPos;
 };
@@ -43,87 +63,211 @@ public:
 class boostStartup
 {
 protected:
-	map<unsigned int, uint256> hashes[8];
+	unsigned int curFile;
+	char fName[32];
+	FILE *file;
+
+	// reads the file next in line
+	void readNextFile()
+	{
+		// close previous file
+		if (file)
+		{
+			fclose(file);
+			file = NULL;
+		}
+
+		// open the next one
+		curFile++;
+		sprintf(fName, "bindex%04d.dat", curFile);
+		boost::filesystem::path path = GetDataDir() / fName;
+		file = fopen(path.string().c_str(), "rb");
+		if (file) {
+			isBoosted = true;
+		} else {
+			isBoosted = false;
+		}
+	}
 
 public:
+	map<unsigned int, BoostBlockIndex> blocks[8];
 	bool isBoosted;
 	bool lastSearchSuccess;
-	unsigned int recordCount;
-	boostStartup() {
-		this->lastSearchSuccess = false;
-		this->isBoosted = false;
-		this->recordCount = 0;
+	double recordCount;
+	blockIndexList lBlock;
+
+	// constructor
+	boostStartup()
+	{
+		lastSearchSuccess = false;
+		isBoosted = false;
+		recordCount = 0;
+		curFile = 0;
+		file = NULL;
 	}
-	~boostStartup() {
-		for (int i = 0; i < 8; i++) {
-			this->hashes[i].clear();
+
+	// destructor
+	~boostStartup()
+	{
+		if (file)
+		{
+			fclose(file);
+		}
+		for (int i = 0; i < 8; i++)
+		{
+			this->blocks[i].clear();
 		}
 	}
-	uint256 GetHash(unsigned int nFile, unsigned int nBlockPos) {
-		if (nFile < 1) {
+
+	// commence the boost loading for fast loop
+	void startLoop()
+	{
+		readNextFile();
+	}
+
+	// get total record count
+	void GetBlockIndexCount()
+	{
+		double fSize = 0;
+
+		readNextFile();
+		while (isBoosted) {
+			if (file)
+			{
+				fSize += GetFilesize(file);
+			}
+			readNextFile();
+		}
+		recordCount = fSize / sizeof(BoostBlockIndex);
+		curFile = 0;
+	}
+
+	// get next block
+	BoostBlockIndex* GetNextBlockIndex()
+	{
+		if (file)
+		{
+			bool r = true;
+			if (feof(file))
+			{
+				readNextFile();
+				if (!isBoosted)
+				{
+					return NULL;
+				}
+			}
+			r &= fread(reinterpret_cast<char*>(&lBlock.block), 1, sizeof(lBlock.block), file);
+			r &= fread(reinterpret_cast<char*>(&lBlock.nBlockPos), 1, sizeof(lBlock.nBlockPos), file);
+			return &lBlock.block;
+		}
+		return NULL;
+	}
+
+	// get a precise block by position
+	BoostBlockIndex *GetBlockIndex(unsigned int nFile, unsigned int nBlockPos)
+	{
+		if (nFile < 1)
+		{
 			this->lastSearchSuccess = false;
-			return(uint256(0));
+			return(NULL);
 		}
-	    map<unsigned int, uint256>::iterator mi = this->hashes[nFile - 1].find(nBlockPos);
-		if (mi != this->hashes[nFile - 1].end()) {
+	    map<unsigned int, BoostBlockIndex>::iterator mi = this->blocks[nFile - 1].find(nBlockPos);
+		if (mi != this->blocks[nFile - 1].end()) {
 			this->lastSearchSuccess = true;
-        	return (*mi).second;
+        	return &((*mi).second);
 		}
 		this->lastSearchSuccess = false;
-		return(uint256(0));
+		return(NULL);
 	}
-	void AddHash(uint256 hash, unsigned int nFile, unsigned int nBlockPos) {
+
+	// add a block index to the memory or append to disk
+	void AddBlockIndex(uint256 hash, CDiskBlockIndex *blockIndex, unsigned int nFile, unsigned int nBlockPos, bool append = false) {
 		if (nFile < 1) {
 			return;
 		}
-	    map<unsigned int, uint256>::iterator mi = this->hashes[nFile - 1].find(nBlockPos);
-		if (mi != this->hashes[nFile - 1].end()) {
-			string s = "boostStartup::DUPLICATED KEY, please report these 3 lines: %d\n";
-			s += "%s\n";
-			s += "%s\n\n";
-			OutputDebugStringF(s.c_str(), nFile, hash.ToString().c_str(), (*mi).second.ToString().c_str());
-			return;
+		BoostBlockIndex block;
+		block.hash = hash;
+		block.hashPrev = blockIndex->hashPrev;
+		block.hashNext = blockIndex->hashNext;
+		block.nFile = blockIndex->nFile;
+		block.nBlockPos = blockIndex->nBlockPos;
+		block.nHeight = blockIndex->nHeight;
+		block.nMint = blockIndex->nMint;
+		block.nMoneySupply = blockIndex->nMoneySupply;
+		block.nFlags = blockIndex->nFlags;
+		block.nStakeModifier = blockIndex->nStakeModifier;
+		block.prevoutStake = blockIndex->prevoutStake;
+		block.nStakeTime = blockIndex->nStakeTime;
+		block.hashProofOfStake = blockIndex->hashProofOfStake;
+		block.nVersion = blockIndex->nVersion;
+		block.hashMerkleRoot = blockIndex->hashMerkleRoot;
+		block.nTime = blockIndex->nTime;
+		block.nBits = blockIndex->nBits;
+		block.nNonce = blockIndex->nNonce;
+		if (append) {
+			char fName[16];
+			sprintf(fName, "bindex%04d.dat", nFile);
+			boost::filesystem::path path = GetDataDir() / fName;
+			file = fopen(path.string().c_str(), "ab");
+			if (file) {
+				fwrite(reinterpret_cast<const char*>(&block), 1, sizeof(block), file);
+				fwrite(reinterpret_cast<const char*>(&nBlockPos), 1, sizeof(nBlockPos), file);
+				fclose(file);
+			}
 		}
-		this->hashes[nFile - 1][nBlockPos] = hash;
+		else
+		{
+			map<unsigned int, BoostBlockIndex>::iterator mi = this->blocks[nFile - 1].find(nBlockPos);
+			if (mi != this->blocks[nFile - 1].end()) {
+				string s = "boostStartup::DUPLICATED KEY, please report these line: %d\n";
+				OutputDebugStringF(s.c_str(), nFile);
+				return;
+			}
+			this->blocks[nFile - 1][nBlockPos] = block;
+		}
 	}
-	void Load() {
+
+	// load entire index in memory (ATTENTION, might be big)
+	void LoadIndex() {
 		for (int i = 0; i < 8; i++) {
 			char fName[16];
-			sprintf(fName, "boost%04d.dat", i + 1);
+			sprintf(fName, "bindex%04d.dat", i + 1);
 			boost::filesystem::path path = GetDataDir() / fName;
-			FILE* file = fopen(path.string().c_str(), "rb");
+			file = fopen(path.string().c_str(), "rb");
 			if (file) {
-				hashList loopHashes;
+				blockIndexList loopBlocks;
 				bool r = true;
 				while (!feof(file)) {
 					this->isBoosted = true;
-					r &= fread(reinterpret_cast<char*>(&loopHashes.hash), 1, sizeof(loopHashes.hash), file);
-					r &= fread(reinterpret_cast<char*>(&loopHashes.nBlockPos), 1, sizeof(loopHashes.nBlockPos), file);
-					this->hashes[i][loopHashes.nBlockPos] = loopHashes.hash;
+					r &= fread(reinterpret_cast<char*>(&loopBlocks.block), 1, sizeof(loopBlocks.block), file);
+					r &= fread(reinterpret_cast<char*>(&loopBlocks.nBlockPos), 1, sizeof(loopBlocks.nBlockPos), file);
+					this->blocks[i][loopBlocks.nBlockPos] = loopBlocks.block;
 					this->recordCount++;
 				}
 				fclose(file);
 			}
 		}
 	}
-	void Store() {
+
+	// store what is in memory to disk
+	void StoreIndex() {
 		for (int i = 0; i < 8; i++) {
 			char fName[16];
-			sprintf(fName, "boost%04d.dat", i + 1);
+			sprintf(fName, "bindex%04d.dat", i + 1);
 			boost::filesystem::path path = GetDataDir() / fName;
-			map<unsigned int, uint256>::iterator mi = this->hashes[i].begin();
-			if (mi == this->hashes[i].end()) {
+			map<unsigned int, BoostBlockIndex>::iterator mi = this->blocks[i].begin();
+			if (mi == this->blocks[i].end()) {
 				continue;
 			}
-			FILE* file = fopen(path.string().c_str(), "wb");
+			file = fopen(path.string().c_str(), "wb");
 			if (file) {
-				hashList loopHashes;
-				mi = this->hashes[i].begin();
-				for (; mi != this->hashes[i].end(); ++mi) {
-					loopHashes.hash = mi->second;
-					loopHashes.nBlockPos = mi->first;
-					fwrite(reinterpret_cast<const char*>(&loopHashes.hash), 1, sizeof(loopHashes.hash), file);
-					fwrite(reinterpret_cast<const char*>(&loopHashes.nBlockPos), 1, sizeof(loopHashes.nBlockPos), file);
+				blockIndexList loopBlocks;
+				mi = this->blocks[i].begin();
+				for (; mi != this->blocks[i].end(); ++mi) {
+					loopBlocks.block = mi->second;
+					loopBlocks.nBlockPos = mi->first;
+					fwrite(reinterpret_cast<const char*>(&loopBlocks.block), 1, sizeof(loopBlocks.block), file);
+					fwrite(reinterpret_cast<const char*>(&loopBlocks.nBlockPos), 1, sizeof(loopBlocks.nBlockPos), file);
 				}
 				fclose(file);
 			}
@@ -190,7 +334,7 @@ bool CDBEnv::Open(boost::filesystem::path pathEnv_)
     if (GetBoolArg("-privdb", true))
         nEnvFlags |= DB_PRIVATE;
 
-    int nDbCache = GetArg("-dbcache", 25);
+    int nDbCache = GetArg("-dbcache", 128);
     dbenv.set_lg_dir(pathLogDir.string().c_str());
     dbenv.set_cachesize(nDbCache / 1024, (nDbCache % 1024)*1048576, 1);
     dbenv.set_lg_bsize(1048576);
@@ -356,6 +500,16 @@ CDB::CDB(const char *pszFile, const char* pszMode) :
                 ret = mpf->set_flags(DB_MPOOL_NOFILE, 1);
                 if (ret != 0)
                     throw runtime_error(strprintf("CDB() : failed to configure for no temp file backing for database %s", pszFile));
+            }
+
+			ret = pdb->set_pagesize(2048);
+            if (ret != 0)
+            {
+                delete pdb;
+                pdb = NULL;
+                --bitdb.mapFileUseCount[strFile];
+                strFile = "";
+                throw runtime_error(strprintf("CDB() : cannot set page size for file %s, error %d", pszFile, ret));
             }
 
             ret = pdb->open(NULL,      // Txn pointer
@@ -659,6 +813,10 @@ bool CTxDB::ReadDiskTx(COutPoint outpoint, CTransaction& tx)
 
 bool CTxDB::WriteBlockIndex(const CDiskBlockIndex& blockindex)
 {
+	boostStartup *boost = new boostStartup();
+	uint256 blockHash = blockindex.GetBlockHash();
+	CDiskBlockIndex bi = blockindex;
+	boost->AddBlockIndex(blockHash, &bi, blockindex.nFile, blockindex.nBlockPos, true);
     return Write(make_pair(string("blockindex"), blockindex.GetBlockHash()), blockindex);
 }
 
@@ -733,7 +891,7 @@ bool CTxDB::LoadBlockIndex()
     unsigned int tempcount=0;
     unsigned int steptemp=0;
     string tempmess;
-    string mess="calculating best chain...";
+    string mess = "Calculating best chain...";
     uiInterface.InitMessage(_(mess.c_str()));
     // Calculate bnChainTrust
     vector<pair<int, CBlockIndex*> > vSortedByHeight;
@@ -743,10 +901,10 @@ bool CTxDB::LoadBlockIndex()
         CBlockIndex* pindex = item.second;
         vSortedByHeight.push_back(make_pair(pindex->nHeight, pindex));
       tempcount++;
-      if(tempcount>=1000)
+      if(tempcount>=10000)
       {
 //        steptemp ++;
-        tempmess="loading pairs / "+ boost::to_string(pindex);
+        tempmess = "Loading pairs / "+ boost::to_string(pindex);
         uiInterface.InitMessage(_(tempmess.c_str()));
         tempcount=0;
       }
@@ -757,10 +915,10 @@ bool CTxDB::LoadBlockIndex()
         CBlockIndex* pindex = item.second;
         pindex->bnChainTrust = (pindex->pprev ? pindex->pprev->bnChainTrust : 0) + pindex->GetBlockTrust();
       tempcount++;
-      if(tempcount>=10000)
+      if(tempcount>=30000)
       {
 //        steptemp ++;
-        tempmess="calculating stake modifiers / "+ boost::to_string(pindex);
+        tempmess = "Calculating stake modifiers / "+ boost::to_string(pindex);
         uiInterface.InitMessage(_(tempmess.c_str()));
         tempcount=0;
       }
@@ -941,25 +1099,85 @@ u_int32_t CTxDB::GetCount()
 
 bool CTxDB::LoadBlockIndexGuts()
 {
-    // Get database cursor
-    Dbc* pcursor1 = GetCursor();
-    if (!pcursor1)
-        return false;
-
 	// By Simone: Boost startup
 	boostStartup *boost = new boostStartup();
-	boost->Load();
 
     // Load mapBlockIndex
     unsigned int fFlags = DB_SET_RANGE;
 	unsigned long ccc = 0;
 	unsigned long cnt = 0;
+	int oldProgress = -1;
 
-	// count number of records
-	if (boost->recordCount < 500000) {
-	    Dbc* pcursor = GetCursor();
-		if (!pcursor)
-		    return false;
+	// load from boost
+	boost->GetBlockIndexCount();
+	boost->startLoop();
+	if (boost->isBoosted) {
+		while (boost->isBoosted) {
+
+			// push into the block index list
+			BoostBlockIndex *diskindex = boost->GetNextBlockIndex();
+			if (diskindex) {
+				CBlockIndex* pindexNew = InsertBlockIndex(diskindex->hash);
+				pindexNew->pprev          = InsertBlockIndex(diskindex->hashPrev);
+				pindexNew->pnext          = InsertBlockIndex(diskindex->hashNext);
+				pindexNew->nFile          = diskindex->nFile;
+				pindexNew->nBlockPos      = diskindex->nBlockPos;
+				pindexNew->nHeight        = diskindex->nHeight;
+				pindexNew->nMint          = diskindex->nMint;
+				pindexNew->nMoneySupply   = diskindex->nMoneySupply;
+				pindexNew->nFlags         = diskindex->nFlags;
+				pindexNew->nStakeModifier = diskindex->nStakeModifier;
+				pindexNew->prevoutStake   = diskindex->prevoutStake;
+				pindexNew->nStakeTime     = diskindex->nStakeTime;
+				pindexNew->hashProofOfStake = diskindex->hashProofOfStake;
+				pindexNew->nVersion       = diskindex->nVersion;
+				pindexNew->hashMerkleRoot = diskindex->hashMerkleRoot;
+				pindexNew->nTime          = diskindex->nTime;
+				pindexNew->nBits          = diskindex->nBits;
+				pindexNew->nNonce         = diskindex->nNonce;
+
+				// Watch for genesis block
+				if (pindexGenesisBlock == NULL && diskindex->hash == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet))
+				    pindexGenesisBlock = pindexNew;
+
+				if (!pindexNew->CheckIndex())
+				    return error("LoadBlockIndex() : CheckIndex failed at %d", pindexNew->nHeight);
+
+				// ppcoin: build setStakeSeen
+				if (pindexNew->IsProofOfStake())
+				    setStakeSeen.insert(make_pair(pindexNew->prevoutStake, pindexNew->nStakeTime));
+			}
+
+			int progress = (int)(((double)(ccc) / (double)(boost->recordCount)) * 100);
+			if (progress > 100) {
+				progress = 100;
+			}
+			if (oldProgress != progress) {
+				char pString[256];
+				sprintf(pString, _("Fast load (%d%%)...").c_str(), progress);
+	#ifdef QT_GUI
+				uiInterface.InitMessage(pString);
+	#endif
+				oldProgress = progress;
+			}
+			ccc++;
+
+		}
+		delete boost;
+		return true;
+	}
+	else
+
+	// the following section, we re-index the boost
+	{
+		Dbc* pcursor1 = GetCursor(DBC_BULK);
+		if (!pcursor1)
+			return false;
+
+		// instead of counting the number of records, which is pointless and VERY slow on old machines, we just set a big random number, for re-index is OK
+		cnt = 1600000;
+		fFlags = DB_SET_RANGE;
+		oldProgress = -1;
 		loop
 		{
 		    // Read next record
@@ -968,118 +1186,83 @@ bool CTxDB::LoadBlockIndexGuts()
 		        ssKey << make_pair(string("blockindex"), uint256(0));
 			}
 			CDataStream ssValue(SER_DISK, CLIENT_VERSION);
-		    int ret = ReadAtCursor(pcursor, ssKey, ssValue, fFlags);
-		    if (ret != 0)
+		    int ret = ReadAtCursor(pcursor1, ssKey, ssValue, fFlags);
+		    fFlags = DB_NEXT_NODUP;
+		    if (ret == DB_NOTFOUND)
 		        break;
-		    fFlags = DB_NEXT;
+		    else if (ret != 0)
+		        return false;
+			int progress = (int)(((double)(ccc) / (double)(cnt)) * 100);
+			if (progress > 100) {
+				progress = 100;
+			}
+			if (oldProgress != progress) {
+				char pString[256];
+				sprintf(pString, (_("Building index (SLOW, %d%%)...") + "   " + _("[do not interrupt]")).c_str(), progress);
+	#ifdef QT_GUI
+				uiInterface.InitMessage(pString);
+	#endif
+				oldProgress = progress;
+			}
+			ccc++;
+
+		    // Unserialize
+		    try {
 		    string strType;
 		    ssKey >> strType;
-			if (strType == "blockindex") {
-				cnt++;
-			}
+		    if (strType == "blockindex" && !fRequestShutdown)
+		    {
+		        CDiskBlockIndex diskindex;
+		        ssValue >> diskindex;
+
+				// by Simone: SUPER BOOST structure
+				uint256 blockHash = diskindex.GetBlockHash();
+				boost->AddBlockIndex(blockHash, &diskindex, diskindex.nFile, diskindex.nBlockPos, true);
+
+		        // Construct block index object
+		        CBlockIndex* pindexNew = InsertBlockIndex(blockHash);
+		        pindexNew->pprev          = InsertBlockIndex(diskindex.hashPrev);
+		        pindexNew->pnext          = InsertBlockIndex(diskindex.hashNext);
+		        pindexNew->nFile          = diskindex.nFile;
+		        pindexNew->nBlockPos      = diskindex.nBlockPos;
+		        pindexNew->nHeight        = diskindex.nHeight;
+		        pindexNew->nMint          = diskindex.nMint;
+		        pindexNew->nMoneySupply   = diskindex.nMoneySupply;
+		        pindexNew->nFlags         = diskindex.nFlags;
+		        pindexNew->nStakeModifier = diskindex.nStakeModifier;
+		        pindexNew->prevoutStake   = diskindex.prevoutStake;
+		        pindexNew->nStakeTime     = diskindex.nStakeTime;
+		        pindexNew->hashProofOfStake = diskindex.hashProofOfStake;
+		        pindexNew->nVersion       = diskindex.nVersion;
+		        pindexNew->hashMerkleRoot = diskindex.hashMerkleRoot;
+		        pindexNew->nTime          = diskindex.nTime;
+		        pindexNew->nBits          = diskindex.nBits;
+		        pindexNew->nNonce         = diskindex.nNonce;
+
+		        // Watch for genesis block
+		        if (pindexGenesisBlock == NULL && blockHash == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet))
+		            pindexGenesisBlock = pindexNew;
+
+		        if (!pindexNew->CheckIndex())
+		            return error("LoadBlockIndex() : CheckIndex failed at %d", pindexNew->nHeight);
+
+		        // ppcoin: build setStakeSeen
+		        if (pindexNew->IsProofOfStake())
+		            setStakeSeen.insert(make_pair(pindexNew->prevoutStake, pindexNew->nStakeTime));
+		    }
+		    else
+		    {
+		        break; // if shutdown requested or finished loading block index
+		    }
+		    }    // try
+		    catch (std::exception &e) {
+				delete boost;
+		        return error("%s() : deserialize error", __PRETTY_FUNCTION__);
+		    }
 		}
-		pcursor->close();
-		Sleep(1000);
-	} else {
-		cnt = boost->recordCount;
+		pcursor1->close();
+		return true;
 	}
-	fFlags = DB_SET_RANGE;
-	int oldProgress = -1;
-    loop
-    {
-        // Read next record
-	    CDataStream ssKey(SER_DISK, CLIENT_VERSION);
-        if (fFlags == DB_SET_RANGE) {
-            ssKey << make_pair(string("blockindex"), uint256(0));
-		}
-	    CDataStream ssValue(SER_DISK, CLIENT_VERSION);
-        int ret = ReadAtCursor(pcursor1, ssKey, ssValue, fFlags);
-        fFlags = DB_NEXT;
-        if (ret == DB_NOTFOUND)
-            break;
-        else if (ret != 0)
-            return false;
-		int progress = (int)(((double)(ccc) / (double)(cnt)) * 100);
-		if (progress > 100) {
-			progress = 100;
-		}
-		if (oldProgress != progress) {
-			char pString[256];
-			if (boost->isBoosted) {
-				sprintf(pString, _("Fast load (%d%%)...").c_str(), progress);
-			} else {
-				sprintf(pString, (_("Building index (SLOW, %d%%)...") + "   " + _("[do not interrupt]")).c_str(), progress);
-			}
-#ifdef QT_GUI
-			uiInterface.InitMessage(pString);
-#endif
-			oldProgress = progress;
-		}
-		ccc++;
-
-        // Unserialize
-        try {
-        string strType;
-        ssKey >> strType;
-        if (strType == "blockindex" && !fRequestShutdown)
-        {
-            CDiskBlockIndex diskindex;
-            ssValue >> diskindex;
-
-			// by Simone: boost structure
-			uint256 blockHash = uint256(0);
-			blockHash = boost->GetHash(diskindex.nFile, diskindex.nBlockPos);
-			if (!boost->lastSearchSuccess) {
-				blockHash = diskindex.GetBlockHash();
-				boost->AddHash(blockHash, diskindex.nFile, diskindex.nBlockPos);
-			}
-
-            // Construct block index object
-            CBlockIndex* pindexNew = InsertBlockIndex(blockHash);
-            pindexNew->pprev          = InsertBlockIndex(diskindex.hashPrev);
-            pindexNew->pnext          = InsertBlockIndex(diskindex.hashNext);
-            pindexNew->nFile          = diskindex.nFile;
-            pindexNew->nBlockPos      = diskindex.nBlockPos;
-            pindexNew->nHeight        = diskindex.nHeight;
-            pindexNew->nMint          = diskindex.nMint;
-            pindexNew->nMoneySupply   = diskindex.nMoneySupply;
-            pindexNew->nFlags         = diskindex.nFlags;
-            pindexNew->nStakeModifier = diskindex.nStakeModifier;
-            pindexNew->prevoutStake   = diskindex.prevoutStake;
-            pindexNew->nStakeTime     = diskindex.nStakeTime;
-            pindexNew->hashProofOfStake = diskindex.hashProofOfStake;
-            pindexNew->nVersion       = diskindex.nVersion;
-            pindexNew->hashMerkleRoot = diskindex.hashMerkleRoot;
-            pindexNew->nTime          = diskindex.nTime;
-            pindexNew->nBits          = diskindex.nBits;
-            pindexNew->nNonce         = diskindex.nNonce;
-
-            // Watch for genesis block
-            if (pindexGenesisBlock == NULL && blockHash == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet))
-                pindexGenesisBlock = pindexNew;
-
-            if (!pindexNew->CheckIndex())
-                return error("LoadBlockIndex() : CheckIndex failed at %d", pindexNew->nHeight);
-
-            // ppcoin: build setStakeSeen
-            if (pindexNew->IsProofOfStake())
-                setStakeSeen.insert(make_pair(pindexNew->prevoutStake, pindexNew->nStakeTime));
-        }
-        else
-        {
-            break; // if shutdown requested or finished loading block index
-        }
-        }    // try
-        catch (std::exception &e) {
-			delete boost;
-            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
-        }
-    }
-    uiInterface.InitMessage(_("Fast Load done..."));
-    pcursor1->close();
-	boost->Store();
-	delete boost;
-    return true;
 }
 
 

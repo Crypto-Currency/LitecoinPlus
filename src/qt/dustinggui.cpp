@@ -369,7 +369,7 @@ void DustingGui::compactBlocks()
 			QApplication::instance()->processEvents();
 			Sleep(50);
 
-			fprintf(stderr, "%d --> [%ld] %s/%d\n", i, selectionSum, uint256(itemTx->text().toStdString()).ToString().c_str(), itemVout->text().toUInt());
+			//fprintf(stderr, "%d --> [%ld] %s/%d\n", i, selectionSum, uint256(itemTx->text().toStdString()).ToString().c_str(), itemVout->text().toUInt());
 		}
 		Sleep(1000);
 		for (int i = 0; i < nOdds; i++)
