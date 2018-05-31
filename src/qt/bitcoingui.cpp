@@ -388,7 +388,6 @@ void BitcoinGUI::createActions()
     toggleHideAction = new QAction(QIcon(":/icons/bitcoin"), tr("&Show / Hide"), this);
     encryptWalletAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Encrypt Wallet..."), this);
     encryptWalletAction->setToolTip(tr("Encrypt or decrypt wallet"));
-    encryptWalletAction->setCheckable(true);
 
     unlockWalletStakeAction = new QAction(QIcon(":/icons/lock_open"), tr("&Unlock To Stake..."), this);
     //unlockWalletStakeAction->setStatusTip(tr("Unlock wallet for Staking only"));
@@ -1027,12 +1026,42 @@ void BitcoinGUI::encryptWallet(bool status)
 {
     if(!walletModel)
         return;
+
+	// by Simone: ASK first.......... !
+	QString strMessage = tr("The wallet will now be set offline and the wallet.dat file encrypted. The operation may require some time, after which the wallet will quit and will need to be restarted. <b>Are you sure you want to do it now</b> ?");
+	QMessageBox::StandardButton retval = QMessageBox::question(
+	      this, tr("Encrypt Wallet warning"), strMessage,
+	      QMessageBox::Yes|QMessageBox::Cancel, QMessageBox::Yes);
+	if (retval == QMessageBox::Cancel)
+	{
+		return;
+	}
+
+	// by Simone: set wallet offline first
+	bool res = setOnlineStatus(false);
+	if (!res) {
+       error(tr("Set Offline Error"),
+               tr("Error, cannot bring the wallet offline at this time. Try again in a few seconds."), true);
+		return;
+	}
+	status = true;
+
+	// let's encrypt it !
     AskPassphraseDialog dlg(status ? AskPassphraseDialog::Encrypt:
                                      AskPassphraseDialog::Decrypt, this);
     dlg.setModel(walletModel);
     dlg.exec();
 
-    setEncryptionStatus(walletModel->getEncryptionStatus());
+	// if we arrive here, the user has pressed cancel, let's go back online
+	information(tr("Cancelled"),
+		   tr("The encryption was cancelled, the wallet is still unencrypted. The software will go back to online status now."));
+	res = setOnlineStatus(true);
+
+   // setEncryptionStatus(walletModel->getEncryptionStatus());
+
+	// by Simone: display a message and QUIT the software, before some big damage is done by clicking around !
+//	QMessageBox::warning(this, tr("Encrypt Wallet Finished."), "<b>" + tr("The wallet will now exit.") + "</b><br><br>" + tr("Please restart your wallet for changes to take effect."));
+//	qApp->quit();
 }
 
 void BitcoinGUI::unlockWalletStake()
