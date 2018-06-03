@@ -333,9 +333,13 @@ namespace Checkpoints
 
         // Relay checkpoint
         {
-            LOCK(cs_vNodes);
-            BOOST_FOREACH(CNode* pnode, vNodes)
-                checkpoint.RelayTo(pnode);
+			// by Simone: a TRY LOCK here, not a LOCK..... Seems like two different threads may bite their back on this lock in some rare cases
+		    TRY_LOCK(cs_vNodes, lockNodes);
+		    if (lockNodes)
+		    {
+	            BOOST_FOREACH(CNode* pnode, vNodes)
+	                checkpoint.RelayTo(pnode);
+			}
         }
         return true;
     }
