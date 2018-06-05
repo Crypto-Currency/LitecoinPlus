@@ -2434,7 +2434,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock, bool lessAggressive)
 		if (!CheckProofOfStake(pblock->vtx[1], pblock->nBits, hashProofOfStake))
 		{
 		    printf("WARNING: ProcessBlock(): check proof-of-stake failed for block %s\n", hash.ToString().c_str());
-		    return true; // do not error here as we expect this during initial block download
+		    return false; // do not error here as we expect this during initial block download
 		}
 		if (!mapProofOfStake.count(hash)) // add to mapProofOfStake
 		    mapProofOfStake.insert(make_pair(hash, hashProofOfStake));
@@ -4033,8 +4033,12 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
 				}
 		    }
 
+			// by Simone: THIS needs to be done WHEN the wallet is synced.....................
 		    // Resend wallet transactions that haven't gotten in a block yet
-		    ResendWalletTransactions();
+			if (!IsInitialBlockDownload())
+			{
+		    	ResendWalletTransactions();
+			}
 
 		    // Address refresh broadcast
 		    static int64 nLastRebroadcast;
