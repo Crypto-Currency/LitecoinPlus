@@ -6,18 +6,18 @@
     <name>AboutDialog</name>
     <message>
         <location filename="../forms/aboutdialog.ui" line="+14"/>
-        <source>About BottleCaps</source>
-        <translation>About BottleCaps</translation>
+        <source>About LitecoinPlus</source>
+        <translation>About LitecoinPlus</translation>
     </message>
     <message>
         <location line="+39"/>
-        <source>&lt;b&gt;BottleCaps&lt;/b&gt; version</source>
-        <translation>&lt;b&gt;BottleCaps&lt;/b&gt; version</translation>
+        <source>&lt;b&gt;LitecoinPlus&lt;/b&gt; version</source>
+        <translation>&lt;b&gt;LitecoinPlus&lt;/b&gt; version</translation>
     </message>
     <message>
         <location line="+41"/>
-        <source>Copyright © 2009-2012 The BottleCaps developers</source>
-        <translation>Copyright © 2009-2012 The BottleCaps developers</translation>
+        <source>Copyright © 2009-2012 The LitecoinPlus developers</source>
+        <translation>Copyright © 2009-2012 The LitecoinPlus developers</translation>
     </message>
     <message>
         <location line="+13"/>
@@ -64,8 +64,8 @@ This product includes software developed by the OpenSSL Project for use in the O
     </message>
     <message>
         <location line="-46"/>
-        <source>These are your BottleCaps addresses for receiving payments. You may want to give a different one to each sender so you can keep track of who is paying you.</source>
-        <translation>These are your BottleCaps addresses for receiving payments. You may want to give a different one to each sender so you can keep track of who is paying you.</translation>
+        <source>These are your LitecoinPlus addresses for receiving payments. You may want to give a different one to each sender so you can keep track of who is paying you.</source>
+        <translation>These are your LitecoinPlus addresses for receiving payments. You may want to give a different one to each sender so you can keep track of who is paying you.</translation>
     </message>
     <message>
         <location line="+60"/>
@@ -79,8 +79,8 @@ This product includes software developed by the OpenSSL Project for use in the O
     </message>
     <message>
         <location line="+11"/>
-        <source>Sign a message to prove you own a BottleCaps address</source>
-        <translation>Sign a message to prove you own a BottleCaps address</translation>
+        <source>Sign a message to prove you own a LitecoinPlus address</source>
+        <translation>Sign a message to prove you own a LitecoinPlus address</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -94,8 +94,8 @@ This product includes software developed by the OpenSSL Project for use in the O
     </message>
     <message>
         <location line="-14"/>
-        <source>Verify a message to ensure it was signed with a specified BottleCaps address</source>
-        <translation>Verify a message to ensure it was signed with a specified BottleCaps address</translation>
+        <source>Verify a message to ensure it was signed with a specified LitecoinPlus address</source>
+        <translation>Verify a message to ensure it was signed with a specified LitecoinPlus address</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -252,8 +252,8 @@ This product includes software developed by the OpenSSL Project for use in the O
     </message>
     <message>
         <location line="-56"/>
-        <source>BottleCaps will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your coins from being stolen by malware infecting your computer.</source>
-        <translation>BottleCaps will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your coins from being stolen by malware infecting your computer.</translation>
+        <source>LitecoinPlus will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your coins from being stolen by malware infecting your computer.</source>
+        <translation>LitecoinPlus will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your coins from being stolen by malware infecting your computer.</translation>
     </message>
     <message>
         <location line="+13"/>
@@ -366,8 +366,8 @@ This product includes software developed by the OpenSSL Project for use in the O
     </message>
     <message>
         <location line="+4"/>
-        <source>Show information about BottleCaps</source>
-        <translation>Show information about BottleCaps</translation>
+        <source>Show information about LitecoinPlus</source>
+        <translation>Show information about LitecoinPlus</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -419,13 +419,13 @@ This product includes software developed by the OpenSSL Project for use in the O
     </message>
     <message>
         <location line="-58"/>
-        <source>Send coins to a BottleCaps address</source>
-        <translation>Send coins to a BottleCaps address</translation>
+        <source>Send coins to a LitecoinPlus address</source>
+        <translation>Send coins to a LitecoinPlus address</translation>
     </message>
     <message>
         <location line="+45"/>
-        <source>Modify configuration options for BottleCaps</source>
-        <translation>Modify configuration options for BottleCaps</translation>
+        <source>Modify configuration options for LitecoinPlus</source>
+        <translation>Modify configuration options for LitecoinPlus</translation>
     </message>
     <message>
         <location line="+14"/>
@@ -464,8 +464,8 @@ This product includes software developed by the OpenSSL Project for use in the O
     </message>
     <message>
         <location line="-186"/>
-        <source>BottleCaps</source>
-        <translation>BottleCaps</translation>
+        <source>LitecoinPlus</source>
+        <translation>LitecoinPlus</translation>
     </message>
     <message>
         <location line="+0"/>
@@ -474,8 +474,8 @@ This product includes software developed by the OpenSSL Project for use in the O
     </message>
     <message>
         <location line="+168"/>
-        <source>&amp;About BottleCaps</source>
-        <translation>&amp;About BottleCaps</translation>
+        <source>&amp;About LitecoinPlus</source>
+        <translation>&amp;About LitecoinPlus</translation>
     </message>
     <message>
         <location line="+9"/>
@@ -516,15 +516,15 @@ This product includes software developed by the OpenSSL Project for use in the O
     <message>
         <location line="+0"/>
         <location line="+60"/>
-        <source>BottleCaps client</source>
-        <translation>BottleCaps client</translation>
+        <source>LitecoinPlus client</source>
+        <translation>LitecoinPlus client</translation>
     </message>
     <message numerus="yes">
         <location line="+69"/>
-        <source>%n active connection(s) to BottleCaps network</source>
+        <source>%n active connection(s) to LitecoinPlus network</source>
         <translation>
-            <numerusform>%n active connection to BottleCaps network</numerusform>
-            <numerusform>%n active connections to BottleCaps network</numerusform>
+            <numerusform>%n active connection to LitecoinPlus network</numerusform>
+            <numerusform>%n active connections to LitecoinPlus network</numerusform>
         </translation>
     </message>
     <message>
@@ -621,8 +621,8 @@ Address: %4
     <message>
         <location line="-15"/>
         <location line="+15"/>
-        <source>URI can not be parsed! This can be caused by an invalid BottleCaps address or malformed URI parameters.</source>
-        <translation>URI can not be parsed! This can be caused by an invalid BottleCaps address or malformed URI parameters.</translation>
+        <source>URI can not be parsed! This can be caused by an invalid LitecoinPlus address or malformed URI parameters.</source>
+        <translation>URI can not be parsed! This can be caused by an invalid LitecoinPlus address or malformed URI parameters.</translation>
     </message>
     <message>
         <location line="+16"/>
@@ -656,8 +656,8 @@ Address: %4
     </message>
     <message>
         <location filename="../bitcoin.cpp" line="+109"/>
-        <source>A fatal error occurred. BottleCaps can no longer continue safely and will quit.</source>
-        <translation>A fatal error occurred. BottleCaps can no longer continue safely and will quit.</translation>
+        <source>A fatal error occurred. LitecoinPlus can no longer continue safely and will quit.</source>
+        <translation>A fatal error occurred. LitecoinPlus can no longer continue safely and will quit.</translation>
     </message>
 </context>
 <context>
@@ -722,8 +722,8 @@ Address: %4
     </message>
     <message>
         <location line="+5"/>
-        <source>The entered address &quot;%1&quot; is not a valid BottleCaps address.</source>
-        <translation>The entered address &quot;%1&quot; is not a valid BottleCaps address.</translation>
+        <source>The entered address &quot;%1&quot; is not a valid LitecoinPlus address.</source>
+        <translation>The entered address &quot;%1&quot; is not a valid LitecoinPlus address.</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -741,8 +741,8 @@ Address: %4
     <message>
         <location filename="../guiutil.cpp" line="+419"/>
         <location line="+12"/>
-        <source>BottleCaps-Qt</source>
-        <translation>BottleCaps-Qt</translation>
+        <source>LitecoinPlus-Qt</source>
+        <translation>LitecoinPlus-Qt</translation>
     </message>
     <message>
         <location line="-12"/>
@@ -804,13 +804,13 @@ Address: %4
     </message>
     <message>
         <location line="+31"/>
-        <source>Automatically start BottleCaps after logging in to the system.</source>
-        <translation>Automatically start BottleCaps after logging in to the system.</translation>
+        <source>Automatically start LitecoinPlus after logging in to the system.</source>
+        <translation>Automatically start LitecoinPlus after logging in to the system.</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>&amp;Start BottleCaps on system login</source>
-        <translation>&amp;Start BottleCaps on system login</translation>
+        <source>&amp;Start LitecoinPlus on system login</source>
+        <translation>&amp;Start LitecoinPlus on system login</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -829,8 +829,8 @@ Address: %4
     </message>
     <message>
         <location line="+6"/>
-        <source>Automatically open the BottleCaps client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Automatically open the BottleCaps client port on the router. This only works when your router supports UPnP and it is enabled.</translation>
+        <source>Automatically open the LitecoinPlus client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Automatically open the LitecoinPlus client port on the router. This only works when your router supports UPnP and it is enabled.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -839,8 +839,8 @@ Address: %4
     </message>
     <message>
         <location line="+7"/>
-        <source>Connect to the BottleCaps network through a SOCKS proxy (e.g. when connecting through Tor).</source>
-        <translation>Connect to the BottleCaps network through a SOCKS proxy (e.g. when connecting through Tor).</translation>
+        <source>Connect to the LitecoinPlus network through a SOCKS proxy (e.g. when connecting through Tor).</source>
+        <translation>Connect to the LitecoinPlus network through a SOCKS proxy (e.g. when connecting through Tor).</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -914,8 +914,8 @@ Address: %4
     </message>
     <message>
         <location line="+13"/>
-        <source>The user interface language can be set here. This setting will take effect after restarting BottleCaps.</source>
-        <translation>The user interface language can be set here. This setting will take effect after restarting BottleCaps.</translation>
+        <source>The user interface language can be set here. This setting will take effect after restarting LitecoinPlus.</source>
+        <translation>The user interface language can be set here. This setting will take effect after restarting LitecoinPlus.</translation>
     </message>
     <message>
         <location line="+11"/>
@@ -929,8 +929,8 @@ Address: %4
     </message>
     <message>
         <location line="+9"/>
-        <source>Whether to show BottleCaps addresses in the transaction list or not.</source>
-        <translation>Whether to show BottleCaps addresses in the transaction list or not.</translation>
+        <source>Whether to show LitecoinPlus addresses in the transaction list or not.</source>
+        <translation>Whether to show LitecoinPlus addresses in the transaction list or not.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -966,8 +966,8 @@ Address: %4
     <message>
         <location line="-9"/>
         <location line="+9"/>
-        <source>This setting will take effect after restarting BottleCaps.</source>
-        <translation>This setting will take effect after restarting BottleCaps.</translation>
+        <source>This setting will take effect after restarting LitecoinPlus.</source>
+        <translation>This setting will take effect after restarting LitecoinPlus.</translation>
     </message>
     <message>
         <location line="+29"/>
@@ -985,8 +985,8 @@ Address: %4
     <message>
         <location line="+33"/>
         <location line="+183"/>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the BottleCaps network after a connection is established, but this process has not completed yet.</source>
-        <translation>The displayed information may be out of date. Your wallet automatically synchronizes with the BottleCaps network after a connection is established, but this process has not completed yet.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the LitecoinPlus network after a connection is established, but this process has not completed yet.</source>
+        <translation>The displayed information may be out of date. Your wallet automatically synchronizes with the LitecoinPlus network after a connection is established, but this process has not completed yet.</translation>
     </message>
     <message>
         <location line="-141"/>
@@ -1201,8 +1201,8 @@ Address: %4
     </message>
     <message>
         <location line="+7"/>
-        <source>Show the BottleCaps-Qt help message to get a list with possible BottleCaps command-line options.</source>
-        <translation>Show the BottleCaps-Qt help message to get a list with possible BottleCaps command-line options.</translation>
+        <source>Show the LitecoinPlus-Qt help message to get a list with possible LitecoinPlus command-line options.</source>
+        <translation>Show the LitecoinPlus-Qt help message to get a list with possible LitecoinPlus command-line options.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -1221,13 +1221,13 @@ Address: %4
     </message>
     <message>
         <location line="-104"/>
-        <source>BottleCaps - Debug window</source>
-        <translation>BottleCaps - Debug window</translation>
+        <source>LitecoinPlus - Debug window</source>
+        <translation>LitecoinPlus - Debug window</translation>
     </message>
     <message>
         <location line="+25"/>
-        <source>BottleCaps Core</source>
-        <translation>BottleCaps Core</translation>
+        <source>LitecoinPlus Core</source>
+        <translation>LitecoinPlus Core</translation>
     </message>
     <message>
         <location line="+279"/>
@@ -1236,8 +1236,8 @@ Address: %4
     </message>
     <message>
         <location line="+7"/>
-        <source>Open the BottleCaps debug log file from the current data directory. This can take a few seconds for large log files.</source>
-        <translation>Open the BottleCaps debug log file from the current data directory. This can take a few seconds for large log files.</translation>
+        <source>Open the LitecoinPlus debug log file from the current data directory. This can take a few seconds for large log files.</source>
+        <translation>Open the LitecoinPlus debug log file from the current data directory. This can take a few seconds for large log files.</translation>
     </message>
     <message>
         <location line="+102"/>
@@ -1246,8 +1246,8 @@ Address: %4
     </message>
     <message>
         <location filename="../rpcconsole.cpp" line="-33"/>
-        <source>Welcome to the BottleCaps RPC console.</source>
-        <translation>Welcome to the BottleCaps RPC console.</translation>
+        <source>Welcome to the LitecoinPlus RPC console.</source>
+        <translation>Welcome to the LitecoinPlus RPC console.</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -1430,8 +1430,8 @@ Address: %4
     </message>
     <message>
         <location filename="../sendcoinsentry.cpp" line="+1"/>
-        <source>Enter a valid BottleCaps address</source>
-        <translation>Enter a valid BottleCaps address </translation>
+        <source>Enter a valid LitecoinPlus address</source>
+        <translation>Enter a valid LitecoinPlus address </translation>
     </message>
 </context>
 <context>
@@ -1491,8 +1491,8 @@ Address: %4
     </message>
     <message>
         <location line="+21"/>
-        <source>Sign the message to prove you own this BottleCaps address</source>
-        <translation>Sign the message to prove you own this BottleCaps address</translation>
+        <source>Sign the message to prove you own this LitecoinPlus address</source>
+        <translation>Sign the message to prove you own this LitecoinPlus address</translation>
     </message>
     <message>
         <location line="+17"/>
@@ -1523,8 +1523,8 @@ Address: %4
     </message>
     <message>
         <location line="+40"/>
-        <source>Verify the message to ensure it was signed with the specified BottleCaps address</source>
-        <translation>Verify the message to ensure it was signed with the specified BottleCaps address</translation>
+        <source>Verify the message to ensure it was signed with the specified LitecoinPlus address</source>
+        <translation>Verify the message to ensure it was signed with the specified LitecoinPlus address</translation>
     </message>
     <message>
         <location line="+17"/>
@@ -1534,8 +1534,8 @@ Address: %4
     <message>
         <location filename="../signverifymessagedialog.cpp" line="+27"/>
         <location line="+3"/>
-        <source>Enter a valid BottleCaps address</source>
-        <translation>Enter a valid BottleCaps address</translation>
+        <source>Enter a valid LitecoinPlus address</source>
+        <translation>Enter a valid LitecoinPlus address</translation>
     </message>
     <message>
         <location line="-2"/>
@@ -1544,8 +1544,8 @@ Address: %4
     </message>
     <message>
         <location line="+3"/>
-        <source>Enter BottleCaps signature</source>
-        <translation>Enter BottleCaps signature</translation>
+        <source>Enter LitecoinPlus signature</source>
+        <translation>Enter LitecoinPlus signature</translation>
     </message>
     <message>
         <location line="+82"/>
@@ -2115,8 +2115,8 @@ Address: %4
     <name>bitcoin-core</name>
     <message>
         <location filename="../bitcoinstrings.cpp" line="+82"/>
-        <source>BottleCaps version</source>
-        <translation>BottleCaps version</translation>
+        <source>LitecoinPlus version</source>
+        <translation>LitecoinPlus version</translation>
     </message>
     <message>
         <location line="+82"/>
@@ -2145,13 +2145,13 @@ Address: %4
     </message>
     <message>
         <location line="+23"/>
-        <source>Specify configuration file (default: BottleCaps.conf)</source>
-        <translation>Specify configuration file (default: BottleCaps.conf)</translation>
+        <source>Specify configuration file (default: LitecoinPlus.conf)</source>
+        <translation>Specify configuration file (default: LitecoinPlus.conf)</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>Specify pid file (default: BottleCapsd.pid)</source>
-        <translation>Specify pid file (default: BottleCapsd.pid)</translation>
+        <source>Specify pid file (default: LitecoinPlusd.pid)</source>
+        <translation>Specify pid file (default: LitecoinPlusd.pid)</translation>
     </message>
     <message>
         <location line="-47"/>
@@ -2305,8 +2305,8 @@ Address: %4
     </message>
     <message>
         <location line="+3"/>
-        <source>Warning: Please check that your computer&apos;s date and time are correct! If your clock is wrong BottleCaps will not work properly.</source>
-        <translation>Warning: Please check that your computer&apos;s date and time are correct! If your clock is wrong BottleCaps will not work properly.</translation>
+        <source>Warning: Please check that your computer&apos;s date and time are correct! If your clock is wrong LitecoinPlus will not work properly.</source>
+        <translation>Warning: Please check that your computer&apos;s date and time are correct! If your clock is wrong LitecoinPlus will not work properly.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -2540,13 +2540,13 @@ Address: %4
     </message>
     <message>
         <location line="-131"/>
-        <source>Cannot obtain a lock on data directory %s.  BottleCaps is probably already running.</source>
-        <translation>Cannot obtain a lock on data directory %s.  BottleCaps is probably already running.</translation>
+        <source>Cannot obtain a lock on data directory %s.  LitecoinPlus is probably already running.</source>
+        <translation>Cannot obtain a lock on data directory %s.  LitecoinPlus is probably already running.</translation>
     </message>
     <message>
         <location line="+57"/>
-        <source>BottleCaps</source>
-        <translation>BottleCaps</translation>
+        <source>LitecoinPlus</source>
+        <translation>LitecoinPlus</translation>
     </message>
     <message>
         <location line="+77"/>
@@ -2580,13 +2580,13 @@ Address: %4
     </message>
     <message>
         <location line="+1"/>
-        <source>Error loading wallet.dat: Wallet requires newer version of BottleCaps</source>
-        <translation>Error loading wallet.dat: Wallet requires newer version of BottleCaps</translation>
+        <source>Error loading wallet.dat: Wallet requires newer version of LitecoinPlus</source>
+        <translation>Error loading wallet.dat: Wallet requires newer version of LitecoinPlus</translation>
     </message>
     <message>
         <location line="+73"/>
-        <source>Wallet needed to be rewritten: restart BottleCaps to complete</source>
-        <translation>Wallet needed to be rewritten: restart BottleCaps to complete</translation>
+        <source>Wallet needed to be rewritten: restart LitecoinPlus to complete</source>
+        <translation>Wallet needed to be rewritten: restart LitecoinPlus to complete</translation>
     </message>
     <message>
         <location line="-75"/>
@@ -2655,8 +2655,8 @@ Address: %4
     </message>
     <message>
         <location line="-25"/>
-        <source>Unable to bind to %s on this computer. BottleCaps is probably already running.</source>
-        <translation>Unable to bind to %s on this computer. BottleCaps is probably already running.</translation>
+        <source>Unable to bind to %s on this computer. LitecoinPlus is probably already running.</source>
+        <translation>Unable to bind to %s on this computer. LitecoinPlus is probably already running.</translation>
     </message>
     <message>
         <location line="+55"/>
