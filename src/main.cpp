@@ -2434,7 +2434,11 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock, bool lessAggressive)
 		if (!CheckProofOfStake(pblock->vtx[1], pblock->nBits, hashProofOfStake))
 		{
 		    printf("WARNING: ProcessBlock(): check proof-of-stake failed for block %s\n", hash.ToString().c_str());
-		    return false; // do not error here as we expect this during initial block download
+
+			// by Simone: when importing from bootstrap, if we return false here, it will break the import
+			// if we return true while syncing, it will break the syncing on Win 10........
+			// the only way, return lessAggressive flag, which is true **only** when importing bootstrap
+		    return lessAggressive; // do not error here as we expect this during initial block download
 		}
 		if (!mapProofOfStake.count(hash)) // add to mapProofOfStake
 		    mapProofOfStake.insert(make_pair(hash, hashProofOfStake));
