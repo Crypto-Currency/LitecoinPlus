@@ -138,7 +138,7 @@ OBJS= \
 all: litecoinplusd
 
 test check: test_litecoinplus FORCE
-	./test_BottleCaps
+	./test_LitecoinPlus
 
 # auto-generated dependencies:
 -include obj/*.P
