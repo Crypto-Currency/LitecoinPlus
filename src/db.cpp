@@ -1170,7 +1170,7 @@ bool CTxDB::LoadBlockIndexGuts()
 
 	// the following section, we re-index the boost
 	{
-		Dbc* pcursor1 = GetCursor(DBC_BULK);
+		Dbc* pcursor1 = GetCursor();
 		if (!pcursor1)
 			return false;
 
@@ -1187,7 +1187,7 @@ bool CTxDB::LoadBlockIndexGuts()
 			}
 			CDataStream ssValue(SER_DISK, CLIENT_VERSION);
 		    int ret = ReadAtCursor(pcursor1, ssKey, ssValue, fFlags);
-		    fFlags = DB_NEXT_NODUP;
+		    fFlags = DB_NEXT;
 		    if (ret == DB_NOTFOUND)
 		        break;
 		    else if (ret != 0)
