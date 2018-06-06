@@ -424,7 +424,8 @@ public:
         nLastTime = nNow;
 
         // Each retry is 2 minutes after the last
-        nRequestTime = std::max(nRequestTime + 2 * 60 * 1000000, nNow);
+		// by Simone: maybe this was OK in 1932, but in 2018, we can relax and set 6 seconds are more than enough (was 2 * 60.....)
+        nRequestTime = std::max(nRequestTime + 1 * 6 * 1000000, nNow);
         mapAskFor.insert(std::make_pair(nRequestTime, inv));
     }
 

@@ -33,6 +33,7 @@ CCriticalSection cs_main;
 CTxMemPool mempool;
 unsigned int nTransactionsUpdated = 0;
 
+map<string, uint256> mapHashes;
 map<uint256, CBlockIndex*> mapBlockIndex;
 set<pair<COutPoint, unsigned int> > setStakeSeen;
 uint256 hashGenesisBlock = hashGenesisBlockOfficial;
@@ -1048,6 +1049,38 @@ CBlockIndex* FindBlockByHeight(int nHeight)
     return pblockindex;
 }
 
+
+uint256 CBlock::GetHash() const
+{
+	// by Simone: use a map and re-use those hashes already calculated, as this function is way over-used
+	// for the moment disabled, because need handle recycle of this map, otherwise memory will explode
+	// also, real performance benefits has yet to be checked
+	/*char buf[sizeof(block_header)];
+	memcpy(&buf[0], CVOIDBEGIN(nVersion), sizeof(block_header));
+	std::stringstream ss;
+	for (unsigned int i = 0; i < sizeof(buf); ++i)
+		ss << std::hex << (int)buf[i];
+	std::string key = ss.str();
+	std::map<std::string, uint256>::iterator mi = mapHashes.find(key);
+	if (mi != mapHashes.end())
+	{
+	    return (*mi).second;
+	}*/
+
+	// ok not found, so let's just calculate it *and also* remember it
+	void * scratchbuff;
+    uint256 thash;
+
+    scratchbuff = scrypt_buffer_alloc();
+
+    scrypt_hash(CVOIDBEGIN(nVersion), sizeof(block_header), UINTBEGIN(thash), scratchbuff);
+
+    scrypt_buffer_free(scratchbuff);
+
+	//mapHashes.insert(std::pair<std::string, uint256>(key, thash));
+
+    return thash;
+}
 
 bool CBlock::ReadFromDisk(const CBlockIndex* pindex, bool fReadTransactions)
 {
@@ -3679,15 +3712,16 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         CBlock block;
         vRecv >> block;
 
-        printf("received block %s\n", block.GetHash().ToString().substr(0,20).c_str());
-        // block.print();
+	    printf("received block %s\n", block.GetHash().ToString().substr(0,20).c_str());
+	    // block.print();
+		//fprintf(stderr, "Received block %d from %d\n", block.nTime, pfrom->GetId());
 
-        CInv inv(MSG_BLOCK, block.GetHash());
-        pfrom->AddInventoryKnown(inv);
+	    CInv inv(MSG_BLOCK, block.GetHash());
+	    pfrom->AddInventoryKnown(inv);
 
-        if (ProcessBlock(pfrom, &block))
-            mapAlreadyAskedFor.erase(inv);
-        if (block.nDoS) Misbehaving(pfrom->GetId(), block.nDoS);
+	    if (ProcessBlock(pfrom, &block))
+	        mapAlreadyAskedFor.erase(inv);
+	    if (block.nDoS) Misbehaving(pfrom->GetId(), block.nDoS);
     }
 
 
@@ -3904,7 +3938,9 @@ bool ProcessMessages(CNode* pfrom)
 
         // Don't bother if send buffer is too full to respond anyway
         if (pfrom->vSend.size() >= SendBufferSize())
+		{
             break;
+		}
 
         // Scan for message start
         CDataStream::iterator pstart = search(vRecv.begin(), vRecv.end(), BEGIN(pchMessageStart), END(pchMessageStart));
@@ -4174,7 +4210,6 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
 		    if (!vInv.empty())
 		        pto->PushMessage("inv", vInv);
 
-
 		    //
 		    // Message: getdata
 		    //
@@ -4187,7 +4222,7 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
 		        if (!AlreadyHave(txdb, inv))
 		        {
 		            if (fDebugNet)
-		                printf("sending getdata: %s\n", inv.ToString().c_str());
+		                printf("sending getdata [1]: %d\n", pto->GetId());
 		            vGetData.push_back(inv);
 		            if (vGetData.size() >= 1000)
 		            {
@@ -4199,7 +4234,9 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
 		        pto->mapAskFor.erase(pto->mapAskFor.begin());
 		    }
 		    if (!vGetData.empty())
+			{
 		        pto->PushMessage("getdata", vGetData);
+			}
 
 		}
 		return true;
