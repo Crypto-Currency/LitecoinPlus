@@ -912,19 +912,7 @@ public:
         return (nBits == 0);
     }
 
-    uint256 GetHash() const
-    {
-        uint256 thash;
-		void * scratchbuff;
-
-        scratchbuff = scrypt_buffer_alloc();
-
-        scrypt_hash(CVOIDBEGIN(nVersion), sizeof(block_header), UINTBEGIN(thash), scratchbuff);
-
-        scrypt_buffer_free(scratchbuff);
-
-        return thash;
-    }
+    uint256 GetHash() const;
 
     int64 GetBlockTime() const
     {
