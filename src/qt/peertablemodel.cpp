@@ -163,12 +163,16 @@ QVariant PeerTableModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     CNodeCombinedStats *rec = static_cast<CNodeCombinedStats*>(index.internalPointer());
+	QString s;
 
     if (role == Qt::DisplayRole) {
         switch(index.column())
         {
         case Address:
-            return QString::fromStdString(rec->nodeStats.addrName);
+			s = QString::fromStdString(rec->nodeStats.addrName);
+			if (rec->nodeStats.currentPushBlock)
+				s += " *D";
+            return s;
         case Subversion:
             return QString::fromStdString(rec->nodeStats.cleanSubVer);
         case Ping:
