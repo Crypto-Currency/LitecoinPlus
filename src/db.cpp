@@ -334,7 +334,7 @@ bool CDBEnv::Open(boost::filesystem::path pathEnv_)
     if (GetBoolArg("-privdb", true))
         nEnvFlags |= DB_PRIVATE;
 
-    int nDbCache = GetArg("-dbcache", 128);
+    int nDbCache = GetArg("-dbcache", 25);
     dbenv.set_lg_dir(pathLogDir.string().c_str());
     dbenv.set_cachesize(nDbCache / 1024, (nDbCache % 1024)*1048576, 1);
     dbenv.set_lg_bsize(1048576);
@@ -500,16 +500,6 @@ CDB::CDB(const char *pszFile, const char* pszMode) :
                 ret = mpf->set_flags(DB_MPOOL_NOFILE, 1);
                 if (ret != 0)
                     throw runtime_error(strprintf("CDB() : failed to configure for no temp file backing for database %s", pszFile));
-            }
-
-			ret = pdb->set_pagesize(2048);
-            if (ret != 0)
-            {
-                delete pdb;
-                pdb = NULL;
-                --bitdb.mapFileUseCount[strFile];
-                strFile = "";
-                throw runtime_error(strprintf("CDB() : cannot set page size for file %s, error %d", pszFile, ret));
             }
 
             ret = pdb->open(NULL,      // Txn pointer
@@ -816,8 +806,10 @@ bool CTxDB::WriteBlockIndex(const CDiskBlockIndex& blockindex)
 	boostStartup *boost = new boostStartup();
 	uint256 blockHash = blockindex.GetBlockHash();
 	CDiskBlockIndex bi = blockindex;
-	boost->AddBlockIndex(blockHash, &bi, blockindex.nFile, blockindex.nBlockPos, true);
-    return Write(make_pair(string("blockindex"), blockindex.GetBlockHash()), blockindex);
+	bool res = Write(make_pair(string("blockindex"), blockindex.GetBlockHash()), blockindex);
+	if (res)
+		boost->AddBlockIndex(blockHash, &bi, blockindex.nFile, blockindex.nBlockPos, true);
+    return res; 
 }
 
 bool CTxDB::ReadHashBestChain(uint256& hashBestChain)

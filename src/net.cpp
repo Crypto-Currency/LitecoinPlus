@@ -165,15 +165,16 @@ CNode::~CNode()
     }
 }
 
+unsigned int lastSendBlock;
 
 void CNode::PushGetBlocks(CBlockIndex* pindexBegin, uint256 hashEnd)
 {
     // Filter out duplicate requests
-    if (pindexBegin == pindexLastGetBlocksBegin && hashEnd == hashLastGetBlocksEnd)
-        return;
+	if (pindexBegin == pindexLastGetBlocksBegin && hashEnd == hashLastGetBlocksEnd)
+		return;
     pindexLastGetBlocksBegin = pindexBegin;
     hashLastGetBlocksEnd = hashEnd;
-
+	lastSendBlock = GetTime();
     PushMessage("getblocks", CBlockLocator(pindexBegin), hashEnd);
 }
 
@@ -897,6 +898,7 @@ void CNode::copyStats(CNodeStats &stats)
     X(nRecvBytes);
     X(mapRecvBytesPerMsgCmd);
     X(fWhitelisted);
+	X(currentPushBlock);
 
     // It is common for nodes with good ping times to suddenly become lagged,
     // due to a new block arriving or other large transfer.
@@ -1185,15 +1187,14 @@ void ThreadSocketHandler2(void* parg)
                         // typical socket buffer is 8K-64K
                         char pchBuf[0x10000];
                         int nBytes = recv(pnode->hSocket, pchBuf, sizeof(pchBuf), MSG_DONTWAIT);
+                        pnode->nLastRecv = GetTime();
+						pnode->nLastRecvMicro = GetTimeMicros();
                         if (nBytes > 0)
                         {
-                            pnode->nLastRecv = GetTime();
                             pnode->nRecvBytes += nBytes;
 							pnode->RecordBytesRecv(nBytes);
                             vRecv.resize(nPos + nBytes);
                             memcpy(&vRecv[nPos], pchBuf, nBytes);
-                            pnode->nLastRecv = GetTime();
-							pnode->nLastRecvMicro = GetTimeMicros();
                         }
                         else if (nBytes == 0)
                         {
@@ -1265,12 +1266,16 @@ void ThreadSocketHandler2(void* parg)
                     printf("socket no message in first 60 seconds, %d %d\n", pnode->nLastRecv != 0, pnode->nLastSend != 0);
                     pnode->fDisconnect = true;
                 }
-                else if (GetTime() - pnode->nLastSend > 90*60 && GetTime() - pnode->nLastSendEmpty > 90*60)
+
+				// by Simone: SEND timeout = 90 minutes...... it is extremely excessive, as the nodes always ping every 30 seconds, so setting to 1 minute is enough
+                else if (GetTime() - pnode->nLastSend > 1 * 60 && GetTime() - pnode->nLastSendEmpty > 1 * 60)
                 {
                     printf("socket not sending\n");
                     pnode->fDisconnect = true;
                 }
-                else if (GetTime() - pnode->nLastRecv > 90*60)
+
+				// by Simone: timeout = 90 minutes...... it is extremely excessive, as the nodes always have a little bit to send here, 1 minute is enough (2 pings)
+                else if (GetTime() - pnode->nLastRecv > 1 * 60)
                 {
                     printf("socket inactivity timeout\n");
                     pnode->fDisconnect = true;
