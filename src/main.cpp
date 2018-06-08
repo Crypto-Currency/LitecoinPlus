@@ -2467,20 +2467,6 @@ CNode *PickCurrentBestNode()
 		if ((pnode->nStartingHeight <= nBestHeight) || (pnode->nPingUsecTime == 0))
 			continue;
 
-		// if our height is below 220k, just download from specific versions that has surely passed the malefic number 192163
-/*		if (nBestHeight < 220000)
-		{
-			if (pnode->cleanSubVer != "LitecoinPlus:3.0.1.1") 
-				//(pnode->cleanSubVer != "LitecoinPlus:3.3.0.3") &&
-				//(pnode->cleanSubVer != "LitecoinPlus:3.3.1.0"))
-			{
-				continue;
-			}
-		// passed the version check but number of blocks is low, discard
-			else if (pnode->nStartingHeight < 300000) 
-				continue;
-		}*/
-
 		// blocks are enough, let's check that damn ping
 		if (((pnode->nPingUsecTime < minTime) || (minTime == 0)) && (pnode->nMinPingUsecTime != 999000))
 		{
