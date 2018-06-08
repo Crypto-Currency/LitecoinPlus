@@ -1,7 +1,22 @@
+***** Version 3.3.1.0
+- Fixed the bootstrap.dat and empty syncing from zero to 191k~192k blocks
+- New intelligent load balance downloading sync algorithm
++ This works for process and QT version
++ Distribute the load MUCH better than the uncontrolled randomness there was before !
+- Show a "*D" next to which peer is downloading from, in peers page
+
+
+***** Version 3.3.0.1-3
+- Fixing the empty start on process version error (blkindex.dat error)
+- Fixing the block #192163 stuck error
+- Fixing the pause problem (retry set to 2 minutes... brought to 6 seconds)
+
+
 ***** Version 3.3.0.1-beta
 - Dusting completed and fully tested
 - Downloading themes from litecoinplus.co and auto-install
 - Add full error controll to themes download
+
 
 ***** Version 3.2.0.2-alpha
 - Added wallet NET offline functionality, closing NET and staking

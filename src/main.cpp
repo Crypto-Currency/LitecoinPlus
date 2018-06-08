@@ -32,6 +32,7 @@ CCriticalSection cs_main;
 
 CTxMemPool mempool;
 unsigned int nTransactionsUpdated = 0;
+unsigned int lastRecvBlockTime;
 
 map<string, uint256> mapHashes;
 map<uint256, CBlockIndex*> mapBlockIndex;
@@ -2187,6 +2188,15 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
 
     txdb.Close();
 
+	// by Simone: commit every 50k blocks otherwise the transactional log will explode at around ~190k from a zero sync...
+	static unsigned int countCommits = 0;
+	if (countCommits == 0)
+	{
+		bitdb.Flush(false);
+		countCommits = 9000;
+	}
+	countCommits--;
+
     if (pindexNew == pindexBest)
     {
         // Notify UI to display prev block's coinbase if it was ours
@@ -2441,6 +2451,38 @@ void Misbehaving(NodeId pnode, int howmuch)
     }
 }
 
+CNode *PickCurrentBestNode()
+{
+	CNode		*retNode = NULL, *firstNode = NULL;
+	int64_t		minTime = 0;
+
+	// loop and find the best next one
+    BOOST_FOREACH(CNode* pnode, vNodes)
+	{
+		pnode->currentPushBlock = false;
+		if (firstNode == NULL)
+			firstNode = pnode;
+
+		// don't even bother if they don't have enough blocks
+		if ((pnode->nStartingHeight <= nBestHeight) || (pnode->nPingUsecTime == 0))
+			continue;
+
+		// blocks are enough, let's check that damn ping
+		if (((pnode->nPingUsecTime < minTime) || (minTime == 0)) && (pnode->nMinPingUsecTime != 999000))
+		{
+			minTime = pnode->nPingUsecTime;
+			retNode = pnode;
+		} 
+	}
+
+	// if all else fail, just se to the first node (if any, may still be NULL if some weird disconnection happens)
+	if (retNode == NULL)
+		retNode = firstNode;
+	if (retNode)
+		retNode->currentPushBlock = true;
+	return retNode;
+}
+
 bool ProcessBlock(CNode* pfrom, CBlock* pblock, bool lessAggressive)
 {
     // Check for duplicate
@@ -2524,12 +2566,14 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock, bool lessAggressive)
         // Ask this guy to fill in what we're missing
         if (pfrom)
         {
-            pfrom->PushGetBlocks(pindexBest, GetOrphanRoot(pblock2));
+			CNode *bestNode = PickCurrentBestNode();
+			bestNode->PushGetBlocks(pindexBest, GetOrphanRoot(pblock2));
+
             // ppcoin: getblocks may not obtain the ancestor block rejected
             // earlier by duplicate-stake check so we ask for it again directly
             if (!IsInitialBlockDownload())
 			{
-                pfrom->AskFor(CInv(MSG_BLOCK, WantedByOrphan(pblock2)));
+                bestNode->AskFor(CInv(MSG_BLOCK, WantedByOrphan(pblock2)));
 			}
         }
         return true;
@@ -3457,15 +3501,16 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             if (fDebug)
                 printf("  got inventory: %s  %s\n", inv.ToString().c_str(), fAlreadyHave ? "have" : "new");
 
+			CNode *bestNode = PickCurrentBestNode();
             if (!fAlreadyHave)
                 pfrom->AskFor(inv);
             else if (inv.type == MSG_BLOCK && mapOrphanBlocks.count(inv.hash)) {
-                pfrom->PushGetBlocks(pindexBest, GetOrphanRoot(mapOrphanBlocks[inv.hash]));
+                bestNode->PushGetBlocks(pindexBest, GetOrphanRoot(mapOrphanBlocks[inv.hash]));
             } else if (nInv == nLastBlock) {
                 // In case we are on a very long side-chain, it is possible that we already have
                 // the last block in an inv bundle sent in response to getblocks. Try to detect
                 // this situation and push another getblocks to continue.
-                pfrom->PushGetBlocks(mapBlockIndex[inv.hash], uint256(0));
+                bestNode->PushGetBlocks(mapBlockIndex[inv.hash], uint256(0));
                 if (fDebug)
                     printf("force request: %s\n", inv.ToString().c_str());
             }
@@ -3709,6 +3754,11 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 
     else if (strCommand == "block")
     {
+		// by Simone: because when syncing from fast peers is very busy, update the recv packet time also here
+		pfrom->nLastRecv = GetTime();
+		pfrom->nLastRecvMicro = GetTimeMicros();
+
+		lastRecvBlockTime = GetTime();
         CBlock block;
         vRecv >> block;
 
@@ -4040,12 +4090,23 @@ bool ProcessMessages(CNode* pfrom)
     return true;
 }
 
-static const int PING_INTERVAL = 2 * 60;
+static const int PING_INTERVAL = 30;
 extern void GetRandBytes(unsigned char* buf, int num);
 extern void AdvertiseLocal(CNode *pnode);
 
 bool SendMessages(CNode* pto, bool fSendTrickle)
 {
+	// by Simone: if long time passed before the last block is received during initial sync, send one out again (one retry time of 6 seconds + 50%)
+	if (IsInitialBlockDownload() && (GetTime() - lastRecvBlockTime) > 9)
+	{
+		lastRecvBlockTime = GetTime();
+		CNode *bestNode = PickCurrentBestNode();
+		if (bestNode)
+		{
+        	bestNode->PushGetBlocks(pindexBest, uint256(0));
+		}
+	}
+
 	{
 		TRY_LOCK(cs_main, lockMain);
 		if (lockMain) {
