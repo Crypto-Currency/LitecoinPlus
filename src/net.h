@@ -174,6 +174,7 @@ public:
     double dPingWait;
     double dPingMin;
     std::string addrLocal;
+	bool currentPushBlock;
 };
 
 typedef enum BanReason
@@ -322,6 +323,7 @@ public:
     static void SweepBanned();
     static bool BannedSetIsDirty();
     static void SetBannedSetDirty(bool dirty=true);
+	bool currentPushBlock;
 
 	// by Simone: for network chart
     static void RecordBytesRecv(uint64_t bytes);
