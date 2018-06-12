@@ -1920,7 +1920,7 @@ void ThreadMessageHandler2(void* parg)
         	}
 			else
 			{
-				sleep(50);
+				Sleep(50);
 				continue;
 			}
 		}
@@ -1971,7 +1971,7 @@ void ThreadMessageHandler2(void* parg)
 				else
 				{
 					// wait for a moment then retry
-					sleep(50);
+					Sleep(50);
 					continue;
 				}
 			}
