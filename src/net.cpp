@@ -24,7 +24,7 @@
 using namespace std;
 using namespace boost;
 
-static const int MAX_OUTBOUND_CONNECTIONS = 12;
+static const int MAX_OUTBOUND_CONNECTIONS = 50;
 
 void ThreadMessageHandler2(void* parg);
 void ThreadSocketHandler2(void* parg);
@@ -235,7 +235,7 @@ bool GetLocal(CService& addr, const CNetAddr *paddrPeer)
 }
 
 // get best local address for a particular peer as a CAddress
-/*CAddress GetLocalAddress(const CNetAddr *paddrPeer)
+CAddress GetLocalAddress(const CNetAddr *paddrPeer)
 {
     CAddress ret(CService("0.0.0.0",0),0);
     CService addr;
@@ -246,7 +246,7 @@ bool GetLocal(CService& addr, const CNetAddr *paddrPeer)
         ret.nTime = GetAdjustedTime();
     }
     return ret;
-}*/
+}
 
 bool RecvLine(SOCKET hSocket, string& strLine)
 {
@@ -297,23 +297,6 @@ bool RecvLine(SOCKET hSocket, string& strLine)
             }
         }
     }
-}
-
-
-// get best local address for a particular peer as a CAddress
-// Otherwise, return the unroutable 0.0.0.0 but filled in with
-// the normal parameters, since the IP may be changed to a useful
-// one by discovery.
-CAddress GetLocalAddress(const CNetAddr *paddrPeer)
-{
-    CAddress ret(CService("0.0.0.0",GetListenPort()), NODE_NONE);
-    CService addr;
-    if (GetLocal(addr, paddrPeer))
-    {
-        ret = CAddress(addr, nLocalServices);
-    }
-    ret.nTime = GetAdjustedTime();
-    return ret;
 }
 
 int GetnScore(const CService& addr)
@@ -1602,6 +1585,7 @@ void static ProcessOneShot()
     if (grant) {
         if (!OpenNetworkConnection(addr, &grant, strDest.c_str(), true))
             AddOneShot(strDest);
+		printf("OpenNetworkConnection() called by ProcessOneShot()\n");
     }
 }
 
@@ -1640,6 +1624,7 @@ void ThreadOpenConnections2(void* parg)
             {
                 CAddress addr;
                 OpenNetworkConnection(addr, NULL, strAddr.c_str());
+				printf("OpenNetworkConnection() called by ThreadOpenConnections2()\n");
                 for (int i = 0; i < 10 && i < nLoop; i++)
                 {
                     Sleep(500);
@@ -1745,6 +1730,7 @@ void ThreadOpenConnections2(void* parg)
 
         if (addrConnect.IsValid())
             OpenNetworkConnection(addrConnect, &grant);
+		printf("OpenNetworkConnection() called by ThreadOpenConnections2() at the end of function\n");
     }
 }
 
@@ -1782,6 +1768,7 @@ void ThreadOpenAddedConnections2(void* parg)
                 CAddress addr;
                 CSemaphoreGrant grant(*semOutbound);
                 OpenNetworkConnection(addr, &grant, strAddNode.c_str());
+				printf("OpenNetworkConnection() called by ThreadOpenAddedConnections2()\n");
                 Sleep(500);
             }
             vnThreadsRunning[THREAD_ADDEDCONNECTIONS]--;
@@ -1826,6 +1813,7 @@ void ThreadOpenAddedConnections2(void* parg)
         {
             CSemaphoreGrant grant(*semOutbound);
             OpenNetworkConnection(CAddress(*(vserv.begin())), &grant);
+			printf("OpenNetworkConnection() called by ThreadOpenAddedConnections2() at the end of function\n");
             Sleep(500);
             if (fShutdown)
                 return;
@@ -1919,13 +1907,23 @@ void ThreadMessageHandler2(void* parg)
 			continue;
 		}
 
+
+		// by Simone: let's try a TRY_LOCK approach here in case of busy situations
         vector<CNode*> vNodesCopy;
-        {
-            LOCK(cs_vNodes);
-            vNodesCopy = vNodes;
-            BOOST_FOREACH(CNode* pnode, vNodesCopy)
-                pnode->AddRef();
-        }
+		{
+			TRY_LOCK(cs_vNodes, lockVNodes);
+			if (lockVNodes)
+			{
+		        vNodesCopy = vNodes;
+		        BOOST_FOREACH(CNode* pnode, vNodesCopy)
+		            pnode->AddRef();
+        	}
+			else
+			{
+				sleep(50);
+				continue;
+			}
+		}
 
         // Poll the connected nodes for messages*/
         CNode* pnodeTrickle = NULL;
@@ -1956,11 +1954,28 @@ void ThreadMessageHandler2(void* parg)
 				continue;
         }
 
+
+		// by Simone: this approach also change to a try lock, but this one cannot be skipped, must be done
+		loop
 		{
-            LOCK(cs_vNodes);
-            BOOST_FOREACH(CNode* pnode, vNodesCopy)
-                pnode->Release();
-        }
+			{
+			    TRY_LOCK(cs_vNodes, lockVNodes);
+				if (lockVNodes)
+				{
+					BOOST_FOREACH(CNode* pnode, vNodesCopy)
+					    pnode->Release();
+
+					// exit the loop
+					break;
+				}
+				else
+				{
+					// wait for a moment then retry
+					sleep(50);
+					continue;
+				}
+			}
+		}
 
         // Wait and allow messages to bunch up.
         // Reduce vnThreadsRunning so StopNode has permission to exit while
