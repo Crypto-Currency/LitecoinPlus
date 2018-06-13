@@ -2506,36 +2506,57 @@ void Misbehaving(NodeId pnode, int howmuch)
     }
 }
 
+// by Simone: a nice logic to pick the current best node to download during initial sync
 CNode *PickCurrentBestNode()
 {
 	CNode		*retNode = NULL, *firstNode = NULL;
 	int64_t		minTime = 0;
 
 	// loop and find the best next one
-    BOOST_FOREACH(CNode* pnode, vNodes)
+	loop
 	{
-		pnode->currentPushBlock = false;
-		if (firstNode == NULL)
-			firstNode = pnode;
-
-		// don't even bother if they don't have enough blocks
-		if ((pnode->nStartingHeight <= nBestHeight) || (pnode->nPingUsecTime == 0))
-			continue;
-
-		// blocks are enough, let's check that damn ping
-		if (((pnode->nPingUsecTime < minTime) || (minTime == 0)) && (pnode->nMinPingUsecTime != 999000))
 		{
-			minTime = pnode->nPingUsecTime;
-			retNode = pnode;
-		} 
-	}
+			// use TRY_LOCK, as it might be used in a GUI, worst case they will retry
+		    TRY_LOCK(cs_vNodes, lockStatus);
+		    if (lockStatus)
+		    {
+				BOOST_FOREACH(CNode* pnode, vNodes)
+				{
+					pnode->currentPushBlock = false;
+					if (firstNode == NULL)
+						firstNode = pnode;
 
-	// if all else fail, just se to the first node (if any, may still be NULL if some weird disconnection happens)
-	if (retNode == NULL)
-		retNode = firstNode;
-	if (retNode)
-		retNode->currentPushBlock = true;
-	return retNode;
+					// don't even bother if they don't have enough blocks
+					if ((pnode->nStartingHeight <= nBestHeight) || (pnode->nPingUsecTime == 0))
+						continue;
+
+					// blocks are enough, let's check that damn ping
+					if (((pnode->nPingUsecTime < minTime) || (minTime == 0)) && (pnode->nMinPingUsecTime != 999000))
+					{
+						minTime = pnode->nPingUsecTime;
+						retNode = pnode;
+					} 
+				}
+
+				// set the flags here and manage retries as well
+				if (retNode)
+				{
+					retNode->currentPushBlock = true;
+					if (IsInitialBlockDownload() && (GetTime() - lastRecvBlockTime) > 9)
+					{
+						lastRecvBlockTime = GetTime();
+			    		retNode->PushGetBlocks(pindexBest, uint256(0));
+					}
+				}
+				return retNode;
+			}
+			else
+			{
+				Sleep(50);
+				continue;
+			}
+		}
+	}
 }
 
 bool ProcessBlock(CNode* pfrom, CBlock* pblock, bool lessAggressive)
@@ -2620,17 +2641,19 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock, bool lessAggressive)
 
         // Ask this guy to fill in what we're missing
         if (pfrom)
-        {
-			CNode *bestNode = PickCurrentBestNode();
-			bestNode->PushGetBlocks(pindexBest, GetOrphanRoot(pblock2));
+		{
+			if (pfrom->currentPushBlock)
+		    {
+				pfrom->PushGetBlocks(pindexBest, GetOrphanRoot(pblock2));
 
-            // ppcoin: getblocks may not obtain the ancestor block rejected
-            // earlier by duplicate-stake check so we ask for it again directly
-            if (!IsInitialBlockDownload())
-			{
-                bestNode->AskFor(CInv(MSG_BLOCK, WantedByOrphan(pblock2)));
-			}
-        }
+		        // ppcoin: getblocks may not obtain the ancestor block rejected
+		        // earlier by duplicate-stake check so we ask for it again directly
+		        if (!IsInitialBlockDownload())
+				{
+		            pfrom->AskFor(CInv(MSG_BLOCK, WantedByOrphan(pblock2)));
+				}
+		    }
+		}
         return true;
     }
 
@@ -3556,18 +3579,21 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             if (fDebug)
                 printf("  got inventory: %s  %s\n", inv.ToString().c_str(), fAlreadyHave ? "have" : "new");
 
-			CNode *bestNode = PickCurrentBestNode();
             if (!fAlreadyHave)
                 pfrom->AskFor(inv);
             else if (inv.type == MSG_BLOCK && mapOrphanBlocks.count(inv.hash)) {
-                bestNode->PushGetBlocks(pindexBest, GetOrphanRoot(mapOrphanBlocks[inv.hash]));
+				if (pfrom->currentPushBlock)
+	                pfrom->PushGetBlocks(pindexBest, GetOrphanRoot(mapOrphanBlocks[inv.hash]));
             } else if (nInv == nLastBlock) {
                 // In case we are on a very long side-chain, it is possible that we already have
                 // the last block in an inv bundle sent in response to getblocks. Try to detect
                 // this situation and push another getblocks to continue.
-                bestNode->PushGetBlocks(mapBlockIndex[inv.hash], uint256(0));
-                if (fDebug)
-                    printf("force request: %s\n", inv.ToString().c_str());
+				if (pfrom->currentPushBlock)
+				{
+	                pfrom->PushGetBlocks(mapBlockIndex[inv.hash], uint256(0));
+	                if (fDebug)
+	                    printf("force request: %s\n", inv.ToString().c_str());
+				}
             }
 
             // Track requests for our stuff
@@ -3813,7 +3839,8 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 		pfrom->nLastRecv = GetTime();
 		pfrom->nLastRecvMicro = GetTimeMicros();
 
-		lastRecvBlockTime = GetTime();
+		if (pfrom->currentPushBlock)
+			lastRecvBlockTime = GetTime();
         CBlock block;
         vRecv >> block;
 
@@ -4151,20 +4178,12 @@ extern void AdvertiseLocal(CNode *pnode);
 
 bool SendMessages(CNode* pto, bool fSendTrickle)
 {
-	// by Simone: if long time passed before the last block is received during initial sync, send one out again (one retry time of 6 seconds + 50%)
-	if (IsInitialBlockDownload() && (GetTime() - lastRecvBlockTime) > 9)
-	{
-		lastRecvBlockTime = GetTime();
-		CNode *bestNode = PickCurrentBestNode();
-		if (bestNode)
-		{
-       	bestNode->PushGetBlocks(pindexBest, uint256(0));
-		}
-	}
-
 	{
 		TRY_LOCK(cs_main, lockMain);
 		if (lockMain) {
+
+			// by Simone: pick currently best node
+			PickCurrentBestNode();
 
 		    // Don't send anything until we get their version message
 		    if (pto->nVersion == 0)
