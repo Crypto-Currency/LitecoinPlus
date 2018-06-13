@@ -4119,22 +4119,22 @@ bool ProcessMessages(CNode* pfrom)
         bool fRet = false;
         try
         {
-			loop
-			{
-		        {
-		            TRY_LOCK(cs_main, lockMain);
-					if (lockMain)
-					{
+//			loop
+//			{
+//		        {
+//		            TRY_LOCK(cs_main, lockMain);
+//					if (lockMain)
+//					{
 		            	fRet = ProcessMessage(pfrom, strCommand, vMsg);
-						break;
-					}
-					else
-					{
-						Sleep(20);
-						continue;
-					}
-		        }
-			}
+//						break;
+//					}
+//					else
+//					{
+//						Sleep(20);
+//						continue;
+//					}
+//		        }
+//			}
             if (fShutdown)
                 return true;
         }
