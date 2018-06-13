@@ -76,6 +76,7 @@ void Shutdown(void* parg)
         nTransactionsUpdated++;
         bitdb.Flush(false);
         StopNode();
+	    UnregisterNodeSignals(GetNodeSignals());
         bitdb.Flush(true);
         boost::filesystem::remove(GetPidFile());
         UnregisterWallet(pwalletMain);
@@ -544,6 +545,8 @@ bool AppInit2()
     }
 
     // ********************************************************* Step 6: network initialization
+
+    RegisterNodeSignals(GetNodeSignals());
 
     int nSocksVersion = GetArg("-socks", 5);
 

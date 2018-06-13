@@ -226,6 +226,23 @@ bool GetNodeStateStats(NodeId nodeid, CNodeStateStats &stats) {
     return true;
 }
 
+void RegisterNodeSignals(CNodeSignals& nodeSignals)
+{
+    //nodeSignals.GetHeight.connect(&GetHeight);
+    nodeSignals.ProcessMessages.connect(&ProcessMessages);
+    nodeSignals.SendMessages.connect(&SendMessages);
+    nodeSignals.InitializeNode.connect(&InitializeNode);
+    nodeSignals.FinalizeNode.connect(&FinalizeNode);
+}
+
+void UnregisterNodeSignals(CNodeSignals& nodeSignals)
+{
+    //nodeSignals.GetHeight.disconnect(&GetHeight);
+    nodeSignals.ProcessMessages.disconnect(&ProcessMessages);
+    nodeSignals.SendMessages.disconnect(&SendMessages);
+    nodeSignals.InitializeNode.disconnect(&InitializeNode);
+    nodeSignals.FinalizeNode.disconnect(&FinalizeNode);
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1306,12 +1323,26 @@ int GetNumBlocksOfPeers()
 
 bool IsInitialBlockDownload()
 {
+    // Once this function has returned false, it must remain false.
+    static bool latched = false;
+
+    if (latched)
+        return false;
+
     if (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate())
+        return true;
+	bool res = (pindexBest->GetBlockTime() < GetTime() - 5 * 60);
+	if (!res)
+	    latched = true;
+    return (res);
+
+
+ /*   if (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate())
         return true;
 
 	// by Simone: removed delta on previous bestIndex and decreased delta from 1 day to 5 minutes, enough !
 	bool res = (pindexBest->GetBlockTime() < GetTime() - 5 * 60);
-    return (res);
+    return (res);*/
 }
 
 void static InvalidChainFound(CBlockIndex* pindexNew)
@@ -2123,6 +2154,10 @@ bool CBlock::GetCoinAge(uint64& nCoinAge) const
     return true;
 }
 
+// by Simone: global instance of this, so that we can buffer up the connection and flush when we want !
+//CTxDB *syncTxdb = NULL;
+//CTxDB *syncTxdbR = NULL;
+
 bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
 {
     // Check for duplicate
@@ -2173,6 +2208,7 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
         setStakeSeen.insert(make_pair(pindexNew->prevoutStake, pindexNew->nStakeTime));
     pindexNew->phashBlock = &((*mi).first);
 
+	// by Simone: the old way
     // Write to disk block index
     CTxDB txdb;
     if (!txdb.TxnBegin())
@@ -2188,13 +2224,46 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
 
     txdb.Close();
 
-	// by Simone: commit every 50k blocks otherwise the transactional log will explode at around ~190k from a zero sync...
-	static unsigned int countCommits = 0;
+	// by Simone: EXPERIMENTAL way
+    // Write to disk block index
+	/*if (!syncTxdb)
+	{
+		syncTxdb = new CTxDB();
+		syncTxdbR = new CTxDB("r");
+	}
+    if (!syncTxdb->TxnBegin())
+        return false;
+    syncTxdb->WriteBlockIndex(CDiskBlockIndex(pindexNew));
+    if (!syncTxdb->TxnCommit())
+        return false;
+
+    // New best
+    if (pindexNew->bnChainTrust > bnBestChainTrust)
+        if (!SetBestChain(*syncTxdb, pindexNew))
+            return false;
+	*/
+
+	// by Simone: commit every 9k blocks otherwise the transactional log will explode at around ~190k from a zero sync...
+	static unsigned int countCommits = 9000;
 	if (countCommits == 0)
 	{
+		//if (syncTxdb)
+		//{
+		//    syncTxdb->Close();
+		//    syncTxdbR->Close();
+		//	syncTxdb = NULL;
+		//	syncTxdbR = NULL;
+		//}
+
 		bitdb.Flush(false);
 		countCommits = 9000;
 	}
+
+	else
+	{
+		//fprintf(stderr, "Block added but flush not ran\n");
+	}
+
 	countCommits--;
 
     if (pindexNew == pindexBest)
@@ -2451,13 +2520,14 @@ void Misbehaving(NodeId pnode, int howmuch)
     }
 }
 
+// by Simone: a nice logic to pick the current best node to download during initial sync
 CNode *PickCurrentBestNode()
 {
 	CNode		*retNode = NULL, *firstNode = NULL;
 	int64_t		minTime = 0;
 
 	// loop and find the best next one
-    BOOST_FOREACH(CNode* pnode, vNodes)
+	BOOST_FOREACH(CNode* pnode, vNodes)
 	{
 		pnode->currentPushBlock = false;
 		if (firstNode == NULL)
@@ -2475,11 +2545,16 @@ CNode *PickCurrentBestNode()
 		} 
 	}
 
-	// if all else fail, just se to the first node (if any, may still be NULL if some weird disconnection happens)
-	if (retNode == NULL)
-		retNode = firstNode;
+	// set the flags here and manage retries as well
 	if (retNode)
+	{
 		retNode->currentPushBlock = true;
+		if (IsInitialBlockDownload() && (GetTime() - lastRecvBlockTime) > 9)
+		{
+			lastRecvBlockTime = GetTime();
+    		retNode->PushGetBlocks(pindexBest, uint256(0));
+		}
+	}
 	return retNode;
 }
 
@@ -2565,17 +2640,19 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock, bool lessAggressive)
 
         // Ask this guy to fill in what we're missing
         if (pfrom)
-        {
-			CNode *bestNode = PickCurrentBestNode();
-			bestNode->PushGetBlocks(pindexBest, GetOrphanRoot(pblock2));
+		{
+			if (pfrom->currentPushBlock)
+		    {
+				pfrom->PushGetBlocks(pindexBest, GetOrphanRoot(pblock2));
 
-            // ppcoin: getblocks may not obtain the ancestor block rejected
-            // earlier by duplicate-stake check so we ask for it again directly
-            if (!IsInitialBlockDownload())
-			{
-                bestNode->AskFor(CInv(MSG_BLOCK, WantedByOrphan(pblock2)));
-			}
-        }
+		        // ppcoin: getblocks may not obtain the ancestor block rejected
+		        // earlier by duplicate-stake check so we ask for it again directly
+		        if (!IsInitialBlockDownload())
+				{
+		            pfrom->AskFor(CInv(MSG_BLOCK, WantedByOrphan(pblock2)));
+				}
+		    }
+		}
         return true;
     }
 
@@ -3432,31 +3509,43 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             if (addr.nTime > nSince && !pfrom->fGetAddr && vAddr.size() <= 10 && addr.IsRoutable())
             {
                 // Relay to a limited number of other nodes
-                {
-                    LOCK(cs_vNodes);
-                    // Use deterministic randomness to send to the same nodes for 24 hours
-                    // at a time so the setAddrKnowns of the chosen nodes prevent repeats
-                    static uint256 hashSalt;
-                    if (hashSalt == 0)
-                        hashSalt = GetRandHash();
-                    uint64 hashAddr = addr.GetHash();
-                    uint256 hashRand = hashSalt ^ (hashAddr<<32) ^ ((GetTime()+hashAddr)/(24*60*60));
-                    hashRand = Hash(BEGIN(hashRand), END(hashRand));
-                    multimap<uint256, CNode*> mapMix;
-                    BOOST_FOREACH(CNode* pnode, vNodes)
-                    {
-                        if (pnode->nVersion < CADDR_TIME_VERSION)
-                            continue;
-                        unsigned int nPointer;
-                        memcpy(&nPointer, &pnode, sizeof(nPointer));
-                        uint256 hashKey = hashRand ^ nPointer;
-                        hashKey = Hash(BEGIN(hashKey), END(hashKey));
-                        mapMix.insert(make_pair(hashKey, pnode));
-                    }
-                    int nRelayNodes = fReachable ? 2 : 1; // limited relaying of addresses outside our network(s)
-                    for (multimap<uint256, CNode*>::iterator mi = mapMix.begin(); mi != mapMix.end() && nRelayNodes-- > 0; ++mi)
-                        ((*mi).second)->PushAddress(addr);
-                }
+				loop
+				{
+		            {
+		                TRY_LOCK(cs_vNodes, lockNodes);
+						if (lockNodes)
+						{
+				            // Use deterministic randomness to send to the same nodes for 24 hours
+				            // at a time so the setAddrKnowns of the chosen nodes prevent repeats
+				            static uint256 hashSalt;
+				            if (hashSalt == 0)
+				                hashSalt = GetRandHash();
+				            uint64 hashAddr = addr.GetHash();
+				            uint256 hashRand = hashSalt ^ (hashAddr<<32) ^ ((GetTime()+hashAddr)/(24*60*60));
+				            hashRand = Hash(BEGIN(hashRand), END(hashRand));
+				            multimap<uint256, CNode*> mapMix;
+				            BOOST_FOREACH(CNode* pnode, vNodes)
+				            {
+				                if (pnode->nVersion < CADDR_TIME_VERSION)
+				                    continue;
+				                unsigned int nPointer;
+				                memcpy(&nPointer, &pnode, sizeof(nPointer));
+				                uint256 hashKey = hashRand ^ nPointer;
+				                hashKey = Hash(BEGIN(hashKey), END(hashKey));
+				                mapMix.insert(make_pair(hashKey, pnode));
+				            }
+				            int nRelayNodes = fReachable ? 2 : 1; // limited relaying of addresses outside our network(s)
+				            for (multimap<uint256, CNode*>::iterator mi = mapMix.begin(); mi != mapMix.end() && nRelayNodes-- > 0; ++mi)
+				                ((*mi).second)->PushAddress(addr);
+							break;
+						}
+						else
+						{
+							Sleep(50);
+							continue;
+						}
+		            }
+				}
             }
             // Do not store addresses outside our network
             if (fReachable)
@@ -3501,18 +3590,21 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             if (fDebug)
                 printf("  got inventory: %s  %s\n", inv.ToString().c_str(), fAlreadyHave ? "have" : "new");
 
-			CNode *bestNode = PickCurrentBestNode();
             if (!fAlreadyHave)
                 pfrom->AskFor(inv);
             else if (inv.type == MSG_BLOCK && mapOrphanBlocks.count(inv.hash)) {
-                bestNode->PushGetBlocks(pindexBest, GetOrphanRoot(mapOrphanBlocks[inv.hash]));
+				if (pfrom->currentPushBlock)
+	                pfrom->PushGetBlocks(pindexBest, GetOrphanRoot(mapOrphanBlocks[inv.hash]));
             } else if (nInv == nLastBlock) {
                 // In case we are on a very long side-chain, it is possible that we already have
                 // the last block in an inv bundle sent in response to getblocks. Try to detect
                 // this situation and push another getblocks to continue.
-                bestNode->PushGetBlocks(mapBlockIndex[inv.hash], uint256(0));
-                if (fDebug)
-                    printf("force request: %s\n", inv.ToString().c_str());
+				if (pfrom->currentPushBlock)
+				{
+	                pfrom->PushGetBlocks(mapBlockIndex[inv.hash], uint256(0));
+	                if (fDebug)
+	                    printf("force request: %s\n", inv.ToString().c_str());
+				}
             }
 
             // Track requests for our stuff
@@ -3758,7 +3850,8 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 		pfrom->nLastRecv = GetTime();
 		pfrom->nLastRecvMicro = GetTimeMicros();
 
-		lastRecvBlockTime = GetTime();
+		if (pfrom->currentPushBlock)
+			lastRecvBlockTime = GetTime();
         CBlock block;
         vRecv >> block;
 
@@ -4052,10 +4145,22 @@ bool ProcessMessages(CNode* pfrom)
         bool fRet = false;
         try
         {
-            {
-                LOCK(cs_main);
-                fRet = ProcessMessage(pfrom, strCommand, vMsg);
-            }
+			loop
+			{
+		        {
+		            TRY_LOCK(cs_main, lockMain);
+					if (lockMain)
+					{
+		            	fRet = ProcessMessage(pfrom, strCommand, vMsg);
+						break;
+					}
+					else
+					{
+						Sleep(20);
+						continue;
+					}
+		        }
+			}
             if (fShutdown)
                 return true;
         }
@@ -4096,20 +4201,12 @@ extern void AdvertiseLocal(CNode *pnode);
 
 bool SendMessages(CNode* pto, bool fSendTrickle)
 {
-	// by Simone: if long time passed before the last block is received during initial sync, send one out again (one retry time of 6 seconds + 50%)
-	if (IsInitialBlockDownload() && (GetTime() - lastRecvBlockTime) > 9)
-	{
-		lastRecvBlockTime = GetTime();
-		CNode *bestNode = PickCurrentBestNode();
-		if (bestNode)
-		{
-        	bestNode->PushGetBlocks(pindexBest, uint256(0));
-		}
-	}
-
 	{
 		TRY_LOCK(cs_main, lockMain);
 		if (lockMain) {
+
+			// by Simone: pick currently best node
+			PickCurrentBestNode();
 
 		    // Don't send anything until we get their version message
 		    if (pto->nVersion == 0)
@@ -4276,7 +4373,11 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
 		    //
 		    vector<CInv> vGetData;
 		    int64 nNow = GetTime() * 1000000;
-		    CTxDB txdb("r");
+
+			// by Simone: don't open all the time this connection, just use existing one, recycled by the get block when a flush is needed
+
+			CTxDB txdb("r");
+
 		    while (!pto->mapAskFor.empty() && (*pto->mapAskFor.begin()).first <= nNow)
 		    {
 		        const CInv& inv = (*pto->mapAskFor.begin()).second;
