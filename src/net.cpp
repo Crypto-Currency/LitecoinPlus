@@ -1937,7 +1937,7 @@ void ThreadMessageHandler2(void* parg)
             {
                 TRY_LOCK(pnode->cs_vRecv, lockRecv);
                 if (lockRecv)
-                    ProcessMessages(pnode);
+                    GetNodeSignals().ProcessMessages(pnode);
             }
             if (fShutdown)
                 return;
@@ -1948,7 +1948,7 @@ void ThreadMessageHandler2(void* parg)
             {
                 TRY_LOCK(pnode->cs_vSend, lockSend);
                 if (lockSend)
-                    SendMessages(pnode, pnode == pnodeTrickle);
+					GetNodeSignals().SendMessages(pnode, pnode == pnodeTrickle);
             }
             if (fShutdown)
                 return;

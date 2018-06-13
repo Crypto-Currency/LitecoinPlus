@@ -229,8 +229,8 @@ bool GetNodeStateStats(NodeId nodeid, CNodeStateStats &stats) {
 void RegisterNodeSignals(CNodeSignals& nodeSignals)
 {
     //nodeSignals.GetHeight.connect(&GetHeight);
-    //nodeSignals.ProcessMessages.connect(&ProcessMessages);
-    //nodeSignals.SendMessages.connect(&SendMessages);
+    nodeSignals.ProcessMessages.connect(&ProcessMessages);
+    nodeSignals.SendMessages.connect(&SendMessages);
     nodeSignals.InitializeNode.connect(&InitializeNode);
     nodeSignals.FinalizeNode.connect(&FinalizeNode);
 }
@@ -238,8 +238,8 @@ void RegisterNodeSignals(CNodeSignals& nodeSignals)
 void UnregisterNodeSignals(CNodeSignals& nodeSignals)
 {
     //nodeSignals.GetHeight.disconnect(&GetHeight);
-    //nodeSignals.ProcessMessages.disconnect(&ProcessMessages);
-    //nodeSignals.SendMessages.disconnect(&SendMessages);
+    nodeSignals.ProcessMessages.disconnect(&ProcessMessages);
+    nodeSignals.SendMessages.disconnect(&SendMessages);
     nodeSignals.InitializeNode.disconnect(&InitializeNode);
     nodeSignals.FinalizeNode.disconnect(&FinalizeNode);
 }
