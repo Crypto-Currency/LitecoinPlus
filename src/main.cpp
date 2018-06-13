@@ -226,6 +226,23 @@ bool GetNodeStateStats(NodeId nodeid, CNodeStateStats &stats) {
     return true;
 }
 
+void RegisterNodeSignals(CNodeSignals& nodeSignals)
+{
+    //nodeSignals.GetHeight.connect(&GetHeight);
+    //nodeSignals.ProcessMessages.connect(&ProcessMessages);
+    //nodeSignals.SendMessages.connect(&SendMessages);
+    nodeSignals.InitializeNode.connect(&InitializeNode);
+    nodeSignals.FinalizeNode.connect(&FinalizeNode);
+}
+
+void UnregisterNodeSignals(CNodeSignals& nodeSignals)
+{
+    //nodeSignals.GetHeight.disconnect(&GetHeight);
+    //nodeSignals.ProcessMessages.disconnect(&ProcessMessages);
+    //nodeSignals.SendMessages.disconnect(&SendMessages);
+    nodeSignals.InitializeNode.disconnect(&InitializeNode);
+    nodeSignals.FinalizeNode.disconnect(&FinalizeNode);
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2123,6 +2140,10 @@ bool CBlock::GetCoinAge(uint64& nCoinAge) const
     return true;
 }
 
+// by Simone: global instance of this, so that we can buffer up the connection and flush when we want !
+//CTxDB *syncTxdb = NULL;
+//CTxDB *syncTxdbR = NULL;
+
 bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
 {
     // Check for duplicate
@@ -2173,6 +2194,7 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
         setStakeSeen.insert(make_pair(pindexNew->prevoutStake, pindexNew->nStakeTime));
     pindexNew->phashBlock = &((*mi).first);
 
+	// by Simone: the old way
     // Write to disk block index
     CTxDB txdb;
     if (!txdb.TxnBegin())
@@ -2188,13 +2210,46 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
 
     txdb.Close();
 
-	// by Simone: commit every 50k blocks otherwise the transactional log will explode at around ~190k from a zero sync...
-	static unsigned int countCommits = 0;
+	// by Simone: EXPERIMENTAL way
+    // Write to disk block index
+	/*if (!syncTxdb)
+	{
+		syncTxdb = new CTxDB();
+		syncTxdbR = new CTxDB("r");
+	}
+    if (!syncTxdb->TxnBegin())
+        return false;
+    syncTxdb->WriteBlockIndex(CDiskBlockIndex(pindexNew));
+    if (!syncTxdb->TxnCommit())
+        return false;
+
+    // New best
+    if (pindexNew->bnChainTrust > bnBestChainTrust)
+        if (!SetBestChain(*syncTxdb, pindexNew))
+            return false;
+	*/
+
+	// by Simone: commit every 9k blocks otherwise the transactional log will explode at around ~190k from a zero sync...
+	static unsigned int countCommits = 9000;
 	if (countCommits == 0)
 	{
+		//if (syncTxdb)
+		//{
+		//    syncTxdb->Close();
+		//    syncTxdbR->Close();
+		//	syncTxdb = NULL;
+		//	syncTxdbR = NULL;
+		//}
+
 		bitdb.Flush(false);
 		countCommits = 9000;
 	}
+
+	else
+	{
+		//fprintf(stderr, "Block added but flush not ran\n");
+	}
+
 	countCommits--;
 
     if (pindexNew == pindexBest)
@@ -4103,7 +4158,7 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
 		CNode *bestNode = PickCurrentBestNode();
 		if (bestNode)
 		{
-        	bestNode->PushGetBlocks(pindexBest, uint256(0));
+       	bestNode->PushGetBlocks(pindexBest, uint256(0));
 		}
 	}
 
@@ -4276,7 +4331,11 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
 		    //
 		    vector<CInv> vGetData;
 		    int64 nNow = GetTime() * 1000000;
-		    CTxDB txdb("r");
+
+			// by Simone: don't open all the time this connection, just use existing one, recycled by the get block when a flush is needed
+
+			CTxDB txdb("r");
+
 		    while (!pto->mapAskFor.empty() && (*pto->mapAskFor.begin()).first <= nNow)
 		    {
 		        const CInv& inv = (*pto->mapAskFor.begin()).second;

@@ -82,6 +82,10 @@ CCriticalSection cs_nLastNodeId;
 
 static CSemaphore *semOutbound = NULL;
 
+// Signals for message handling
+static CNodeSignals g_signals;
+CNodeSignals& GetNodeSignals() { return g_signals; }
+
 void AddOneShot(string strDest)
 {
     LOCK(cs_vOneShots);
@@ -92,9 +96,6 @@ unsigned short GetListenPort()
 {
     return (unsigned short)(GetArg("-port", GetDefaultPort()));
 }
-
-extern void InitializeNode(NodeId nodeid, const CNode *pnode);
-extern void FinalizeNode(NodeId nodeid);
 
 CNode::CNode(SOCKET hSocketIn, CAddress addrIn, std::string addrNameIn, bool fInboundIn) :
 	vSend(SER_NETWORK, MIN_PROTO_VERSION),
@@ -148,21 +149,22 @@ CNode::CNode(SOCKET hSocketIn, CAddress addrIn, std::string addrNameIn, bool fIn
 	    id = nLastNodeId++;
 	}
 
-	InitializeNode(id, this);
-
     // Be shy and don't send version until we hear
     if (!fInbound)
         PushVersion();
+
+	GetNodeSignals().InitializeNode(GetId(), this);
 }
 
 CNode::~CNode()
 {
-	FinalizeNode(id);
     if (hSocket != INVALID_SOCKET)
     {
         closesocket(hSocket);
         hSocket = INVALID_SOCKET;
     }
+
+    GetNodeSignals().FinalizeNode(GetId());
 }
 
 unsigned int lastSendBlock;

@@ -10,6 +10,8 @@
 #include <boost/foreach.hpp>
 #include <openssl/rand.h>
 
+#include <boost/signals2/signal.hpp>
+
 #ifndef WIN32
 #include <arpa/inet.h>
 #endif
@@ -56,6 +58,34 @@ unsigned short GetListenPort();
 bool BindListenPort(const CService &bindAddr, std::string& strError=REF(std::string()));
 void StartNode(void* parg);
 bool StopNode();
+
+struct CombinerAll
+{
+    typedef bool result_type;
+
+    template<typename I>
+    bool operator()(I first, I last) const
+    {
+        while (first != last) {
+            if (!(*first)) return false;
+            ++first;
+        }
+        return true;
+    }
+};
+
+// Signals for message handling
+struct CNodeSignals
+{
+    boost::signals2::signal<int ()> GetHeight;
+    boost::signals2::signal<bool (CNode*), CombinerAll> ProcessMessages;
+    boost::signals2::signal<bool (CNode*), CombinerAll> SendMessages;
+    boost::signals2::signal<void (NodeId, const CNode*)> InitializeNode;
+    boost::signals2::signal<void (NodeId)> FinalizeNode;
+};
+
+
+CNodeSignals& GetNodeSignals();
 
 enum
 {
