@@ -1252,15 +1252,15 @@ void ThreadSocketHandler2(void* parg)
                     pnode->fDisconnect = true;
                 }
 
-				// by Simone: SEND timeout = 90 minutes...... it is extremely excessive, as the nodes always ping every 30 seconds, so setting to 1 minute is enough
-                else if (GetTime() - pnode->nLastSend > 1 * 60 && GetTime() - pnode->nLastSendEmpty > 1 * 60)
+				// by Simone: SEND timeout = 90 minutes...... it is extremely excessive, as the nodes always ping every 30 seconds, so setting to 3 minutes is enough
+                else if (GetTime() - pnode->nLastSend > 3 * 60 && GetTime() - pnode->nLastSendEmpty > 3 * 60)
                 {
                     printf("socket not sending\n");
                     pnode->fDisconnect = true;
                 }
 
-				// by Simone: timeout = 90 minutes...... it is extremely excessive, as the nodes always have a little bit to send here, 1 minute is enough (2 pings)
-                else if (GetTime() - pnode->nLastRecv > 1 * 60)
+				// by Simone: timeout = 90 minutes...... it is extremely excessive, as the nodes always have a little bit to send here, 3 minutes is enough (2 pings)
+                else if (GetTime() - pnode->nLastRecv > 3 * 60)
                 {
                     printf("socket inactivity timeout\n");
                     pnode->fDisconnect = true;

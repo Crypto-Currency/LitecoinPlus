@@ -2513,50 +2513,35 @@ CNode *PickCurrentBestNode()
 	int64_t		minTime = 0;
 
 	// loop and find the best next one
-	loop
+	BOOST_FOREACH(CNode* pnode, vNodes)
 	{
+		pnode->currentPushBlock = false;
+		if (firstNode == NULL)
+			firstNode = pnode;
+
+		// don't even bother if they don't have enough blocks
+		if ((pnode->nStartingHeight <= nBestHeight) || (pnode->nPingUsecTime == 0))
+			continue;
+
+		// blocks are enough, let's check that damn ping
+		if (((pnode->nPingUsecTime < minTime) || (minTime == 0)) && (pnode->nMinPingUsecTime != 999000))
 		{
-			// use TRY_LOCK, as it might be used in a GUI, worst case they will retry
-		    TRY_LOCK(cs_vNodes, lockStatus);
-		    if (lockStatus)
-		    {
-				BOOST_FOREACH(CNode* pnode, vNodes)
-				{
-					pnode->currentPushBlock = false;
-					if (firstNode == NULL)
-						firstNode = pnode;
+			minTime = pnode->nPingUsecTime;
+			retNode = pnode;
+		} 
+	}
 
-					// don't even bother if they don't have enough blocks
-					if ((pnode->nStartingHeight <= nBestHeight) || (pnode->nPingUsecTime == 0))
-						continue;
-
-					// blocks are enough, let's check that damn ping
-					if (((pnode->nPingUsecTime < minTime) || (minTime == 0)) && (pnode->nMinPingUsecTime != 999000))
-					{
-						minTime = pnode->nPingUsecTime;
-						retNode = pnode;
-					} 
-				}
-
-				// set the flags here and manage retries as well
-				if (retNode)
-				{
-					retNode->currentPushBlock = true;
-					if (IsInitialBlockDownload() && (GetTime() - lastRecvBlockTime) > 9)
-					{
-						lastRecvBlockTime = GetTime();
-			    		retNode->PushGetBlocks(pindexBest, uint256(0));
-					}
-				}
-				return retNode;
-			}
-			else
-			{
-				Sleep(50);
-				continue;
-			}
+	// set the flags here and manage retries as well
+	if (retNode)
+	{
+		retNode->currentPushBlock = true;
+		if (IsInitialBlockDownload() && (GetTime() - lastRecvBlockTime) > 9)
+		{
+			lastRecvBlockTime = GetTime();
+    		retNode->PushGetBlocks(pindexBest, uint256(0));
 		}
 	}
+	return retNode;
 }
 
 bool ProcessBlock(CNode* pfrom, CBlock* pblock, bool lessAggressive)
@@ -4134,10 +4119,22 @@ bool ProcessMessages(CNode* pfrom)
         bool fRet = false;
         try
         {
-            {
-                LOCK(cs_main);
-                fRet = ProcessMessage(pfrom, strCommand, vMsg);
-            }
+			loop
+			{
+		        {
+		            TRY_LOCK(cs_main, lockMain);
+					if (lockMain)
+					{
+		            	fRet = ProcessMessage(pfrom, strCommand, vMsg);
+						break;
+					}
+					else
+					{
+						Sleep(20);
+						continue;
+					}
+		        }
+			}
             if (fShutdown)
                 return true;
         }
