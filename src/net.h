@@ -425,19 +425,43 @@ public:
 
     void AddInventoryKnown(const CInv& inv)
     {
-        {
-            LOCK(cs_inventory);
-            setInventoryKnown.insert(inv);
-        }
+		loop
+		{
+		    {
+		        TRY_LOCK(cs_inventory, lockInv);
+				if (lockInv)
+				{
+		        	setInventoryKnown.insert(inv);
+					break;
+				}
+				else
+				{
+					Sleep(20);
+					continue;
+				}
+		    }
+		}
     }
 
     void PushInventory(const CInv& inv)
     {
-        {
-            LOCK(cs_inventory);
-            if (!setInventoryKnown.count(inv))
-                vInventoryToSend.push_back(inv);
-        }
+		loop
+		{
+		    {
+		        TRY_LOCK(cs_inventory, lockInv);
+				if (lockInv)
+				{
+				    if (!setInventoryKnown.count(inv))
+				        vInventoryToSend.push_back(inv);
+					break;
+				}
+				else
+				{
+					Sleep(20);
+					continue;
+				}
+		    }
+		}
     }
 
     void AskFor(const CInv& inv)
