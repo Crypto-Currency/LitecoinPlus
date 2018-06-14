@@ -4316,55 +4316,67 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
 		    //
 		    vector<CInv> vInv;
 		    vector<CInv> vInvWait;
-		    {
-		        LOCK(pto->cs_inventory);
-		        vInv.reserve(pto->vInventoryToSend.size());
-		        vInvWait.reserve(pto->vInventoryToSend.size());
-		        BOOST_FOREACH(const CInv& inv, pto->vInventoryToSend)
-		        {
-		            if (pto->setInventoryKnown.count(inv))
-		                continue;
+			loop
+			{
+				{
+				    TRY_LOCK(pto->cs_inventory, lockInv);
+					if (lockInv)
+					{
+						vInv.reserve(pto->vInventoryToSend.size());
+						vInvWait.reserve(pto->vInventoryToSend.size());
+						BOOST_FOREACH(const CInv& inv, pto->vInventoryToSend)
+						{
+						    if (pto->setInventoryKnown.count(inv))
+						        continue;
 
-		            // trickle out tx inv to protect privacy
-		            if (inv.type == MSG_TX && !fSendTrickle)
-		            {
-		                // 1/4 of tx invs blast to all immediately
-		                static uint256 hashSalt;
-		                if (hashSalt == 0)
-		                    hashSalt = GetRandHash();
-		                uint256 hashRand = inv.hash ^ hashSalt;
-		                hashRand = Hash(BEGIN(hashRand), END(hashRand));
-		                bool fTrickleWait = ((hashRand & 3) != 0);
+						    // trickle out tx inv to protect privacy
+						    if (inv.type == MSG_TX && !fSendTrickle)
+						    {
+						        // 1/4 of tx invs blast to all immediately
+						        static uint256 hashSalt;
+						        if (hashSalt == 0)
+						            hashSalt = GetRandHash();
+						        uint256 hashRand = inv.hash ^ hashSalt;
+						        hashRand = Hash(BEGIN(hashRand), END(hashRand));
+						        bool fTrickleWait = ((hashRand & 3) != 0);
 
-		                // always trickle our own transactions
-		                if (!fTrickleWait)
-		                {
-		                    CWalletTx wtx;
-		                    if (GetTransaction(inv.hash, wtx))
-		                        if (wtx.fFromMe)
-		                            fTrickleWait = true;
-		                }
+						        // always trickle our own transactions
+						        if (!fTrickleWait)
+						        {
+						            CWalletTx wtx;
+						            if (GetTransaction(inv.hash, wtx))
+						                if (wtx.fFromMe)
+						                    fTrickleWait = true;
+						        }
 
-		                if (fTrickleWait)
-		                {
-		                    vInvWait.push_back(inv);
-		                    continue;
-		                }
-		            }
+						        if (fTrickleWait)
+						        {
+						            vInvWait.push_back(inv);
+						            continue;
+						        }
+						    }
 
-		            // returns true if wasn't already contained in the set
-		            if (pto->setInventoryKnown.insert(inv).second)
-		            {
-		                vInv.push_back(inv);
-		                if (vInv.size() >= 1000)
-		                {
-		                    pto->PushMessage("inv", vInv);
-		                    vInv.clear();
-		                }
-		            }
-		        }
-		        pto->vInventoryToSend = vInvWait;
-		    }
+						    // returns true if wasn't already contained in the set
+						    if (pto->setInventoryKnown.insert(inv).second)
+						    {
+						        vInv.push_back(inv);
+						        if (vInv.size() >= 1000)
+						        {
+						            pto->PushMessage("inv", vInv);
+						            vInv.clear();
+						        }
+						    }
+						}
+						pto->vInventoryToSend = vInvWait;
+						break;
+					}
+					else
+					{
+						Sleep(20);
+						continue;
+					}
+				}
+			}
 		    if (!vInv.empty())
 		        pto->PushMessage("inv", vInv);
 
