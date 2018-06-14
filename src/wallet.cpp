@@ -801,14 +801,14 @@ int CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate, i
 		char message[256];
         while (pindex)
         {
-#ifdef QT_GUI
 			progress = (int)(((float)ccc / (float)numBlocks) * 100);
 			if ((progress != oldProgress) && (numBlocks != 0)) {
 				sprintf(message, "Scanning transactions %d%%...", progress);
+#ifdef QT_GUI
 				updateBitcoinGUISplashMessage(message);
+#endif
 				oldProgress = progress;
 			}
-#endif
             CBlock block;
             block.ReadFromDisk(pindex, true);
             BOOST_FOREACH(CTransaction& tx, block.vtx)
