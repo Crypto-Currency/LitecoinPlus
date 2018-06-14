@@ -823,11 +823,22 @@ public:
 inline void RelayInventory(const CInv& inv)
 {
     // Put on lists to offer to the other nodes
-    {
-        LOCK(cs_vNodes);
-        BOOST_FOREACH(CNode* pnode, vNodes)
-            pnode->PushInventory(inv);
-    }
+	loop
+	{
+		{
+		    TRY_LOCK(cs_vNodes, lockNodes);
+			if (lockNodes)
+			{
+				BOOST_FOREACH(CNode* pnode, vNodes)
+				    pnode->PushInventory(inv);
+				break;
+			}
+			else
+			{
+				Sleep(20);
+			}
+		}
+	}
 }
 
 template<typename T>

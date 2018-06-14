@@ -2447,15 +2447,24 @@ bool CBlock::AcceptBlock(bool lessAggressive)
 		int nBlockEstimate = Checkpoints::GetTotalBlocksEstimate();
 		if (hashBestChain == hash)
 		{
-            {
-				// by Simone: use TRY LOCK, not a LOCK....
-		        TRY_LOCK(cs_vNodes, lockStatus);
-		        if (lockStatus)
+			loop
+			{
 		        {
-				    BOOST_FOREACH(CNode* pnode, vNodes)
+					// by Simone: use TRY LOCK, not a LOCK....
+				    TRY_LOCK(cs_vNodes, lockStatus);
+				    if (lockStatus)
+				    {
+						BOOST_FOREACH(CNode* pnode, vNodes)
+						{
+						    if (nBestHeight > (pnode->nStartingHeight != -1 ? pnode->nStartingHeight - 2000 : nBlockEstimate))
+						        pnode->PushInventory(CInv(MSG_BLOCK, hash));
+						}
+						break;
+					}
+					else
 					{
-				        if (nBestHeight > (pnode->nStartingHeight != -1 ? pnode->nStartingHeight - 2000 : nBlockEstimate))
-				            pnode->PushInventory(CInv(MSG_BLOCK, hash));
+						Sleep(20);
+						continue;
 					}
 				}
 			}
