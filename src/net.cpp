@@ -1731,7 +1731,10 @@ void ThreadOpenConnections2(void* parg)
         }
 
         if (addrConnect.IsValid())
-            OpenNetworkConnection(addrConnect, &grant);
+
+			// by Simone: if fail, let's break this loop and run the external one once again.
+            if (!OpenNetworkConnection(addrConnect, &grant))
+				break;
 		printf("OpenNetworkConnection() called by ThreadOpenConnections2() at the end of function\n");
     }
 }
