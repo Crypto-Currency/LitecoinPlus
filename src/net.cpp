@@ -303,10 +303,23 @@ bool RecvLine(SOCKET hSocket, string& strLine)
 
 int GetnScore(const CService& addr)
 {
-    LOCK(cs_mapLocalHost);
-    if (mapLocalHost.count(addr) == LOCAL_NONE)
-        return 0;
-    return mapLocalHost[addr].nScore;
+    loop
+	{
+		{
+			TRY_LOCK(cs_mapLocalHost, lockMLH);
+			if (lockMLH)
+			{
+				if (mapLocalHost.count(addr) == LOCAL_NONE)
+					return 0;
+				return mapLocalHost[addr].nScore;
+			}
+			else
+			{
+				Sleep(20);
+				continue;
+			}
+		}
+	}
 }
 
 // Is our peer's addrLocal potentially useful as an external IP source?
@@ -1729,12 +1742,8 @@ void ThreadOpenConnections2(void* parg)
             addrConnect = addr;
             break;
         }
-
         if (addrConnect.IsValid())
-
-			// by Simone: if fail, let's break this loop and run the external one once again.
-            if (!OpenNetworkConnection(addrConnect, &grant))
-				break;
+			OpenNetworkConnection(addrConnect, &grant);
 		printf("OpenNetworkConnection() called by ThreadOpenConnections2() at the end of function\n");
     }
 }
