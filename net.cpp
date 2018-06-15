@@ -1704,21 +1704,21 @@ void ThreadOpenConnections2(void* parg)
         int nOutbound = 0;
         set<vector<unsigned char> > setConnected;
 	    {
-	        //TRY_LOCK(cs_vNodes, lockNodes);
-			//if (lockNodes)
-			//{
+	        TRY_LOCK(cs_vNodes, lockNodes);
+			if (lockNodes)
+			{
 			    BOOST_FOREACH(CNode* pnode, vNodes) {
 			        if (!pnode->fInbound) {
 			            setConnected.insert(pnode->addr.GetGroup());
 			            nOutbound++;
 			        }
 			    }
-				//break;
-			//}
-			//else
-			//{
-			//	continue;
-			//}
+				break;
+			}
+			else
+			{
+				continue;
+			}
 	    }
 		printf("TOC2(): 4\n");
 
