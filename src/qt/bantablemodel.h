@@ -7,6 +7,9 @@
 
 #include "net.h"
 
+// remove the malefic compiling warning coming from the QT libraries
+#undef printf
+
 #include <QAbstractTableModel>
 #include <QStringList>
 
