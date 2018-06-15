@@ -1541,7 +1541,7 @@ void ThreadDumpAddress2(void* parg)
     vnThreadsRunning[THREAD_DUMPADDRESS]++;
     while (!fShutdown)
     {
-        //DumpAddresses();
+        DumpAddresses();
         vnThreadsRunning[THREAD_DUMPADDRESS]--;
         Sleep(100000);
         vnThreadsRunning[THREAD_DUMPADDRESS]++;
@@ -1703,27 +1703,23 @@ void ThreadOpenConnections2(void* parg)
         // Do this here so we don't have to critsect vNodes inside mapAddresses critsect.
         int nOutbound = 0;
         set<vector<unsigned char> > setConnected;
-		loop
-		{
-		    {
-		        TRY_LOCK(cs_vNodes, lockNodes);
-				if (lockNodes)
-				{
-				    BOOST_FOREACH(CNode* pnode, vNodes) {
-				        if (!pnode->fInbound) {
-				            setConnected.insert(pnode->addr.GetGroup());
-				            nOutbound++;
-				        }
-				    }
-					break;
-				}
-				else
-				{
-					Sleep(20);
-					continue;
-				}
-		    }
-		}
+	    {
+	        //TRY_LOCK(cs_vNodes, lockNodes);
+			//if (lockNodes)
+			//{
+			    BOOST_FOREACH(CNode* pnode, vNodes) {
+			        if (!pnode->fInbound) {
+			            setConnected.insert(pnode->addr.GetGroup());
+			            nOutbound++;
+			        }
+			    }
+				//break;
+			//}
+			//else
+			//{
+			//	continue;
+			//}
+	    }
 		printf("TOC2(): 4\n");
 
         int64 nANow = GetAdjustedTime();
