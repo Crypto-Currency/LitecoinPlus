@@ -1655,9 +1655,7 @@ void ThreadOpenConnections2(void* parg)
     int64 nStart = GetTime();
     loop
     {
-		printf("TOC2(): 0\n");
         ProcessOneShot();
-		printf("TOC2(): 1\n");
 
         vnThreadsRunning[THREAD_OPENCONNECTIONS]--;
         Sleep(500);
@@ -1668,7 +1666,6 @@ void ThreadOpenConnections2(void* parg)
 
         vnThreadsRunning[THREAD_OPENCONNECTIONS]--;
         CSemaphoreGrant grant(*semOutbound);
-		printf("TOC2(): 2\n");
         vnThreadsRunning[THREAD_OPENCONNECTIONS]++;
         if (fShutdown)
             return;
@@ -1692,7 +1689,6 @@ void ThreadOpenConnections2(void* parg)
             }
             addrman.Add(vAdd, CNetAddr("127.0.0.1"));
         }
-		printf("TOC2(): 3\n");
 
         //
         // Choose an address to connect to based on most recently seen
@@ -1703,24 +1699,12 @@ void ThreadOpenConnections2(void* parg)
         // Do this here so we don't have to critsect vNodes inside mapAddresses critsect.
         int nOutbound = 0;
         set<vector<unsigned char> > setConnected;
-	    {
-	        //TRY_LOCK(cs_vNodes, lockNodes);
-			//if (lockNodes)
-			//{
-			    BOOST_FOREACH(CNode* pnode, vNodes) {
-			        if (!pnode->fInbound) {
-			            setConnected.insert(pnode->addr.GetGroup());
-			            nOutbound++;
-			        }
-			    }
-				//break;
-			//}
-			//else
-			//{
-			//	continue;
-			//}
+	    BOOST_FOREACH(CNode* pnode, vNodes) {
+	        if (!pnode->fInbound) {
+	            setConnected.insert(pnode->addr.GetGroup());
+	            nOutbound++;
+	        }
 	    }
-		printf("TOC2(): 4\n");
 
         int64 nANow = GetAdjustedTime();
 
@@ -1729,13 +1713,11 @@ void ThreadOpenConnections2(void* parg)
         {
             // use an nUnkBias between 10 (no outgoing connections) and 90 (8 outgoing connections)
             CAddress addr = addrman.Select(10 + min(nOutbound,8)*10);
-			printf("TOC2(): 5\n");
 
             // if we selected an invalid address, restart
             if (!addr.IsValid() || setConnected.count(addr.GetGroup()) || IsLocal(addr))
                 break;
 
-			printf("TOC2(): 6\n");
             // If we didn't find an appropriate destination after trying 100 addresses fetched from addrman,
             // stop this loop, and let the outer loop run again (which sleeps, adds seed nodes, recalculates
             // already-connected network ranges, ...) before trying new addrman addresses.
@@ -1745,17 +1727,14 @@ void ThreadOpenConnections2(void* parg)
 
             if (IsLimited(addr))
                 continue;
-			printf("TOC2(): 7\n");
 
             // only consider very recently tried nodes after 30 failed attempts
             if (nANow - addr.nLastTry < 600 && nTries < 30)
                 continue;
-			printf("TOC2(): 8\n");
 
             // do not allow non-default ports, unless after 50 invalid addresses selected already
             if (addr.GetPort() != GetDefaultPort() && nTries < 50)
                 continue;
-			printf("TOC2(): 9\n");
 
             addrConnect = addr;
             break;
