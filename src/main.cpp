@@ -2560,7 +2560,8 @@ CNode *PickCurrentBestNode()
 	if (retNode)
 	{
 		retNode->currentPushBlock = true;
-		if (IsInitialBlockDownload() && (GetTime() - lastRecvBlockTime) > 9)
+		if ((IsInitialBlockDownload() && (GetTime() - lastRecvBlockTime) > 9) ||
+			(!IsInitialBlockDownload() && (GetTime() - lastRecvBlockTime) > 50))
 		{
 			lastRecvBlockTime = GetTime();
     		retNode->PushGetBlocks(pindexBest, uint256(0));
