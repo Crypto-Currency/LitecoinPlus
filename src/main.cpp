@@ -182,15 +182,17 @@ CNodeState *State(NodeId pnode) {
     return &it->second;
 }
 
-void InitializeNode(NodeId nodeid, const CNode *pnode) {
-    LOCK(cs_main);
+void InitializeNode(NodeId nodeid, const CNode *pnode)
+{
+    //LOCK(cs_main);
     CNodeState &state = mapNodeState.insert(std::make_pair(nodeid, CNodeState())).first->second;
     state.name = pnode->addrName;
     state.address = pnode->addr;
 }
 
-void FinalizeNode(NodeId nodeid) {
-    LOCK(cs_main);
+void FinalizeNode(NodeId nodeid)
+{
+    //LOCK(cs_main);
     CNodeState *state = State(nodeid);
 
     nPreferredDownload -= state->fPreferredDownload;
@@ -2447,27 +2449,27 @@ bool CBlock::AcceptBlock(bool lessAggressive)
 		int nBlockEstimate = Checkpoints::GetTotalBlocksEstimate();
 		if (hashBestChain == hash)
 		{
-			//loop
-			//{
-		       // {
+			loop
+			{
+		   		{
 					// by Simone: use TRY LOCK, not a LOCK....
-				//    TRY_LOCK(cs_vNodes, lockStatus);
-				 //   if (lockStatus)
-				  //  {
+				    TRY_LOCK(cs_vNodes, lockStatus);
+					if (lockStatus)
+				    {
 						BOOST_FOREACH(CNode* pnode, vNodes)
 						{
 						    if (nBestHeight > (pnode->nStartingHeight != -1 ? pnode->nStartingHeight - 2000 : nBlockEstimate))
 						        pnode->PushInventory(CInv(MSG_BLOCK, hash));
 						}
-					//	break;
-				//	}
-				//	else
-				//	{
-				//		Sleep(20);
-				//		continue;
-				//	}
-			//	}
-		//	}
+						break;
+					}
+					else
+					{
+						Sleep(20);
+						continue;
+					}
+				}
+			}
 		}
 
 		// ppcoin: check pending sync-checkpoint
@@ -3741,11 +3743,11 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         {
             // Relay
             pfrom->hashCheckpointKnown = checkpoint.hashCheckpoint;
-			//{
-		        //LOCK(cs_vNodes);
+			{
+		        LOCK(cs_vNodes);
 		        BOOST_FOREACH(CNode* pnode, vNodes)
 		            checkpoint.RelayTo(pnode);
-			//}
+			}
         }
     }
 
@@ -4032,11 +4034,11 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             {
                 // Relay
                 pfrom->setKnown.insert(alertHash);
-                //{
-                    //LOCK(cs_vNodes);
+                {
+                    LOCK(cs_vNodes);
                     BOOST_FOREACH(CNode* pnode, vNodes)
                         alert.RelayTo(pnode);
-                //}
+                }
             }
             else {
                 // Small DoS penalty so peers that send us lots of
