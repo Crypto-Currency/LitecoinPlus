@@ -2560,11 +2560,22 @@ CNode *PickCurrentBestNode()
 	if (retNode)
 	{
 		retNode->currentPushBlock = true;
-		if ((IsInitialBlockDownload() && (GetTime() - lastRecvBlockTime) > 9) ||
-			(!IsInitialBlockDownload() && (GetTime() - lastRecvBlockTime) > 50))
+		if (IsInitialBlockDownload() && (GetTime() - lastRecvBlockTime) > 9)
 		{
 			lastRecvBlockTime = GetTime();
     		retNode->PushGetBlocks(pindexBest, uint256(0));
+		}
+	}
+
+	// if more than 50 seconds passed from the first block, submit one stimulation
+	if (firstNode)
+	{
+		if (!IsInitialBlockDownload() && (GetTime() - lastRecvBlockTime) > 50)
+		{
+			retNode = firstNode;
+			lastRecvBlockTime = GetTime();
+    		firstNode->PushGetBlocks(pindexBest, uint256(0));
+			firstNode->currentPushBlock = true;
 		}
 	}
 	return retNode;
