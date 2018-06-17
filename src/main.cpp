@@ -1325,7 +1325,7 @@ int GetNumBlocksOfPeers()
 
 bool IsInitialBlockDownload()
 {
-/*
+
     // Once this function has returned false, it must remain false.
     static bool latched = false;
 
@@ -1337,15 +1337,15 @@ bool IsInitialBlockDownload()
 	bool res = (pindexBest->GetBlockTime() < GetTime() - 5 * 60);
 	if (!res)
 	    latched = true;
-    return (res);*/
+    return (res);
 
 
-	if (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate())
+ /*   if (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate())
         return true;
 
 	// by Simone: removed delta on previous bestIndex and decreased delta from 1 day to 5 minutes, enough !
 	bool res = (pindexBest->GetBlockTime() < GetTime() - 5 * 60);
-    return (res);
+    return (res);*/
 }
 
 void static InvalidChainFound(CBlockIndex* pindexNew)
@@ -2568,17 +2568,6 @@ CNode *PickCurrentBestNode()
 		}
 	}
 
-	// if more than 50 seconds passed from the first block, submit one stimulation
-	if (firstNode)
-	{
-		if (!IsInitialBlockDownload() && (GetTime() - lastRecvBlockTime) > 50)
-		{
-			retNode = firstNode;
-			lastRecvBlockTime = GetTime();
-    		firstNode->PushGetBlocks(pindexBest, uint256(0));
-			firstNode->currentPushBlock = true;
-		}
-	}
 	return retNode;
 }
 
@@ -2665,7 +2654,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock, bool lessAggressive)
         // Ask this guy to fill in what we're missing
         if (pfrom)
 		{
-			if (pfrom->currentPushBlock)
+			if ((pfrom->currentPushBlock) || (!IsInitialBlockDownload()))
 		    {
 				pfrom->PushGetBlocks(pindexBest, GetOrphanRoot(pblock2));
 
@@ -3618,13 +3607,13 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             if (!fAlreadyHave)
                 pfrom->AskFor(inv);
             else if (inv.type == MSG_BLOCK && mapOrphanBlocks.count(inv.hash)) {
-				if (pfrom->currentPushBlock)
+				if ((pfrom->currentPushBlock) || (!IsInitialBlockDownload()))
 	                pfrom->PushGetBlocks(pindexBest, GetOrphanRoot(mapOrphanBlocks[inv.hash]));
             } else if (nInv == nLastBlock) {
                 // In case we are on a very long side-chain, it is possible that we already have
                 // the last block in an inv bundle sent in response to getblocks. Try to detect
                 // this situation and push another getblocks to continue.
-				if (pfrom->currentPushBlock)
+				if ((pfrom->currentPushBlock) || (!IsInitialBlockDownload()))
 				{
 	                pfrom->PushGetBlocks(mapBlockIndex[inv.hash], uint256(0));
 	                if (fDebug)
@@ -3875,7 +3864,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 		pfrom->nLastRecv = GetTime();
 		pfrom->nLastRecvMicro = GetTimeMicros();
 
-		if (pfrom->currentPushBlock)
+		if ((pfrom->currentPushBlock) || (!IsInitialBlockDownload()))
 			lastRecvBlockTime = GetTime();
         CBlock block;
         vRecv >> block;
