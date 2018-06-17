@@ -1325,6 +1325,7 @@ int GetNumBlocksOfPeers()
 
 bool IsInitialBlockDownload()
 {
+/*
     // Once this function has returned false, it must remain false.
     static bool latched = false;
 
@@ -1336,15 +1337,15 @@ bool IsInitialBlockDownload()
 	bool res = (pindexBest->GetBlockTime() < GetTime() - 5 * 60);
 	if (!res)
 	    latched = true;
-    return (res);
+    return (res);*/
 
 
- /*   if (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate())
+	if (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate())
         return true;
 
 	// by Simone: removed delta on previous bestIndex and decreased delta from 1 day to 5 minutes, enough !
 	bool res = (pindexBest->GetBlockTime() < GetTime() - 5 * 60);
-    return (res);*/
+    return (res);
 }
 
 void static InvalidChainFound(CBlockIndex* pindexNew)
