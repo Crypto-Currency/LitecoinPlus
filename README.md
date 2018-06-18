@@ -2,6 +2,9 @@
 <br>
 For detailed changes list, see file changelog.txt
 <br>
+<br>
+<br>
+[ORIGINAL RELEASE]
 Aug 2017
   re-enabled PoW
   corrected PoS rate to 15%
