@@ -213,6 +213,7 @@ public:
 				fwrite(reinterpret_cast<const char*>(&block), 1, sizeof(block), file);
 				fwrite(reinterpret_cast<const char*>(&nBlockPos), 1, sizeof(nBlockPos), file);
 				fclose(file);
+				file = NULL;
 			}
 		}
 		else
@@ -809,6 +810,7 @@ bool CTxDB::WriteBlockIndex(const CDiskBlockIndex& blockindex)
 	bool res = Write(make_pair(string("blockindex"), blockindex.GetBlockHash()), blockindex);
 	if (res)
 		boost->AddBlockIndex(blockHash, &bi, blockindex.nFile, blockindex.nBlockPos, true);
+	delete boost;
     return res; 
 }
 
