@@ -1,4 +1,6 @@
-<b>LitecoinPlus V3.3.2.8</b> <br>
+<b>LitecoinPlus V3.3.2.9</b> <br>
+<br>
+For detailed changes list, see file changelog.txt
 <br>
 Aug 2017
   re-enabled PoW
