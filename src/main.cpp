@@ -61,6 +61,12 @@ int64 nTimeBestReceived = 0;
 // by Simone, use just a single value....
 int cPeerBlockCounts = 0;
 
+// by Simone: output in console process block timing
+static bool blockSyncingTraceTiming = false;
+static bool blockSyncingAcceptBlock = false;
+static bool blockSyncingAddToBlockIndex = false;
+static bool blockSyncingSetBestChain = false;
+
 map<uint256, CBlock*> mapOrphanBlocks;
 multimap<uint256, CBlock*> mapOrphanBlocksByPrev;
 set<pair<COutPoint, unsigned int> > setStakeSeenOrphan;
@@ -1978,6 +1984,7 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
 {
     uint256 hash = GetHash();
 
+    int64 nStart = GetTimeMillis();
     if (!txdb.TxnBegin())
         return error("SetBestChain() : TxnBegin failed");
 
@@ -1992,6 +1999,9 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
     {
         if (!SetBestChainInner(txdb, pindexNew))
             return error("SetBestChain() : SetBestChainInner failed");
+		if (blockSyncingTraceTiming && blockSyncingSetBestChain)
+			fprintf(stderr, "SetBestChain()/[chk 0.1] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+		nStart = GetTimeMillis();
     }
     else
     {
@@ -2009,6 +2019,10 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
             pindexIntermediate = pindexIntermediate->pprev;
         }
 
+		if (blockSyncingTraceTiming && blockSyncingSetBestChain)
+			fprintf(stderr, "SetBestChain()/[chk 0.2] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+		nStart = GetTimeMillis();
+
         if (!vpindexSecondary.empty())
             printf("Postponing %"PRIszu" reconnects\n", vpindexSecondary.size());
 
@@ -2019,6 +2033,10 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
             InvalidChainFound(pindexNew);
             return error("SetBestChain() : Reorganize failed");
         }
+
+		if (blockSyncingTraceTiming && blockSyncingSetBestChain)
+			fprintf(stderr, "SetBestChain()/[chk 0.3] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+		nStart = GetTimeMillis();
 
         // Connect further blocks
         BOOST_REVERSE_FOREACH(CBlockIndex *pindex, vpindexSecondary)
@@ -2038,14 +2056,29 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
                 break;
         }
     }
+	if (blockSyncingTraceTiming && blockSyncingSetBestChain)
+		fprintf(stderr, "SetBestChain()/[chk 1] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    nStart = GetTimeMillis();
 
     // Update best block in wallet (so we can detect restored wallets)
     bool fIsInitialDownload = IsInitialBlockDownload();
     if (!fIsInitialDownload)
     {
+		if (blockSyncingTraceTiming && blockSyncingSetBestChain)
+			fprintf(stderr, "SetBestChain()/[chk 1.1] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+		nStart = GetTimeMillis();
         const CBlockLocator locator(pindexNew);
+		if (blockSyncingTraceTiming && blockSyncingSetBestChain)
+			fprintf(stderr, "SetBestChain()/[chk 1.2] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+		nStart = GetTimeMillis();
         ::SetBestChain(locator);
+		if (blockSyncingTraceTiming && blockSyncingSetBestChain)
+			fprintf(stderr, "LOCATOR UPDATED\n");
     }
+
+	if (blockSyncingTraceTiming && blockSyncingSetBestChain)
+		fprintf(stderr, "SetBestChain()/[chk 2] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    nStart = GetTimeMillis();
 
     // New best block
     hashBestChain = hash;
@@ -2060,6 +2093,10 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
       DateTimeStrFormat("%x %H:%M:%S", pindexBest->GetBlockTime()).c_str());
 
 	printf("Stake checkpoint: %x\n", pindexBest->nStakeModifierChecksum);
+
+	if (blockSyncingTraceTiming && blockSyncingSetBestChain)
+		fprintf(stderr, "SetBestChain()/[chk 3] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    nStart = GetTimeMillis();
 
     // Check the version of the last 100 blocks to see if we need to upgrade:
     if (!fIsInitialDownload)
@@ -2080,11 +2117,19 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
     }
     std::string strCmd = GetArg("-blocknotify", "");
 
+	if (blockSyncingTraceTiming && blockSyncingSetBestChain)
+		fprintf(stderr, "SetBestChain()/[chk 4] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    nStart = GetTimeMillis();
+
     if (!fIsInitialDownload && !strCmd.empty())
     {
         boost::replace_all(strCmd, "%s", hashBestChain.GetHex());
         boost::thread t(runCommand, strCmd); // thread runs free
     }
+
+	if (blockSyncingTraceTiming && blockSyncingSetBestChain)
+		fprintf(stderr, "SetBestChain()/[chk 5] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    nStart = GetTimeMillis();
 
     return true;
 }
@@ -2157,10 +2202,6 @@ bool CBlock::GetCoinAge(uint64& nCoinAge) const
     return true;
 }
 
-// by Simone: global instance of this, so that we can buffer up the connection and flush when we want !
-//CTxDB *syncTxdb = NULL;
-//CTxDB *syncTxdbR = NULL;
-
 bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
 {
     // Check for duplicate
@@ -2173,6 +2214,8 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
     if (!pindexNew)
         return error("AddToBlockIndex() : new CBlockIndex failed");
     pindexNew->phashBlock = &hash;
+
+    int64 nStart = GetTimeMillis();
     map<uint256, CBlockIndex*>::iterator miPrev = mapBlockIndex.find(hashPrevBlock);
     if (miPrev != mapBlockIndex.end())
     {
@@ -2195,6 +2238,10 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
         pindexNew->hashProofOfStake = mapProofOfStake[hash];
     }
 
+	if (blockSyncingTraceTiming && blockSyncingAddToBlockIndex)
+		fprintf(stderr, "AddToBlockIndex()/[chk 1] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    nStart = GetTimeMillis();
+
     // ppcoin: compute stake modifier
     uint64 nStakeModifier = 0;
     bool fGeneratedStakeModifier = false;
@@ -2204,6 +2251,10 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
     pindexNew->nStakeModifierChecksum = GetStakeModifierChecksum(pindexNew);
     if (!CheckStakeModifierCheckpoints(pindexNew->nHeight, pindexNew->nStakeModifierChecksum))
         return error("AddToBlockIndex() : Rejected by stake modifier checkpoint height=%d, modifier=0x%016"PRI64x, pindexNew->nHeight, nStakeModifier);
+
+	if (blockSyncingTraceTiming && blockSyncingAddToBlockIndex)
+		fprintf(stderr, "AddToBlockIndex()/[chk 2] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    nStart = GetTimeMillis();
 
     // Add to mapBlockIndex
     map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.insert(make_pair(hash, pindexNew)).first;
@@ -2220,53 +2271,32 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
     if (!txdb.TxnCommit())
         return false;
 
+	if (blockSyncingTraceTiming && blockSyncingAddToBlockIndex)
+		fprintf(stderr, "AddToBlockIndex()/[chk 3] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    nStart = GetTimeMillis();
+
     // New best
     if (pindexNew->bnChainTrust > bnBestChainTrust)
         if (!SetBestChain(txdb, pindexNew))
             return false;
 
+	if (blockSyncingTraceTiming && blockSyncingAddToBlockIndex)
+		fprintf(stderr, "AddToBlockIndex()/[chk 3.1] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    nStart = GetTimeMillis();
+
     txdb.Close();
 
-	// by Simone: EXPERIMENTAL way
-    // Write to disk block index
-	/*if (!syncTxdb)
-	{
-		syncTxdb = new CTxDB();
-		syncTxdbR = new CTxDB("r");
-	}
-    if (!syncTxdb->TxnBegin())
-        return false;
-    syncTxdb->WriteBlockIndex(CDiskBlockIndex(pindexNew));
-    if (!syncTxdb->TxnCommit())
-        return false;
-
-    // New best
-    if (pindexNew->bnChainTrust > bnBestChainTrust)
-        if (!SetBestChain(*syncTxdb, pindexNew))
-            return false;
-	*/
+	if (blockSyncingTraceTiming && blockSyncingAddToBlockIndex)
+		fprintf(stderr, "AddToBlockIndex()/[chk 4] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    nStart = GetTimeMillis();
 
 	// by Simone: commit every 9k blocks otherwise the transactional log will explode at around ~190k from a zero sync...
 	static unsigned int countCommits = 9000;
 	if (countCommits == 0)
 	{
-		//if (syncTxdb)
-		//{
-		//    syncTxdb->Close();
-		//    syncTxdbR->Close();
-		//	syncTxdb = NULL;
-		//	syncTxdbR = NULL;
-		//}
-
 		bitdb.Flush(false);
 		countCommits = 9000;
 	}
-
-	else
-	{
-		//fprintf(stderr, "Block added but flush not ran\n");
-	}
-
 	countCommits--;
 
     if (pindexNew == pindexBest)
@@ -2276,6 +2306,10 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
         UpdatedTransaction(hashPrevBestCoinBase);
         hashPrevBestCoinBase = vtx[0].GetHash();
     }
+
+	if (blockSyncingTraceTiming && blockSyncingAddToBlockIndex)
+		fprintf(stderr, "AddToBlockIndex()/[chk 5] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    nStart = GetTimeMillis();
 
     uiInterface.NotifyBlocksChanged();
     return true;
@@ -2373,6 +2407,7 @@ bool CBlock::AcceptBlock(bool lessAggressive)
 // We can simply trust the data from the boostrap file.
 // Anyway the coins would not be spendable on the network
 // if someone created a tampered bootstrap.dat 
+    int64 nStart = GetTimeMillis();
 	if (!lessAggressive)
 	{
 		hash = GetHash();
@@ -2381,6 +2416,10 @@ bool CBlock::AcceptBlock(bool lessAggressive)
 		if (mapBlockIndex.count(hash))
 		    return error("AcceptBlock() : block already in mapBlockIndex");
 
+		if (blockSyncingTraceTiming && blockSyncingAcceptBlock)
+			fprintf(stderr, "AcceptBlock()/[chk 1] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+		nStart = GetTimeMillis();
+
 		// Get prev block index
 		map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashPrevBlock);
 		if (mi == mapBlockIndex.end())
@@ -2388,16 +2427,32 @@ bool CBlock::AcceptBlock(bool lessAggressive)
 		CBlockIndex* pindexPrev = (*mi).second;
 		int nHeight = pindexPrev->nHeight+1;
 
+		if (blockSyncingTraceTiming && blockSyncingAcceptBlock)
+			fprintf(stderr, "AcceptBlock()/[chk 2] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+		nStart = GetTimeMillis();
+
 		if (IsProofOfWork() && nHeight > POW_CUTOFF_BLOCK && nHeight < POW_RESTART_BLOCK)
 		  return DoS(100, error("AcceptBlock() : No PoW block allowed between %d and %d (height = %d)", POW_CUTOFF_BLOCK,POW_RESTART_BLOCK,nHeight));
+
+		if (blockSyncingTraceTiming && blockSyncingAcceptBlock)
+			fprintf(stderr, "AcceptBlock()/[chk 3] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+		nStart = GetTimeMillis();
 
 		// Check proof-of-work or proof-of-stake
 		if (nBits != GetNextTargetRequired(pindexPrev, IsProofOfStake()))
 		    return DoS(100, error("AcceptBlock() : incorrect %s", IsProofOfWork() ? "proof-of-work" : "proof-of-stake"));
 
+		if (blockSyncingTraceTiming && blockSyncingAcceptBlock)
+			fprintf(stderr, "AcceptBlock()/[chk 4] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+		nStart = GetTimeMillis();
+
 		// Check timestamp against prev
 		if (GetBlockTime() <= pindexPrev->GetMedianTimePast() || GetBlockTime() + nMaxClockDrift < pindexPrev->GetBlockTime())
 		    return error("AcceptBlock() : block's timestamp is too early");
+
+		if (blockSyncingTraceTiming && blockSyncingAcceptBlock)
+			fprintf(stderr, "AcceptBlock()/[chk 5] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+		nStart = GetTimeMillis();
 
 		// Check that all transactions are finalized
 		BOOST_FOREACH(const CTransaction& tx, vtx)
@@ -2406,22 +2461,41 @@ bool CBlock::AcceptBlock(bool lessAggressive)
 		        return DoS(10, error("AcceptBlock() : contains a non-final transaction"));
 		}
 
+		if (blockSyncingTraceTiming && blockSyncingAcceptBlock)
+			fprintf(stderr, "AcceptBlock()/[chk 6] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+		nStart = GetTimeMillis();
+
 		// Check that the block chain matches the known block chain up to a checkpoint
 		if (!Checkpoints::CheckHardened(nHeight, hash))
 		    return DoS(100, error("AcceptBlock() : rejected by hardened checkpoint lock-in at %d", nHeight));
 
+		if (blockSyncingTraceTiming && blockSyncingAcceptBlock)
+			fprintf(stderr, "AcceptBlock()/[chk 6.1] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+
 		// ppcoin: check that the block satisfies synchronized checkpoint
-		if (!Checkpoints::CheckSync(hash, pindexPrev))
+		// by Simone: do this every 500 blocks, not at every block, during initial sync
+		// during normal operation, we can do it every block, just to be sure
+		static int checkSyncCounter = 0;
+		if (checkSyncCounter > (IsInitialBlockDownload() ? 500 : 0))
 		{
-		    if(!GetBoolArg("-nosynccheckpoints", false))
-		    {
-		        return error("AcceptBlock() : rejected by synchronized checkpoint");
-		    }
-		    else
-		    {
-		        strMiscWarning = _("WARNING: syncronized checkpoint violation detected, but skipped!");
-		    }
+			checkSyncCounter = 0;
+			if (!Checkpoints::CheckSync(hash, pindexPrev))
+			{
+				if(!GetBoolArg("-nosynccheckpoints", false))
+				{
+				    return error("AcceptBlock() : rejected by synchronized checkpoint");
+				}
+				else
+				{
+				    strMiscWarning = _("WARNING: syncronized checkpoint violation detected, but skipped!");
+				}
+			}
 		}
+		checkSyncCounter++;
+
+		if (blockSyncingTraceTiming && blockSyncingAcceptBlock)
+			fprintf(stderr, "AcceptBlock()/[chk 7] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+		nStart = GetTimeMillis();
 
 		// Reject block.nVersion < 3 blocks since 95% threshold on mainNet and always on testNet:
 		if (nVersion < 3 && ((!fTestNet && nHeight > 14060) || (fTestNet && nHeight > 0)))
@@ -2433,15 +2507,28 @@ bool CBlock::AcceptBlock(bool lessAggressive)
 		    return DoS(100, error("AcceptBlock() : block height mismatch in coinbase"));
 	}
 
+	if (blockSyncingTraceTiming && blockSyncingAcceptBlock)
+		fprintf(stderr, "AcceptBlock()/[chk 8] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+	nStart = GetTimeMillis();
+
     // Write block to history file
     if (!CheckDiskSpace(::GetSerializeSize(*this, SER_DISK, CLIENT_VERSION)))
         return error("AcceptBlock() : out of disk space");
+	if (blockSyncingTraceTiming && blockSyncingAcceptBlock)
+		fprintf(stderr, "AcceptBlock()/CheckDiskSpace() lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
     unsigned int nFile = -1;
     unsigned int nBlockPos = 0;
+    nStart = GetTimeMillis();
     if (!WriteToDisk(nFile, nBlockPos))
         return error("AcceptBlock() : WriteToDisk failed");
+	if (blockSyncingTraceTiming && blockSyncingAcceptBlock)
+		fprintf(stderr, "AcceptBlock()/WriteToDisk() lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    nStart = GetTimeMillis();
     if (!AddToBlockIndex(nFile, nBlockPos))
         return error("AcceptBlock() : AddToBlockIndex failed");
+	if (blockSyncingTraceTiming && blockSyncingAcceptBlock)
+		fprintf(stderr, "AcceptBlock()/AddToBlockIndex() lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    nStart = GetTimeMillis();
 
 	// by Simone: for bootstrap
 	if (!lessAggressive)
@@ -2476,6 +2563,10 @@ bool CBlock::AcceptBlock(bool lessAggressive)
 		// ppcoin: check pending sync-checkpoint
 		Checkpoints::AcceptPendingSyncCheckpoint();
 	}
+
+	if (blockSyncingTraceTiming && blockSyncingAcceptBlock)
+		fprintf(stderr, "AcceptBlock()/[chk 9] lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    nStart = GetTimeMillis();
 
     return true;
 }
@@ -2670,8 +2761,11 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock, bool lessAggressive)
     }
 
     // Store to disk
+    int64 nStart = GetTimeMillis();
     if (!pblock->AcceptBlock(lessAggressive))
         return error("ProcessBlock() : AcceptBlock FAILED");
+	if (blockSyncingTraceTiming)
+		fprintf(stderr, "AcceptBlock()/normal lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
 
     // Recursively process any orphan blocks that depended on this one
 	vector<uint256> vWorkQueue;
@@ -2685,8 +2779,11 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock, bool lessAggressive)
 	    {
 	        CBlock* pblockOrphan = (*mi).second;
 			hash = pblockOrphan->GetHash();
+			int64 nStart = GetTimeMillis();
 	        if (pblockOrphan->AcceptBlock())
 	            vWorkQueue.push_back(hash);
+			if (blockSyncingTraceTiming)
+				fprintf(stderr, "AcceptBlock()/orphans lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
 	        mapOrphanBlocks.erase(hash);
 	        setStakeSeenOrphan.erase(pblockOrphan->GetProofOfStake());
 	        delete pblockOrphan;
