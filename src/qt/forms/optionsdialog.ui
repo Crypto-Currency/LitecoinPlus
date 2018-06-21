@@ -111,7 +111,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabDusting">
+     <!--<widget class="QWidget" name="tabDusting">
       <attribute name="title">
        <string>&amp;Dusting</string>
       </attribute>
@@ -140,7 +140,7 @@
         </spacer>
        </item>
       </layout>
-     </widget>
+     </widget>-->
      <widget class="QWidget" name="tabNetwork">
       <attribute name="title">
        <string>&amp;Network</string>

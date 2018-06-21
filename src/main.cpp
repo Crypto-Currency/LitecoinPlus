@@ -234,9 +234,12 @@ bool GetNodeStateStats(NodeId nodeid, CNodeStateStats &stats) {
     return true;
 }
 
+void NetResumed();
+
 void RegisterNodeSignals(CNodeSignals& nodeSignals)
 {
     //nodeSignals.GetHeight.connect(&GetHeight);
+    nodeSignals.NetResumed.connect(&NetResumed);
     nodeSignals.ProcessMessages.connect(&ProcessMessages);
     nodeSignals.SendMessages.connect(&SendMessages);
     nodeSignals.InitializeNode.connect(&InitializeNode);
@@ -246,6 +249,7 @@ void RegisterNodeSignals(CNodeSignals& nodeSignals)
 void UnregisterNodeSignals(CNodeSignals& nodeSignals)
 {
     //nodeSignals.GetHeight.disconnect(&GetHeight);
+    nodeSignals.NetResumed.disconnect(&NetResumed);
     nodeSignals.ProcessMessages.disconnect(&ProcessMessages);
     nodeSignals.SendMessages.disconnect(&SendMessages);
     nodeSignals.InitializeNode.disconnect(&InitializeNode);
@@ -1329,20 +1333,29 @@ int GetNumBlocksOfPeers()
 	return cPeerBlockCounts;
 }
 
+// by Simone: the initial sync latch flag
+// once IsInitialBlockDownload() function has returned false, it must remain false.
+bool IBDLatched = false;
+
+// this event is launched when net resumed from:
+// 1 - net outage (line down etc.)
+// 2 - PC resume from sleep
+void NetResumed()
+{
+	IBDLatched = false;
+}
+
 bool IsInitialBlockDownload()
 {
-
-    // Once this function has returned false, it must remain false.
-    static bool latched = false;
-
-    if (latched)
+    if (IBDLatched)
         return false;
 
+	bool res = false;
     if (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate())
-        return true;
-	bool res = (pindexBest->GetBlockTime() < GetTime() - 5 * 60);
+        res = true;
+	res |= (pindexBest->GetBlockTime() < GetTime() - 5 * 60);
 	if (!res)
-	    latched = true;
+	    IBDLatched = true;
     return (res);
 
 
@@ -3271,6 +3284,10 @@ bool setOnlineStatus(bool online)
 				{
 			        pnode->fDisconnect = true;
 				}
+
+				// unlatch IsInitialBlockDownload() function, otherwise when go online,
+				// it may be extremely slow, in wrong catch-up status
+				IBDLatched = false;
 			}
 			else
 			{
@@ -3965,6 +3982,18 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 			lastRecvBlockTime = GetTime();
         CBlock block;
         vRecv >> block;
+
+		// by Simone: every 20 blocks, let's shot a QT::ProcessEvents, otherwise QT may stutter, especially on Windows
+#ifdef QT_GUI
+		extern void RefreshQtGui();
+		static int blockCount = 0;
+		if (blockCount > 20)
+		{
+			RefreshQtGui();
+			blockCount = 0;
+		}
+		blockCount++;
+#endif
 
 	    printf("received block %s\n", block.GetHash().ToString().substr(0,20).c_str());
 	    // block.print();
