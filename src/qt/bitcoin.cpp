@@ -121,6 +121,12 @@ static void ThreadSafeHandleURI(const std::string& strURI)
                                Q_ARG(QString, QString::fromStdString(strURI)));
 }
 
+// by Simone: the new found sync speed may render the interface a bit stutter, let's run this when necessary
+void RefreshQtGui()
+{
+	QApplication::instance()->processEvents();
+}
+
 // find splash font color here
 static void InitMessage(const std::string &message)
 {
