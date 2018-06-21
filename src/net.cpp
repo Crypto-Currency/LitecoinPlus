@@ -1016,6 +1016,13 @@ void ThreadSocketHandler2(void* parg)
         }
         if (vNodes.size() != nPrevNodeCount)
         {
+			// by Simone: net resumed event
+			// when coming back from sleep, the number of node passes from N to zero, good time to catch the event here
+			// when the connection is down or anything, it can do also the same thing, if down for long time, when back up will run this event
+			if ((nPrevNodeCount > 0) && (vNodes.size() == 0))
+			{
+				GetNodeSignals().NetResumed();
+			}
             nPrevNodeCount = vNodes.size();
             uiInterface.NotifyNumConnectionsChanged(vNodes.size());
         }
