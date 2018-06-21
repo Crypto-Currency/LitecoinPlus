@@ -3983,6 +3983,18 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         CBlock block;
         vRecv >> block;
 
+		// by Simone: every 20 blocks, let's shot a QT::ProcessEvents, otherwise QT may stutter, especially on Windows
+#ifdef QT_GUI
+		extern void RefreshQtGui();
+		static int blockCount = 0;
+		if (blockCount > 20)
+		{
+			RefreshQtGui();
+			blockCount = 0;
+		}
+		blockCount++;
+#endif
+
 	    printf("received block %s\n", block.GetHash().ToString().substr(0,20).c_str());
 	    // block.print();
 		//fprintf(stderr, "Received block %d from %d\n", block.nTime, pfrom->GetId());
