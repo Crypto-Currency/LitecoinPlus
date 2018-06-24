@@ -102,6 +102,7 @@ protected:
     DbTxn *activeTxn;
     bool fReadOnly;
 	void *statData;
+	bool traceTiming;
 
     explicit CDB(const char* pszFile, const char* pszMode="r+");
     ~CDB() { Close(); }
@@ -127,7 +128,10 @@ protected:
         // Read
         Dbt datValue;
         datValue.set_flags(DB_DBT_MALLOC);
+	    int64 nStart = GetTimeMillis();
         int ret = pdb->get(activeTxn, &datKey, &datValue, 0);
+		if (traceTiming)
+			fprintf(stderr, "CDB::Read() lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
         memset(datKey.get_data(), 0, datKey.get_size());
         if (datValue.get_data() == NULL)
             return false;
@@ -168,7 +172,10 @@ protected:
         Dbt datValue(&ssValue[0], ssValue.size());
 
         // Write
+	    int64 nStart = GetTimeMillis();
         int ret = pdb->put(activeTxn, &datKey, &datValue, (fOverwrite ? 0 : DB_NOOVERWRITE));
+		if (traceTiming)
+			fprintf(stderr, "CDB::Write() lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
 
         // Clear memory in case it was a private key
         memset(datKey.get_data(), 0, datKey.get_size());
@@ -191,7 +198,10 @@ protected:
         Dbt datKey(&ssKey[0], ssKey.size());
 
         // Erase
+	    int64 nStart = GetTimeMillis();
         int ret = pdb->del(activeTxn, &datKey, 0);
+		if (traceTiming)
+			fprintf(stderr, "CDB::Erase() lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
 
         // Clear memory
         memset(datKey.get_data(), 0, datKey.get_size());
@@ -211,7 +221,10 @@ protected:
         Dbt datKey(&ssKey[0], ssKey.size());
 
         // Exists
+	    int64 nStart = GetTimeMillis();
         int ret = pdb->exists(activeTxn, &datKey, 0);
+		if (traceTiming)
+			fprintf(stderr, "CDB::Exists() lasted %15"PRI64d"ms\n", GetTimeMillis() - nStart);
 
         // Clear memory
         memset(datKey.get_data(), 0, datKey.get_size());

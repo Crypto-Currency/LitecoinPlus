@@ -109,10 +109,6 @@ public:
 	// destructor
 	~boostStartup()
 	{
-		if (file)
-		{
-			fclose(file);
-		}
 		for (int i = 0; i < 8; i++)
 		{
 			this->blocks[i].clear();
@@ -246,6 +242,7 @@ public:
 					this->recordCount++;
 				}
 				fclose(file);
+				file = NULL;
 			}
 		}
 	}
@@ -271,6 +268,7 @@ public:
 					fwrite(reinterpret_cast<const char*>(&loopBlocks.nBlockPos), 1, sizeof(loopBlocks.nBlockPos), file);
 				}
 				fclose(file);
+				file = NULL;
 			}
 		}
 	}
@@ -472,6 +470,8 @@ void CDBEnv::CheckpointLSN(std::string strFile)
 CDB::CDB(const char *pszFile, const char* pszMode) :
     pdb(NULL), activeTxn(NULL)
 {
+	// by Simone: setting the below to true will output operational timing in console
+	traceTiming = false;
     int ret;
     if (pszFile == NULL)
         return;
@@ -1255,6 +1255,7 @@ bool CTxDB::LoadBlockIndexGuts()
 		    }
 		}
 		pcursor1->close();
+		delete boost;
 		return true;
 	}
 }
