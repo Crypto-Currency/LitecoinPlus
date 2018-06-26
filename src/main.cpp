@@ -180,6 +180,10 @@ map<NodeId, CNodeState> mapNodeState;
 /** Number of preferable block download peers. */
 int nPreferredDownload = 0;
 
+// by Simone: latched status for the IsInitialBlockDownload() function
+bool ibdLatched = false;
+extern void NetResumed();
+
 // Requires cs_main.
 CNodeState *State(NodeId pnode) {
     map<NodeId, CNodeState>::iterator it = mapNodeState.find(pnode);
@@ -233,8 +237,6 @@ bool GetNodeStateStats(NodeId nodeid, CNodeStateStats &stats) {
     stats.nCommonHeight = state->pindexLastCommonBlock ? state->pindexLastCommonBlock->nHeight : -1;
     return true;
 }
-
-void NetResumed();
 
 void RegisterNodeSignals(CNodeSignals& nodeSignals)
 {
@@ -1333,38 +1335,23 @@ int GetNumBlocksOfPeers()
 	return cPeerBlockCounts;
 }
 
-// by Simone: the initial sync latch flag
-// once IsInitialBlockDownload() function has returned false, it must remain false.
-bool IBDLatched = false;
-
 // this event is launched when net resumed from:
 // 1 - net outage (line down etc.)
 // 2 - PC resume from sleep
 void NetResumed()
 {
-	IBDLatched = false;
+	ibdLatched = false;
 }
 
 bool IsInitialBlockDownload()
 {
-    if (IBDLatched)
+    if (ibdLatched)
         return false;
 
-	bool res = false;
-    if (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate())
-        res = true;
-	res |= (pindexBest->GetBlockTime() < GetTime() - 5 * 60);
+	bool res = (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate()) || (pindexBest->GetBlockTime() < GetTime() - 5 * 60);
 	if (!res)
-	    IBDLatched = true;
+	    ibdLatched = true;
     return (res);
-
-
- /*   if (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate())
-        return true;
-
-	// by Simone: removed delta on previous bestIndex and decreased delta from 1 day to 5 minutes, enough !
-	bool res = (pindexBest->GetBlockTime() < GetTime() - 5 * 60);
-    return (res);*/
 }
 
 void static InvalidChainFound(CBlockIndex* pindexNew)
@@ -3287,7 +3274,7 @@ bool setOnlineStatus(bool online)
 
 				// unlatch IsInitialBlockDownload() function, otherwise when go online,
 				// it may be extremely slow, in wrong catch-up status
-				IBDLatched = false;
+				ibdLatched = false;
 			}
 			else
 			{
