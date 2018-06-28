@@ -1,4 +1,4 @@
-<b>LitecoinPlus V3.3.2.9</b> <br>
+<b>LitecoinPlus V3.3.2.10</b> <br>
 <br>
 For detailed changes list, see file changelog.txt
 <br>
