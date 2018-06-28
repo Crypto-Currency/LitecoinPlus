@@ -1,3 +1,7 @@
+***** Version 3.3.2.10
+- Fixed crash on start on Ubuntu 12.04 due to compiler boolean error
+
+
 ***** Version 3.3.2.9
 - Fixed various stability issues
 - Base release version for mandatory upgrade
