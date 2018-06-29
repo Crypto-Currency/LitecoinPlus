@@ -218,7 +218,7 @@ void OverviewPage::setModel(WalletModel *model)
 */
      }
 
-    // update the display unit, to not use the default ("ECC")
+    // update the display unit, to not use the default ("LCP")
     updateDisplayUnit();
 }
 
