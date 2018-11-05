@@ -1,6 +1,7 @@
 ***** Version 3.3.2.12
 - Sort order for Dusting and Advanced Coin Control page fixed for newer Linux QT versions
 - Do not accept anymore clients with version < 3.3.2.10 or malformed CLIENT version string
+- Embedded profile problem compiling PNG with newer versions of libpng (removed color profile)
 
 
 ***** Version 3.3.2.11
