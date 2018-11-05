@@ -1,3 +1,12 @@
+***** Version 3.3.2.12
+- Sort order for Dusting and Advanced Coin Control page fixed for newer Linux QT versions
+- Do not accept anymore clients with version < 3.3.2.10 or malformed CLIENT version string
+
+
+***** Version 3.3.2.11
+- MAX_OUTBOUND_CONNECTION back to the correct value of 12
+
+
 ***** Version 3.3.2.10
 - Fixed crash on start on Ubuntu 12.04 due to compiler boolean error
 
