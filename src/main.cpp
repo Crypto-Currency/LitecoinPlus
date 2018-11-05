@@ -3476,6 +3476,33 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             pfrom->fDisconnect = true;
             return false;
           }
+		  else
+		  {
+		    int v1 = 0;
+		    int v2 = 0;
+		    int v3 = 0;
+		    int v4 = 0;
+		    if (sscanf(pfrom->cleanSubVer.c_str(), "LitecoinPlus:%d.%d.%d.%d", &v1, &v2, &v3, &v4) == 4)
+		    {
+				int cVer = 
+                           1000000 * v1
+                         +   10000 * v2
+                         +     100 * v3
+                         +       1 * v4;
+				if (cVer < MIN_CLIENT_VERSION)
+				{
+					printf("  -  peer connection rejected (not satisfying minimum version).");
+					pfrom->fDisconnect = true;
+					return false;
+				}
+		    }
+			else
+			{
+				printf("  -  error decoding client version, connection rejected.");
+				pfrom->fDisconnect = true;
+				return false;
+			}
+		  }
           printf("\n");
         }
 
