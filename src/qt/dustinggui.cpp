@@ -10,6 +10,8 @@
 #include "coincontrol.h"
 #include "addressbookpage.h"
 
+#include <inttypes.h>
+
 #include <QClipboard>
 #include <QMessageBox>
 #include <QMenu>
@@ -221,7 +223,7 @@ void DustingGui::updateBlockList()
 
             // amount
             amountItem->setText(BitcoinUnits::format(nDisplayUnit, out.tx->vout[out.i].nValue));
-            amountInt64Item->setText(strPad(QString::number(out.tx->vout[out.i].nValue), 15, " ")); // padding so that sorting works correctly
+            amountInt64Item->setText(strPad(QString::number(out.tx->vout[out.i].nValue), 18, "0")); // padding so that sorting works correctly
 
             // date
             dateItem->setText(QDateTime::fromTime_t(out.tx->GetTxTime()).toUTC().toString("yy-MM-dd hh:mm"));
@@ -255,7 +257,7 @@ void DustingGui::updateBlockList()
 	}
     
     // sort view to default
-    sortView(6, Qt::AscendingOrder);
+    sortView(COLUMN_AMOUNT_INT64, Qt::AscendingOrder);
     blocksTable->setEnabled(true);
 
 	// put count
@@ -493,8 +495,8 @@ void DustingGui::sortView(int column, Qt::SortOrder order)
 {
     sortColumn = column;
     sortOrder = order;
-    blocksTable->sortItems(column, order);
-    blocksTable->horizontalHeader()->setSortIndicator((sortColumn == 5 ? 0 : sortColumn), sortOrder);
+    blocksTable->sortByColumn(column, order);
+    blocksTable->horizontalHeader()->setSortIndicator((sortColumn == COLUMN_AMOUNT_INT64 ? 0 : sortColumn), sortOrder);
 }
 
 //  ------------------------------------------------------------------------ //
