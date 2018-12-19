@@ -45,7 +45,66 @@ Q_IMPORT_PLUGIN(qtaccessiblewidgets)
 // Need a global reference for the notifications to find the GUI
 // By Simone: BitcoinGUI is accessible from outside too, removes static
 BitcoinGUI *guiref;
-static QSplashScreen *splashref;
+StartupWindow *stwref;
+
+/** by Simone: "Startup" window */
+StartupWindow::StartupWindow(QWidget *parent, Qt::WindowFlags f):
+    QWidget(parent, f)
+{
+// set basic stuff
+    QVBoxLayout *layout = new QVBoxLayout();
+	setWindowTitle(tr("LitecoinPlus") + " - " + QString::fromStdString(CLIENT_BUILD));
+    setMinimumWidth(600);
+    setMaximumWidth(600);
+    setMinimumHeight(350);
+    setMaximumHeight(350);
+
+// add background, with image rotate every minute
+	int v = (time(NULL) / 60) % 4 + 1;
+	char s[32];
+	sprintf(s, ":/images/startup%d", v);
+	QPixmap bkgnd(s);
+    bkgnd = bkgnd.scaled(this->size(), Qt::IgnoreAspectRatio);
+    QPalette palette;
+    palette.setBrush(QPalette::Background, bkgnd);
+    this->setPalette(palette);
+
+// render label
+	info = new QLabel();
+	info->setAlignment(Qt::AlignCenter);
+	info->setStyleSheet("QLabel { width: 600px; height: 350px; color: white; padding-top: 310px;}");
+
+// add stuff in order
+    layout->addWidget(info);
+    setLayout(layout);
+}
+void StartupWindow::systemOnTop()
+{
+	setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
+	setWindowModality(Qt::ApplicationModal);
+}
+void StartupWindow::setMessage(const char *message)
+{
+// update the message
+	info->setText(tr(message));
+	QApplication::instance()->processEvents();
+	Sleep(1);
+	QApplication::instance()->processEvents();
+}
+void StartupWindow::showStartupWindow()
+{
+    // Center startup window in the screen
+	QRect screenGeometry = QApplication::desktop()->screenGeometry();
+	int x = (screenGeometry.width() - width()) / 2;
+	int y = (screenGeometry.height() - height()) / 2;
+	move(x, y);
+    show();
+}
+
+void StartupWindow::closeEvent(QCloseEvent *event)
+{
+    event->ignore();
+}
 
 /** by Simone: "Shutdown" window */
 ShutdownWindow::ShutdownWindow(QWidget *parent, Qt::WindowFlags f):
@@ -130,11 +189,10 @@ void RefreshQtGui()
 // find splash font color here
 static void InitMessage(const std::string &message)
 {
-    if(splashref)
-    {
-		splashref->showMessage(QString::fromStdString(message), Qt::AlignBottom|Qt::AlignHCenter, QColor(0xcce2fc));
-        QApplication::instance()->processEvents();
-    }
+	if (stwref)
+	{
+		stwref->setMessage(message.c_str());
+	}
 }
 
 static void QueueShutdown()
@@ -245,15 +303,53 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    QSplashScreen splash(QPixmap(":/images/splash"), Qt::WindowStaysOnTopHint);
-	splash.setEnabled(false);
-    if (GetBoolArg("-splash", true) && !GetBoolArg("-min"))
-    {
-        splash.show();
-        splash.setAutoFillBackground(true);
-        splashref = &splash;
-    }
+	// by Simone: startupWindow
+	StartupWindow stw;
+	stwref = &stw;
+	stw.showStartupWindow();
+	app.processEvents();
+	Sleep(100);
+	app.processEvents();
 
+	/*
+	stw.setMessage("Fast loading 10%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 20%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 30%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 40%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 50%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 60%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 61%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 70%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 72%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 73%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 75%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 87%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 88%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 89%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 90%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 95%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 98%...");
+	Sleep(200);
+	stw.setMessage("Fast loading 100%...");
+	Sleep(200);
+	return 0;*/
+	
     app.processEvents();
 
     app.setQuitOnLastWindowClosed(false);
@@ -275,14 +371,14 @@ int main(int argc, char *argv[])
 
                 optionsModel.Upgrade(); // Must be done after AppInit2
 
-                if (splashref)
-                    splash.finish(&window);
-
                 ClientModel clientModel(&optionsModel);
                 WalletModel walletModel(pwalletMain, &optionsModel);
 
                 window.setClientModel(&clientModel);
                 window.setWalletModel(&walletModel);
+
+				// by Simone: hide startup Window, startup completed
+				stw.hide();
 
                 // If -min option passed, start window minimized.
                 if(GetBoolArg("-min"))

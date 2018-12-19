@@ -369,11 +369,11 @@ void DustingGui::compactBlocks()
 			// select the row to show something on screen
 			blocksTable->selectRow(i);
 			QApplication::instance()->processEvents();
-			Sleep(50);
+			Sleep(5);
 
 			//fprintf(stderr, "%d --> [%ld] %s/%d\n", i, selectionSum, uint256(itemTx->text().toStdString()).ToString().c_str(), itemVout->text().toUInt());
 		}
-		Sleep(1000);
+		Sleep(500);
 		for (int i = 0; i < nOdds; i++)
 		{
 			blocksTable->removeRow(i);
