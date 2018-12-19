@@ -1125,8 +1125,6 @@ bool CTxDB::LoadBlockIndexGuts()
 	unsigned long cnt = 0;
 	int oldProgress = -1;
 
-	fprintf(stderr, "And the size is: %ld\n", boost::filesystem::file_size(GetDataDir() / "blkindex.dat") / 589);
-
 	// load from boost
 	boost->GetBlockIndexCount();
 	boost->startLoop();
