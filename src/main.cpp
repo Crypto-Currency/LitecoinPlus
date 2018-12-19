@@ -3004,7 +3004,15 @@ bool LoadBlockIndex(bool fAllowNew)
     //
     CTxDB txdb("cr");
     if (!txdb.LoadBlockIndex())
-        return false;
+	{
+
+	// by Simone: we don't give up at first failure, might be a bad cache, let's just clean cache up and try again
+		txdb.DestroyCachedIndex();
+		if (!txdb.LoadBlockIndex())
+		{
+			return false;
+		}
+	}
     txdb.Close();
 
     //
