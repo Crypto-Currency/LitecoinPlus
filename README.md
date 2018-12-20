@@ -1,4 +1,4 @@
-<b>LitecoinPlus V3.3.2.11</b> <br>
+<b>LitecoinPlus V3.3.2.12</b> <br>
 <br>
 For detailed changes list, see file changelog.txt
 <br>
@@ -16,6 +16,6 @@ explorer http://lcp.altcoinwarz.com/<br>
 <br>
 windows-QT and macOS-QT wallets can be downloaded from the web site<br>
 BitcoinTalk https://bitcointalk.org/index.php?topic=599095.780<br>
-Discord https://discord.gg/vfqj4vF
+Discord https://discord.gg/UqXEmd5
 
 

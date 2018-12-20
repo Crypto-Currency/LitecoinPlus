@@ -86,6 +86,7 @@ protected:
 			isBoosted = true;
 		} else {
 			isBoosted = false;
+			file = NULL;
 		}
 	}
 
@@ -112,6 +113,20 @@ public:
 		for (int i = 0; i < 8; i++)
 		{
 			this->blocks[i].clear();
+		}
+	}
+
+	// deletes all stored boost files on disk
+	void destroy()
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			sprintf(fName, "bindex%04d.dat", i);
+			boost::filesystem::path path = GetDataDir() / fName;
+			if (boost::filesystem::exists(path))
+			{
+				boost::filesystem::remove(path);
+			}
 		}
 	}
 
@@ -1091,6 +1106,14 @@ u_int32_t CTxDB::GetCount()
     return 0;
 }
 
+// completely remove cached index from disk
+void CTxDB::DestroyCachedIndex()
+{
+	boostStartup *boost = new boostStartup();
+	boost->destroy();
+	delete boost;
+}
+
 bool CTxDB::LoadBlockIndexGuts()
 {
 	// By Simone: Boost startup
@@ -1168,8 +1191,8 @@ bool CTxDB::LoadBlockIndexGuts()
 		if (!pcursor1)
 			return false;
 
-		// instead of counting the number of records, which is pointless and VERY slow on old machines, we just set a big random number, for re-index is OK
-		cnt = 1600000;
+		// instead of counting the number of records, which is pointless and VERY slow on old machines, we just set an approximate number
+		cnt = boost::filesystem::file_size(GetDataDir() / "blkindex.dat") / 589;
 		fFlags = DB_SET_RANGE;
 		oldProgress = -1;
 		loop

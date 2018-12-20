@@ -17,6 +17,13 @@ static const int CLIENT_VERSION =
                          +     100 * CLIENT_VERSION_REVISION
                          +       1 * CLIENT_VERSION_BUILD;
 
+// as of version 3.3.2.10, we do not accept anymore older version of clients, as they are forked and likely messing the network up
+static const int MIN_CLIENT_VERSION =
+                           1000000 * 3
+                         +   10000 * 3
+                         +     100 * 2
+                         +       1 * 10;
+
 extern const std::string CLIENT_NAME;
 extern const std::string CLIENT_BUILD;
 extern const std::string CLIENT_DATE;
@@ -44,7 +51,6 @@ static const int BIP0031_VERSION = 60000;
 // "mempool" command, enhanced "getdata" behavior starts with this version:
 static const int MEMPOOL_GD_VERSION = 60002;
 
-// change version in clientversion.h
 #define DISPLAY_VERSION_MAJOR    CLIENT_VERSION_MAJOR
 #define DISPLAY_VERSION_MINOR    CLIENT_VERSION_MINOR
 #define DISPLAY_VERSION_REVISION CLIENT_VERSION_REVISION

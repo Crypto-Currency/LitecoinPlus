@@ -65,8 +65,8 @@
 extern CWallet *pwalletMain;
 extern int64 nLastCoinStakeSearchInterval;
 extern unsigned int nStakeTargetSpacing;
-static QSplashScreen *splashref;
 extern BitcoinGUI *guiref;
+extern StartupWindow *stwref;
 
 // added by Simone
 ClickableLabel::ClickableLabel(QWidget* parent, Qt::WindowFlags f)
@@ -86,6 +86,9 @@ void updateBitcoinGUISplashMessage(char *message)
 {
 	if (guiref) {
 		guiref-> splashMessage(_(message), true);
+	}
+	if (stwref) {
+		stwref->setMessage(message);
 	}
 }
 
@@ -1169,12 +1172,17 @@ void BitcoinGUI::zapWallet()
 	//debug
 	printf("running zapwallettxes from qt menu.\n");
 
+	// by Simone: bring up the startup window
+	stwref->setMessage("");
+	stwref->systemOnTop();
+	stwref->showStartupWindow();
+
 	// bring up splash screen
-	QSplashScreen splash(QPixmap(":/images/splash"), Qt::WindowStaysOnTopHint);
+	/*QSplashScreen splash(QPixmap(":/images/splash"), Qt::WindowStaysOnTopHint);
 	splash.setEnabled(false);
 	splash.show();
 	splash.setAutoFillBackground(true);
-	splashref = &splash;
+	splashref = &splash;*/
 
 	// Zap the wallet as requested by user
 	// 1= save meta data
@@ -1193,8 +1201,9 @@ void BitcoinGUI::zapWallet()
 	{
 		splashMessage(_("Error loading wallet.dat: Wallet corrupted"));
 		printf("Error loading wallet.dat: Wallet corrupted\n");
-		if (splashref)
-			splash.close();
+		stwref->hide();
+		//if (splashref)
+		//	splash.close();
 	    return;
 	}
 
@@ -1231,8 +1240,9 @@ void BitcoinGUI::zapWallet()
 		{
 			setStatusTip(tr("Wallet needed to be rewritten: restart BitBar to complete"));
 			printf("Wallet needed to be rewritten: restart BitBar to complete\n");
-			if (splashref)
-				splash.close();
+			stwref->hide();
+			//if (splashref)
+			//	splash.close();
 			return;
 		}
 		else
@@ -1275,9 +1285,10 @@ void BitcoinGUI::zapWallet()
 	splashMessage(_("Please restart your wallet."));
 	printf(" zap wallet  done - please restart wallet.\n");
 
-	// close splash screen
-	if (splashref)
-		splash.close();
+	// by Simone: close startup window
+	stwref->hide();
+	//if (splashref)
+	//	splash.close();
 
 	// by Simone: display a message and QUIT the software, before some big damage is done by clicking around !
 	QMessageBox::warning(this, tr("Zap Wallet Finished."), "<b>" + tr("The wallet will now exit.") + "</b><br><br>" + tr("Please restart your wallet for changes to take effect."));
@@ -1286,7 +1297,17 @@ void BitcoinGUI::zapWallet()
 
 void BitcoinGUI::splashMessage(const std::string &message, bool quickSleep)
 {
-  if(splashref)
+	if (stwref)
+	{
+		stwref->setMessage(message.c_str());
+		if (quickSleep) {
+			Sleep(50);
+		} else {
+			Sleep(500);
+		}
+	}
+
+/*  if(splashref)
   {
     splashref->showMessage(QString::fromStdString(message), Qt::AlignBottom|Qt::AlignHCenter, QColor(0xfce2cc));
     QApplication::instance()->processEvents();
@@ -1295,7 +1316,7 @@ void BitcoinGUI::splashMessage(const std::string &message, bool quickSleep)
 	} else {
 		Sleep(500);
 	}
-  }
+  }*/
 }
 
 void BitcoinGUI::backupWallet()
