@@ -1,6 +1,7 @@
 ***** Version 3.3.2.13
-- added getnetworkhashps call to RPC (used for block explorer, maybe some mining pools)
-- replaced alert key with new
+- Added getnetworkhashps call to RPC (used for block explorer, maybe some mining pools)
+- Removing all compiler warnings with newer versions of GCC
+
 
 ***** Version 3.3.2.12
 - Sort order for Dusting and Advanced Coin Control page fixed for newer Linux QT versions
