@@ -1027,8 +1027,8 @@ void BitcoinGUI::setEncryptionStatus(int status)
 
 void BitcoinGUI::encryptWallet(bool status)
 {
-    if(!walletModel)
-        return;
+	if (!walletModel)
+		return;
 
 	// by Simone: ASK first.......... !
 	QString strMessage = tr("The wallet will now be set offline and the wallet.dat file encrypted. The operation may require some time, after which the wallet will quit and will need to be restarted. <b>Are you sure you want to do it now</b> ?");
@@ -1253,7 +1253,7 @@ void BitcoinGUI::zapWallet()
 	}
   
 	splashMessage(_("Wallet loaded..."));
-	printf(" zap wallet  load     %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+	printf(" zap wallet  load     %15" PRI64d "ms\n", GetTimeMillis() - nStart);
 
 	splashMessage(_("Loaded lables..."));
 	printf(" zap wallet  loading metadata\n");

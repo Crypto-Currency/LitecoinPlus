@@ -254,14 +254,13 @@ void SkinsPage::loadSettings()
  
 void SkinsPage::loadSkin()
 {
-  QFile styleFile(inipath+"/"+inifname);
-  styleFile.open(QFile::ReadOnly);
-  QByteArray bytes = styleFile.readAll();
-  QString newStyleSheet(bytes);
-  newStyleSheet.replace("myimages",inipath+"/images"); // deal with relative path
-  QApplication *app = (QApplication*)QApplication::instance();
-  app->setStyleSheet(NULL);
-  app->setStyleSheet(newStyleSheet);
+	QFile styleFile(inipath+"/"+inifname);
+	styleFile.open(QFile::ReadOnly);
+	QByteArray bytes = styleFile.readAll();
+	QString newStyleSheet(bytes);
+	QApplication *app = (QApplication*)QApplication::instance();
+	app->setStyleSheet(NULL);
+	app->setStyleSheet(newStyleSheet);
 }
 
 void SkinsPage::resizeEvent(QResizeEvent* event)
@@ -330,7 +329,7 @@ void SkinsPage::getListFinished(QNetworkReply* reply)
     for(int i=0;i<list.count();i++)
     {
       line=list.at(i).toLocal8Bit().constData();
-      line.simplified(); // strip extra characters
+      line = line.simplified(); // strip extra characters
       line.replace("\r",""); // this one too
       if(line.length())
       {  
