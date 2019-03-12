@@ -278,7 +278,7 @@ std::string HelpMessage()
 #endif
         "  -rpcuser=<user>        " + _("Username for JSON-RPC connections") + "\n" +
         "  -rpcpassword=<pw>      " + _("Password for JSON-RPC connections") + "\n" +
-        "  -rpcport=<port>        " + _("Listen for JSON-RPC connections on <port> (default: 44350 or testnet: 44352)") + "\n" +
+        "  -rpcport=<port>        " + _("Listen for JSON-RPC connections on <port> (default: 44350 or testnet: 44353)") + "\n" +
         "  -rpcallowip=<ip>       " + _("Allow JSON-RPC connections from specified IP address") + "\n" +
         "  -rpcconnect=<ip>       " + _("Send commands to node running on <ip> (default: 127.0.0.1)") + "\n" +
         "  -blocknotify=<cmd>     " + _("Execute command when the best block changes (%s in cmd is replaced by block hash)") + "\n" +
@@ -355,6 +355,8 @@ bool AppInit2()
 
     // ********************************************************* Step 2: parameter interactions
     SoftSetBoolArg("-listen", true); // just making sure
+
+    fTestNet = GetBoolArg("-testnet");
 
     if (mapArgs.count("-bind")) {
         // when specifying an explicit binding address, you want to listen on it
