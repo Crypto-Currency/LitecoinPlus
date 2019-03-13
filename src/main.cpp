@@ -1348,6 +1348,11 @@ bool IsInitialBlockDownload()
 	if (ibdLatched)
 		return false;
 	
+	// only for testnet
+	if (fTestNet && nBestHeight == 0) {
+		return false;
+	}
+
 	bool res = (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate()) || (pindexBest->GetBlockTime() < GetTime() - 5 * 60);
 	if (!res)
 		ibdLatched = true;
@@ -5294,11 +5299,6 @@ void static ThreadBitcoinMiner(void* parg)
 
 void GenerateBitcoins(bool fGenerate, CWallet* pwallet)
 {
-// let's make it true to start the chain
-fGenerate=true;
-
-printf("GenerateBitcoins-> fGenerate= %s\n", fGenerate ? "true" : "false");
-
     fGenerateBitcoins = fGenerate;
     nLimitProcessors = GetArg("-genproclimit", -1);
     if (nLimitProcessors == 0)

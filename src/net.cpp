@@ -897,6 +897,7 @@ void CNode::copyStats(CNodeStats &stats)
     X(mapRecvBytesPerMsgCmd);
     X(fWhitelisted);
 	X(currentPushBlock);
+	X(nMisbehavior);
 
     // It is common for nodes with good ping times to suddenly become lagged,
     // due to a new block arriving or other large transfer.
@@ -1607,7 +1608,6 @@ void static ProcessOneShot()
     if (grant) {
         if (!OpenNetworkConnection(addr, &grant, strDest.c_str(), true))
             AddOneShot(strDest);
-		printf("OpenNetworkConnection() called by ProcessOneShot()\n");
     }
 }
 
@@ -1646,7 +1646,6 @@ void ThreadOpenConnections2(void* parg)
             {
                 CAddress addr;
                 OpenNetworkConnection(addr, NULL, strAddr.c_str());
-//				printf("OpenNetworkConnection() called by ThreadOpenConnections2()\n");
                 for (int i = 0; i < 10 && i < nLoop; i++)
                 {
                     Sleep(500);
@@ -1748,7 +1747,6 @@ void ThreadOpenConnections2(void* parg)
         }
         if (addrConnect.IsValid())
 			OpenNetworkConnection(addrConnect, &grant);
-//		printf("OpenNetworkConnection() called by ThreadOpenConnections2() at the end of function\n");
     }
 }
 
@@ -1786,7 +1784,6 @@ void ThreadOpenAddedConnections2(void* parg)
                 CAddress addr;
                 CSemaphoreGrant grant(*semOutbound);
                 OpenNetworkConnection(addr, &grant, strAddNode.c_str());
-				printf("OpenNetworkConnection() called by ThreadOpenAddedConnections2()\n");
                 Sleep(500);
             }
             vnThreadsRunning[THREAD_ADDEDCONNECTIONS]--;
@@ -1831,7 +1828,6 @@ void ThreadOpenAddedConnections2(void* parg)
         {
             CSemaphoreGrant grant(*semOutbound);
             OpenNetworkConnection(CAddress(*(vserv.begin())), &grant);
-			printf("OpenNetworkConnection() called by ThreadOpenAddedConnections2() at the end of function\n");
             Sleep(500);
             if (fShutdown)
                 return;
