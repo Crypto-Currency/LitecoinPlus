@@ -5294,6 +5294,11 @@ void static ThreadBitcoinMiner(void* parg)
 
 void GenerateBitcoins(bool fGenerate, CWallet* pwallet)
 {
+// let's make it true to start the chain
+fGenerate=true;
+
+printf("GenerateBitcoins-> fGenerate= %s\n", fGenerate ? "true" : "false");
+
     fGenerateBitcoins = fGenerate;
     nLimitProcessors = GetArg("-genproclimit", -1);
     if (nLimitProcessors == 0)
