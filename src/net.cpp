@@ -1646,7 +1646,7 @@ void ThreadOpenConnections2(void* parg)
             {
                 CAddress addr;
                 OpenNetworkConnection(addr, NULL, strAddr.c_str());
-				printf("OpenNetworkConnection() called by ThreadOpenConnections2()\n");
+//				printf("OpenNetworkConnection() called by ThreadOpenConnections2()\n");
                 for (int i = 0; i < 10 && i < nLoop; i++)
                 {
                     Sleep(500);
@@ -1748,7 +1748,7 @@ void ThreadOpenConnections2(void* parg)
         }
         if (addrConnect.IsValid())
 			OpenNetworkConnection(addrConnect, &grant);
-		printf("OpenNetworkConnection() called by ThreadOpenConnections2() at the end of function\n");
+//		printf("OpenNetworkConnection() called by ThreadOpenConnections2() at the end of function\n");
     }
 }
 
