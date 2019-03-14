@@ -1352,8 +1352,13 @@ bool IsInitialBlockDownload()
 	if (fTestNet && nBestHeight == 0) {
 		return false;
 	}
+	int minTolerated;
+	if (fTestNet)
+		minTolerated = 30;
+	else
+		minTolerated = 5;
 
-	bool res = (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate()) || (pindexBest->GetBlockTime() < GetTime() - 5 * 60);
+	bool res = (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate()) || (pindexBest->GetBlockTime() < GetTime() - minTolerated * 60);
 	if (!res)
 		ibdLatched = true;
 	return (res);
