@@ -1,6 +1,14 @@
-***** Version 3.3.2.13
+***** Version 4.0.0.1
+- Changed alert broadcasting private key (only known by two persons)
+- Added block rules remote management via encoded + encrypted alert message
+
+
+***** Version 3.3.2.13 (DEV version, preparing for 4.0.0.1)
 - Added getnetworkhashps call to RPC (used for block explorer, maybe some mining pools)
 - Removing all compiler warnings with newer versions of GCC
+- BUGFIX: banscore in getpeerinfo RPC was not displayed correctly (random number)
+- BUGFIX: sendalert failed with int type error on parameter #3
+- BUGFIX: fixed various problems with testnet (now working)
 
 
 ***** Version 3.3.2.12
