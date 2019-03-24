@@ -7,6 +7,7 @@
 #include "optionsmodel.h"
 #include "guiutil.h"
 #include "guiconstants.h"
+#include <string.h>
 
 #include "init.h"
 #include "ui_interface.h"
@@ -42,6 +43,8 @@ Q_IMPORT_PLUGIN(qkrcodecs)
 Q_IMPORT_PLUGIN(qtaccessiblewidgets)
 #endif
 
+using namespace std;
+
 // Need a global reference for the notifications to find the GUI
 // By Simone: BitcoinGUI is accessible from outside too, removes static
 BitcoinGUI *guiref;
@@ -63,11 +66,14 @@ StartupWindow::StartupWindow(QWidget *parent, Qt::WindowFlags f):
 	int v = (time(NULL) / 60) % 4 + 1;
 	char s[32];
 	sprintf(s, ":/images/startup%d", v);
-	QPixmap bkgnd(s);
-    bkgnd = bkgnd.scaled(this->size(), Qt::IgnoreAspectRatio);
-    QPalette palette;
-    palette.setBrush(QPalette::Background, bkgnd);
-    this->setPalette(palette);
+//	QPixmap bkgnd(s);
+//    bkgnd = bkgnd.scaled(this->size(), Qt::IgnoreAspectRatio);
+//    QPalette palette;
+//    palette.setBrush(QPalette::Background, bkgnd);
+//    this->setPalette(palette);
+string str(s);
+string sty="border-image: url("+ str +") 0 0 0 0 stretch stretch;";
+this->setStyleSheet(sty.c_str());
 
 // render label
 	info = new QLabel();
