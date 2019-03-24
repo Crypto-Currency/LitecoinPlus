@@ -1349,16 +1349,22 @@ bool IsInitialBlockDownload()
 		return false;
 	
 	// only for testnet
-	if (fTestNet && nBestHeight == 0) {
+	if (fTestNet && nBestHeight == 0)
+  {
 		return false;
 	}
-	int minTolerated;
-	if (fTestNet)
-		minTolerated = 30;
-	else
-		minTolerated = 5;
 
-	bool res = (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate()) || (pindexBest->GetBlockTime() < GetTime() - minTolerated * 60);
+  if (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate())
+    return true;
+  static int64 nLastUpdate;
+  static CBlockIndex* pindexLastBest;
+  if (pindexBest != pindexLastBest)
+  {
+    pindexLastBest = pindexBest;
+    nLastUpdate = GetTime();
+  }
+
+  bool res=(GetTime()-nLastUpdate < 10 && pindexBest->GetBlockTime() < GetTime() - 24 * 60 * 60);
 	if (!res)
 		ibdLatched = true;
 	return (res);
