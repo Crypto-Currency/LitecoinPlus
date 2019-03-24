@@ -2,6 +2,8 @@
 - Changed alert broadcasting private key (only known by two persons)
 - Added block rules remote management via encoded + encrypted alert message
 - increased time from last block for IsInitialBlockDownload
+- changed the way images are applied to the splash screen
+
 
 ***** Version 3.3.2.13 (DEV version, preparing for 4.0.0.1)
 - Added getnetworkhashps call to RPC (used for block explorer, maybe some mining pools)
