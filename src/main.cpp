@@ -3256,7 +3256,7 @@ bool LoadExternalBlockFile(FILE* fileIn)
 						if (progress != oldProgress)
 						{
 							double dispProgress = progress / 10;
-							sprintf(msg, "Importing bootstrap (%.1f%%)...", dispProgress);
+							sprintf(msg, "Importing bootstrap (%.2f%%)...", dispProgress);
 #ifdef QT_GUI
 							uiInterface.InitMessage(_(msg));
 #endif
