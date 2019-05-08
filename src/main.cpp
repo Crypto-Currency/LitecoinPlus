@@ -3500,7 +3500,11 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 		    int v2 = 0;
 		    int v3 = 0;
 		    int v4 = 0;
-		    if (sscanf(pfrom->cleanSubVer.c_str(), "LitecoinPlus:%d.%d.%d.%d", &v1, &v2, &v3, &v4) == 4)
+std::string incomingver=pfrom->cleanSubVer.c_str();
+int index= incomingver.find(':');
+std::string testver=incomingver.substr(index); // first chr should be ':'
+		    if (sscanf(testver.c_str(), ":%d.%d.%d.%d", &v1, &v2, &v3, &v4) == 4)
+//		    if (sscanf(pfrom->cleanSubVer.c_str(), "LitecoinPlus:%d.%d.%d.%d", &v1, &v2, &v3, &v4) == 4)
 		    {
 				int cVer = 
                            1000000 * v1
@@ -5117,6 +5121,10 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
         {
             strMintWarning = strMintMessage;
             Sleep(1000);
+
+	// by SIMONE: we must check this flag or this thread never exit when wallet is locked !
+            if (fShutdown)
+                return;
         }
         strMintWarning = "";
 
@@ -5349,5 +5357,4 @@ int64 GetProofOfStakeReward(int64 nCoinAge, unsigned int nBits, unsigned int nTi
 
     return nSubsidy;
 }
-
 
