@@ -1,9 +1,18 @@
 ***** Version 4.0.0.1
+- Major overall improvement release
 - Changed alert broadcasting private key (only known by two persons)
-- Added block rules remote management via encoded + encrypted alert message
-- increased time from last block for IsInitialBlockDownload
-- changed the way images are applied to the splash screen
-- added 1 more decimal to external file loading screen
+- Increased time from last block for IsInitialBlockDownload
+- Changed the way images are applied to the splash screen
+- Added 1 more decimal to external file loading screen
+- Added ARM support for daemon and QT
+- Fixed overwrite effect on splash when loading a theme
+- Rotate dynamically the splash for long stuff, like index rebuild or bootstrap import
+- Cross compile for Fedora 29 and Fedora 30
+- Fixed compatibilty with BOOST >= 1.66
+- BUGFIX: solved the "Assertion `!posix::pthread_mutex_lock(&m)' failed." on shutdown.
+- BUGFIX: solved the slow shutdown issue along with the "mutex" bug above
+- QApplication::commitData management, for automatic shutdown at LOGOUT, RESTART or SHUTDOWN
+
 
 ***** Version 3.3.2.13 (DEV version, preparing for 4.0.0.1)
 - Added getnetworkhashps call to RPC (used for block explorer, maybe some mining pools)
