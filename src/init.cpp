@@ -85,6 +85,7 @@ void Shutdown(void* parg)
         Sleep(50);
         printf("LitecoinPlus exited\n\n");
         fExit = true;
+		fShutdown = false;
 
 #ifndef QT_GUI
         // ensure non-UI client gets exited here, but let Bitcoin-Qt reach 'return 0;' in bitcoin.cpp

@@ -7,6 +7,7 @@
 #include "optionsmodel.h"
 #include "guiutil.h"
 #include "guiconstants.h"
+#include "splash.h"
 #include <string.h>
 
 #include "init.h"
@@ -17,6 +18,7 @@
 
 #include <QDesktopWidget>
 #include <QApplication>
+#include <QSessionManager>
 #include <QMessageBox>
 #include <QTextCodec>
 #include <QLocale>
@@ -48,70 +50,7 @@ using namespace std;
 // Need a global reference for the notifications to find the GUI
 // By Simone: BitcoinGUI is accessible from outside too, removes static
 BitcoinGUI *guiref;
-StartupWindow *stwref;
-
-/** by Simone: "Startup" window */
-StartupWindow::StartupWindow(QWidget *parent, Qt::WindowFlags f):
-    QWidget(parent, f)
-{
-// set basic stuff
-    QVBoxLayout *layout = new QVBoxLayout();
-	setWindowTitle(tr("LitecoinPlus") + " - " + QString::fromStdString(CLIENT_BUILD));
-    setMinimumWidth(600);
-    setMaximumWidth(600);
-    setMinimumHeight(350);
-    setMaximumHeight(350);
-
-// add background, with image rotate every minute
-	int v = (time(NULL) / 60) % 4 + 1;
-	char s[32];
-	sprintf(s, ":/images/startup%d", v);
-
-//	QPixmap bkgnd(s);
-//    bkgnd = bkgnd.scaled(this->size(), Qt::IgnoreAspectRatio);
-//    QPalette palette;
-//    palette.setBrush(QPalette::Background, bkgnd);
-//    this->setPalette(palette);
-string str(s);
-string sty="border-image: url("+ str +");";
-this->setStyleSheet(sty.c_str());
-
-// render label
-	info = new QLabel();
-	info->setAlignment(Qt::AlignCenter);
-	info->setStyleSheet("QLabel { width: 600px; height: 350px; color: white; padding-top: 310px;}");
-
-// add stuff in order
-    layout->addWidget(info);
-    setLayout(layout);
-}
-void StartupWindow::systemOnTop()
-{
-	setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
-	setWindowModality(Qt::ApplicationModal);
-}
-void StartupWindow::setMessage(const char *message)
-{
-// update the message
-	info->setText(tr(message));
-	QApplication::instance()->processEvents();
-	Sleep(1);
-	QApplication::instance()->processEvents();
-}
-void StartupWindow::showStartupWindow()
-{
-    // Center startup window in the screen
-	QRect screenGeometry = QApplication::desktop()->screenGeometry();
-	int x = (screenGeometry.width() - width()) / 2;
-	int y = (screenGeometry.height() - height()) / 2;
-	move(x, y);
-    show();
-}
-
-void StartupWindow::closeEvent(QCloseEvent *event)
-{
-    event->ignore();
-}
+Splash *stwref;
 
 /** by Simone: "Shutdown" window */
 ShutdownWindow::ShutdownWindow(QWidget *parent, Qt::WindowFlags f):
@@ -215,6 +154,47 @@ static std::string Translate(const char* psz)
     return QCoreApplication::translate("bitcoin-core", psz).toStdString();
 }
 
+/* by SIMONE: connect Session Manager of PC to the quit command, so no more forced quits ! */
+void QApplication::commitData(QSessionManager& manager)
+{
+	printf("Shutdown invoked by session. Shutting down...\n");
+	quit();
+	processEvents();
+	Sleep(1000);
+	processEvents();
+	while (fShutdown)
+	{
+		Sleep(300);
+	}
+	manager.release();
+}
+
+  /*  if (manager.allowsInteraction()) {
+        int ret = QMessageBox::warning(
+                    guiref,
+                    tr("My Application"),
+                    tr("Save changes to document?"),
+                    QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+
+        switch (ret) {
+        case QMessageBox::Save:
+            manager.release();
+            break;
+        case QMessageBox::Discard:
+            break;
+        case QMessageBox::Cancel:
+        default:
+            manager.cancel();
+        }
+    } else {
+        // we did not get permission to interact, then
+        // do something reasonable instead
+
+		printf("IT PASSED FROM COMMIT DATA, NO INTERACTION\n");
+
+    }
+}*/
+
 /* Handle runaway exceptions. Shows a message box with the problem and quits the program.
  */
 static void handleRunawayException(std::exception *e)
@@ -310,10 +290,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-	// by Simone: startupWindow
-	StartupWindow stw;
+	// by Simone: Splash
+	Splash stw;
 	stwref = &stw;
-	stw.showStartupWindow();
+	stw.showSplash();
 	app.processEvents();
 	Sleep(100);
 	app.processEvents();
@@ -385,7 +365,10 @@ int main(int argc, char *argv[])
                 window.setWalletModel(&walletModel);
 
 				// by Simone: hide startup Window, startup completed
-				stw.hide();
+				stw.hideSplash();
+
+				// by Simone: load skin here
+				window.loadSkin();
 
                 // If -min option passed, start window minimized.
                 if(GetBoolArg("-min"))
@@ -425,6 +408,7 @@ int main(int argc, char *argv[])
     } catch (...) {
         handleRunawayException(NULL);
     }
+
     return 0;
 }
 #endif // BITCOIN_QT_TEST
