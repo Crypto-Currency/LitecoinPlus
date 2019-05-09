@@ -30,6 +30,7 @@
 #include "version.h"
 #include "skinspage.h"
 #include "dustinggui.h"
+#include "splash.h"
 
 #ifdef Q_OS_MAC
 #include "macdockiconhandler.h"
@@ -66,7 +67,7 @@ extern CWallet *pwalletMain;
 extern int64 nLastCoinStakeSearchInterval;
 extern unsigned int nStakeTargetSpacing;
 extern BitcoinGUI *guiref;
-extern StartupWindow *stwref;
+extern Splash *stwref;
 
 // added by Simone
 ClickableLabel::ClickableLabel(QWidget* parent, Qt::WindowFlags f)
@@ -90,6 +91,12 @@ void updateBitcoinGUISplashMessage(char *message)
 	if (stwref) {
 		stwref->setMessage(message);
 	}
+}
+
+// by Simone: expose loadSkin call
+void BitcoinGUI::loadSkin()
+{
+	skinsPage->loadSkin();
 }
 
 BitcoinGUI::BitcoinGUI(QWidget *parent):
@@ -1175,7 +1182,7 @@ void BitcoinGUI::zapWallet()
 	// by Simone: bring up the startup window
 	stwref->setMessage("");
 	stwref->systemOnTop();
-	stwref->showStartupWindow();
+	stwref->showSplash();
 
 	// bring up splash screen
 	/*QSplashScreen splash(QPixmap(":/images/splash"), Qt::WindowStaysOnTopHint);
