@@ -156,7 +156,7 @@ static std::string Translate(const char* psz)
 
 /* by SIMONE: connect Session Manager of PC to the quit command, so no more forced quits ! */
 void QApplication::commitData(QSessionManager& manager)
-{
+{z
 	printf("Shutdown invoked by session. Shutting down...\n");
 	quit();
 	processEvents();
@@ -168,32 +168,6 @@ void QApplication::commitData(QSessionManager& manager)
 	}
 	manager.release();
 }
-
-  /*  if (manager.allowsInteraction()) {
-        int ret = QMessageBox::warning(
-                    guiref,
-                    tr("My Application"),
-                    tr("Save changes to document?"),
-                    QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-
-        switch (ret) {
-        case QMessageBox::Save:
-            manager.release();
-            break;
-        case QMessageBox::Discard:
-            break;
-        case QMessageBox::Cancel:
-        default:
-            manager.cancel();
-        }
-    } else {
-        // we did not get permission to interact, then
-        // do something reasonable instead
-
-		printf("IT PASSED FROM COMMIT DATA, NO INTERACTION\n");
-
-    }
-}*/
 
 /* Handle runaway exceptions. Shows a message box with the problem and quits the program.
  */
