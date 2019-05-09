@@ -156,7 +156,7 @@ static std::string Translate(const char* psz)
 
 /* by SIMONE: connect Session Manager of PC to the quit command, so no more forced quits ! */
 void QApplication::commitData(QSessionManager& manager)
-{z
+{
 	printf("Shutdown invoked by session. Shutting down...\n");
 	quit();
 	processEvents();
