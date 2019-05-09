@@ -793,7 +793,13 @@ void ThreadRPCServer2(void* parg)
         else printf("ThreadRPCServer ERROR: missing server private key file %s\n", pathPKFile.string().c_str());
 
         string strCiphers = GetArg("-rpcsslciphers", "TLSv1+HIGH:!SSLv2:!aNULL:!eNULL:!AH:!3DES:@STRENGTH");
+
+    // BOOST 1.66 require old asio interface and syntax is different too
+#if BOOST_VERSION >= 106600L
         SSL_CTX_set_cipher_list(context.native_handle(), strCiphers.c_str());
+#else
+        SSL_CTX_set_cipher_list(context.impl(), strCiphers.c_str());
+#endif
     }
 
     // Try a dual IPv6/IPv4 socket, falling back to separate IPv4 and IPv6 sockets

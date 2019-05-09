@@ -49,24 +49,6 @@ protected:
 
 };
 
-// by Simone: "Startup" window
-class StartupWindow : public QWidget
-{
-	Q_OBJECT
-
-public:
-    StartupWindow(QWidget *parent=0, Qt::WindowFlags = Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
-	void systemOnTop();
-	void setMessage(const char *message);
-    void showStartupWindow();
-
-private:
-	QLabel *info;
-
-protected:
-    void closeEvent(QCloseEvent *event);
-};
-
 // by Simone: "Shutdown" window
 class ShutdownWindow : public QWidget
 {
@@ -101,6 +83,7 @@ public:
         functionality.
     */
     void setWalletModel(WalletModel *walletModel);
+	void loadSkin();
 
 protected:
     void changeEvent(QEvent *e);
