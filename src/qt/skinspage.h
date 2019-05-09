@@ -40,6 +40,7 @@ public:
 //    static QString saveFileName(const QUrl &url);
     bool saveToDisk(const QString &filename, QIODevice *data);
     static bool isHttpRedirect(QNetworkReply *reply);
+    void loadSkin();
 
 private slots:
 //  void browse();
@@ -68,7 +69,6 @@ private:
   void loadSkin(QString fname);
   void loadSettings();
   void saveSettings();
-  void loadSkin();
   void download(const QUrl &filename);
   boost::filesystem::path IniFile;
   QString inipath,inifname;

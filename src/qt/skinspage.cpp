@@ -41,7 +41,6 @@ SkinsPage::SkinsPage(QWidget *parent) : QWidget(parent), ui(new Ui::SkinsPage)
   inipath=GetDataDir().string().c_str();
   inipath=inipath+"/themes/";
   loadSettings();
-  loadSkin();
 
   filesFoundLabel = new QLabel;
   statusLabel = new QLabel;
