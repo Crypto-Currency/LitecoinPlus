@@ -155,18 +155,32 @@ static std::string Translate(const char* psz)
 }
 
 /* by SIMONE: connect Session Manager of PC to the quit command, so no more forced quits ! */
+ShutdownWindow *sdwRef;
 void QApplication::commitData(QSessionManager& manager)
 {
-	printf("Shutdown invoked by session. Shutting down...\n");
-	quit();
-	processEvents();
-	Sleep(1000);
-	processEvents();
-	while (fShutdown)
+// if we enter in a first phase, request a second one, and do operations there
+	if (!manager.isPhase2())
 	{
-		Sleep(300);
+		printf("User attempting shutdown, waiting...\n");
+		manager.requestPhase2();
+		return;
 	}
-	manager.release();
+
+// second phase, save all data and quit cleanly
+	if (manager.isPhase2())
+	{
+		printf("Shutdown invoked by session. Shutting down...\n");
+		if (manager.allowsInteraction())
+		{
+			sdwRef->showShutdownWindow();
+			processEvents();
+			Sleep(100);
+			processEvents();
+
+		}
+		Shutdown(NULL);
+		manager.release();
+	}
 }
 
 /* Handle runaway exceptions. Shows a message box with the problem and quits the program.
@@ -270,60 +284,18 @@ int main(int argc, char *argv[])
 	stw.showSplash();
 	app.processEvents();
 	Sleep(100);
-	app.processEvents();
-
-	/*
-	stw.setMessage("Fast loading 10%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 20%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 30%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 40%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 50%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 60%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 61%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 70%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 72%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 73%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 75%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 87%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 88%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 89%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 90%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 95%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 98%...");
-	Sleep(200);
-	stw.setMessage("Fast loading 100%...");
-	Sleep(200);
-	return 0;*/
-	
     app.processEvents();
-
     app.setQuitOnLastWindowClosed(false);
-
     try
     {
         // Regenerate startup link, to fix links to old versions
         if (GUIUtil::GetStartOnSystemStartup())
             GUIUtil::SetStartOnSystemStartup(true);
 
+        ShutdownWindow sdw;
+		sdwRef = &sdw;
         BitcoinGUI window;
         guiref = &window;
-		ShutdownWindow sdw;
         if(AppInit2())
         {
             {
@@ -365,9 +337,9 @@ int main(int argc, char *argv[])
 				Sleep(100);
 				app.processEvents();
 
-                window.hide();
-                window.setClientModel(0);
-                window.setWalletModel(0);
+	            window.hide();
+	            window.setClientModel(0);
+	            window.setWalletModel(0);
                 guiref = 0;
             }
             // Shutdown the core and its threads, but don't exit Bitcoin-Qt here
