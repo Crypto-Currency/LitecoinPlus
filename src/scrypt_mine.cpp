@@ -29,7 +29,15 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <xmmintrin.h>
+
+extern "C"
+{
+  #ifndef NOSSE
+    #ifndef NO_ASM
+      #include <xmmintrin.h>
+    #endif
+  #endif
+}
 
 #include "scrypt_mine.h"
 #include "pbkdf2.h"
