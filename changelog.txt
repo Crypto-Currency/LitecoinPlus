@@ -12,6 +12,11 @@
 - BUGFIX: solved the "Assertion `!posix::pthread_mutex_lock(&m)' failed." on shutdown.
 - BUGFIX: solved the slow shutdown issue along with the "mutex" bug above
 - QApplication::commitData management, for automatic shutdown at LOGOUT, RESTART or SHUTDOWN
+- Removed synced checkpoint check (very heavy), as centralized checkpoints are not used in LCP network
+- BLOATFIX: removed "getheaders" code from net protocol, is not used in any way
+- BLOATFIX: removed all unused functions from CBlockLocator class
+- rpcwallet.cpp: do not use CBlockLocator to find blocks, use boost/map
+- CBlockLocator::Set: instead of the mega heavy loop, just init to last 30 blocks + genesis one
 
 
 ***** Version 3.3.2.13 (DEV version, preparing for 4.0.0.1)
