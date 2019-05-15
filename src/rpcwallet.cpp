@@ -1180,7 +1180,12 @@ Value listsinceblock(const Array& params, bool fHelp)
         uint256 blockId = 0;
 
         blockId.SetHex(params[0].get_str());
-        pindex = CBlockLocator(blockId).GetBlockIndex();
+
+        map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(blockId);
+        if (mi != mapBlockIndex.end() && (*mi).second)
+        {
+            pindex = (*mi).second;
+		}
     }
 
     if (params.size() > 1)
