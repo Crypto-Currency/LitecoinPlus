@@ -435,6 +435,38 @@ unsigned int LimitOrphanTxSize(unsigned int nMaxOrphans)
     return nEvicted;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//
+// CBlockLocator
+//
+void CBlockLocator::Set(const CBlockIndex* pindex)
+{
+    vHave.clear();
+    int i = 30;
+    while ((pindex) && (i > 0))
+    {
+        vHave.push_back(pindex->GetBlockHash());
+        pindex = pindex->pprev;
+		i--;		
+    }
+    vHave.push_back((!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet));
+}
+
+CBlockIndex* CBlockLocator::GetBlockIndex()
+{
+    // Find the first block the caller has in the main chain
+    BOOST_FOREACH(const uint256& hash, vHave)
+    {
+        std::map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hash);
+        if (mi != mapBlockIndex.end())
+        {
+            CBlockIndex* pindex = (*mi).second;
+            if (pindex->IsInMainChain())
+                return pindex;
+        }
+    }
+    return pindexGenesisBlock;
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2482,10 +2514,11 @@ bool CBlock::AcceptBlock(bool lessAggressive)
 		if (blockSyncingTraceTiming && blockSyncingAcceptBlock)
 			fprintf(stderr, "AcceptBlock()/[chk 6.1] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
 
+		// by Simone: no one ever broadcast any checkpoint as LCP is fully decentralized coin, so this part is fully commented
 		// ppcoin: check that the block satisfies synchronized checkpoint
 		// by Simone: do this every 500 blocks, not at every block, during initial sync
 		// during normal operation, we can do it every block, just to be sure
-		static int checkSyncCounter = 0;
+		/*static int checkSyncCounter = 0;
 		if (checkSyncCounter > (IsInitialBlockDownload() ? 500 : 0))
 		{
 			checkSyncCounter = 0;
@@ -2501,7 +2534,7 @@ bool CBlock::AcceptBlock(bool lessAggressive)
 				}
 			}
 		}
-		checkSyncCounter++;
+		checkSyncCounter++;*/
 
 		if (blockSyncingTraceTiming && blockSyncingAcceptBlock)
 			fprintf(stderr, "AcceptBlock()/[chk 7] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
@@ -3888,6 +3921,9 @@ std::string testver=incomingver.substr(index); // first chr should be ':'
     }
     else if (strCommand == "checkpoint")
     {
+
+		fprintf(stderr, "CHECKPOINT YES\n");
+
         CSyncCheckpoint checkpoint;
         vRecv >> checkpoint;
 
@@ -3902,42 +3938,6 @@ std::string testver=incomingver.substr(index); // first chr should be ':'
 			}
         }
     }
-
-    else if (strCommand == "getheaders")
-    {
-        CBlockLocator locator;
-        uint256 hashStop;
-        vRecv >> locator >> hashStop;
-
-        CBlockIndex* pindex = NULL;
-        if (locator.IsNull())
-        {
-            // If locator is null, return the hashStop block
-            map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashStop);
-            if (mi == mapBlockIndex.end())
-                return true;
-            pindex = (*mi).second;
-        }
-        else
-        {
-            // Find the last block the caller has in the main chain
-            pindex = locator.GetBlockIndex();
-            if (pindex)
-                pindex = pindex->pnext;
-        }
-
-        vector<CBlock> vHeaders;
-        int nLimit = 2000;
-        printf("getheaders %d to %s\n", (pindex ? pindex->nHeight : -1), hashStop.ToString().substr(0,20).c_str());
-        for (; pindex; pindex = pindex->pnext)
-        {
-            vHeaders.push_back(pindex->GetBlockHeader());
-            if (--nLimit <= 0 || pindex->GetBlockHash() == hashStop)
-                break;
-        }
-        pfrom->PushMessage("headers", vHeaders);
-    }
-
 
     else if (strCommand == "tx")
     {
