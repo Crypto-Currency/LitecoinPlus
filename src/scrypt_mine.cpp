@@ -29,7 +29,15 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <xmmintrin.h>
+
+extern "C"
+{
+  #ifndef NOSSE
+    #ifndef NO_ASM
+      #include <xmmintrin.h>
+    #endif
+  #endif
+}
 
 #include "scrypt_mine.h"
 #include "pbkdf2.h"
@@ -54,8 +62,8 @@ extern "C" void scrypt_core(uint32_t *X, uint32_t *V);
 extern "C" void scrypt_core_2way(uint32_t *X, uint32_t *Y, uint32_t *V);
 extern "C" void scrypt_core_3way(uint32_t *X, uint32_t *Y, uint32_t *Z, uint32_t *V);
 
-#elif defined(__i386__)
-
+//#elif defined(__i386__)
+#elif ( defined(__i386__)||defined(__arm__) )
 #define SCRYPT_BUFFER_SIZE (131072 + 63)
 
 extern  "C" void scrypt_core(uint32_t *X, uint32_t *V);
