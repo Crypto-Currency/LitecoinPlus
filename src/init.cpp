@@ -307,6 +307,9 @@ std::string HelpMessage()
     return strUsage;
 }
 
+// by Simone: before doing anything, let's capture this status
+bool txIndexFileExists = true;
+
 /** Initialize bitcoin.
  *  @pre Parameters should be parsed and config file should be read.
  */
@@ -508,6 +511,17 @@ bool AppInit2()
 
     std::ostringstream strErrors;
 
+
+	// by Simone: we check if the file txindex.dat exists, otherwise we need to create it from the old index, the guts will take care of it
+	boost::filesystem::path path = GetDataDir() / "txindex.dat";
+	boost::filesystem::path pathBlk = GetDataDir() / "blkindex.dat";
+	if ((!boost::filesystem::exists(path)) && (boost::filesystem::exists(pathBlk)))
+	{
+		boost::filesystem::path pathOld = GetDataDir() / "blkindex.dat";
+		boost::filesystem::rename(pathOld, path);
+		txIndexFileExists = false;
+	}
+
     if (fDaemon)
         fprintf(stdout, "LitecoinPlus server starting\n");
 
@@ -684,7 +698,7 @@ bool AppInit2()
     if (GetBoolArg("-loadblockindextest"))
     {
         CTxDB txdb("r");
-        txdb.LoadBlockIndex();
+        txdb.blkDb->LoadBlockIndex();
         PrintBlockTree();
         return false;
     }

@@ -1749,9 +1749,9 @@ bool CBlock::DisconnectBlock(CTxDB& txdb, CBlockIndex* pindex)
     // The memory index structure will be changed after the db commits.
     if (pindex->pprev)
     {
-        CDiskBlockIndex blockindexPrev(pindex->pprev);
+        CDiskBlockIndexV2 blockindexPrev(pindex->pprev);
         blockindexPrev.hashNext = 0;
-        if (!txdb.WriteBlockIndex(blockindexPrev))
+        if (!txdb.blkDb->WriteBlockIndexV2(blockindexPrev))
             return error("DisconnectBlock() : WriteBlockIndex failed");
     }
 
@@ -1854,7 +1854,7 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
     // ppcoin: track money supply and mint amount info
     pindex->nMint = nValueOut - nValueIn + nFees;
     pindex->nMoneySupply = (pindex->pprev? pindex->pprev->nMoneySupply : 0) + nValueOut - nValueIn;
-    if (!txdb.WriteBlockIndex(CDiskBlockIndex(pindex)))
+    if (!txdb.blkDb->WriteBlockIndexV2(CDiskBlockIndexV2(pindex)))
         return error("Connect() : WriteBlockIndex for pindex failed");
 
     // ppcoin: fees are not collected by miners as in bitcoin
@@ -1886,9 +1886,9 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
     // The memory index structure will be changed after the db commits.
     if (pindex->pprev)
     {
-        CDiskBlockIndex blockindexPrev(pindex->pprev);
+        CDiskBlockIndexV2 blockindexPrev(pindex->pprev);
         blockindexPrev.hashNext = pindex->GetBlockHash();
-        if (!txdb.WriteBlockIndex(blockindexPrev))
+        if (!txdb.blkDb->WriteBlockIndexV2(blockindexPrev))
             return error("ConnectBlock() : WriteBlockIndex failed");
     }
 
@@ -2309,7 +2309,7 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
     CTxDB txdb;
     if (!txdb.TxnBegin())
         return false;
-    txdb.WriteBlockIndex(CDiskBlockIndex(pindexNew));
+    txdb.blkDb->WriteBlockIndexV2(CDiskBlockIndexV2(pindexNew));
 	if (!txdb.TxnCommit())
 		return false;
 
@@ -3043,20 +3043,23 @@ bool LoadBlockIndex(bool fAllowNew)
     }
 
     //
-    // Load block index
+    // special opening way in case need splicing on boot
     //
-    CTxDB txdb("cr");
-    if (!txdb.LoadBlockIndex())
+	CTxDB txdb("cr");
+	extern bool txIndexFileExists;
+	if (!txIndexFileExists)
 	{
-
-	// by Simone: we don't give up at first failure, might be a bad cache, let's just clean cache up and try again
-		txdb.DestroyCachedIndex();
-		if (!txdb.LoadBlockIndex())
+		txdb.Close();
+		CTxDB rwtxdb;
+	    if (!rwtxdb.blkDb->LoadBlockIndex())
 		{
 			return false;
 		}
+	} else if (!txdb.blkDb->LoadBlockIndex())
+	{	
+		txdb.Close();
+		return false;
 	}
-    txdb.Close();
 
     //
     // Init with genesis block
