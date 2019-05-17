@@ -1522,10 +1522,8 @@ bool CTxDB::SpliceTxIndex()
 	pcursor1->close();
 
 	// now erase all stuff not needed from the txindex.dat file
-	char pString[256];
-	sprintf(pString, (_("Cleaning up...")).c_str());
 #ifdef QT_GUI
-	uiInterface.InitMessage(pString);
+	uiInterface.InitMessage((_("Cleaning up...")).c_str());
 #endif
 	for (map<unsigned long, uint256>::iterator mi = eraseHashes.begin(); mi != eraseHashes.end(); ++mi)
 	{
