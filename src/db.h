@@ -328,14 +328,36 @@ public:
 
 
 
+/** By Simone: separate block index file for blockchain index !!!!!!!!!!!! (blkindex.dat) */
+class CBlkDB : public CDB
+{
+public:
+    CBlkDB(CTxDB *txdb, const char* pszMode="r+") : CDB("blkindex.dat", pszMode) { pTxdb = txdb; }
+	CTxDB *pTxdb;
+private:
+    CBlkDB(const CBlkDB&);
+    void operator=(const CBlkDB&);
+public:
+    bool WriteBlockIndex(const CDiskBlockIndex& blockindex, uint256 blockHash = 0);
+    bool WriteBlockIndexV2(const CDiskBlockIndexV2& blockindex);
+	bool ReadBlockIndex(uint256 hash, CDiskBlockIndex& blockindex);
+	bool EraseBlockIndex(uint256 hash);
+    bool LoadBlockIndex();
+    void DestroyCachedIndex();
+private:
+    u_int32_t GetCount();
+    bool LoadBlockIndexGuts();
+};
 
 
 
-/** Access to the transaction database (blkindex.dat) */
+
+/** Access to the transaction database (txindex.dat) */
 class CTxDB : public CDB
 {
 public:
-    CTxDB(const char* pszMode="r+") : CDB("blkindex.dat", pszMode) { }
+    CTxDB(const char* pszMode="r+") : CDB("txindex.dat", pszMode) { blkDb = new CBlkDB(this, pszMode); }
+	CBlkDB *blkDb;
 private:
     CTxDB(const CTxDB&);
     void operator=(const CTxDB&);
@@ -349,7 +371,6 @@ public:
     bool ReadDiskTx(uint256 hash, CTransaction& tx);
     bool ReadDiskTx(COutPoint outpoint, CTransaction& tx, CTxIndex& txindex);
     bool ReadDiskTx(COutPoint outpoint, CTransaction& tx);
-    bool WriteBlockIndex(const CDiskBlockIndex& blockindex);
     bool ReadHashBestChain(uint256& hashBestChain);
     bool WriteHashBestChain(uint256 hashBestChain);
     bool ReadBestInvalidTrust(CBigNum& bnBestInvalidTrust);
@@ -358,11 +379,10 @@ public:
     bool WriteSyncCheckpoint(uint256 hashCheckpoint);
     bool ReadCheckpointPubKey(std::string& strPubKey);
     bool WriteCheckpointPubKey(const std::string& strPubKey);
-    bool LoadBlockIndex();
-    void DestroyCachedIndex();
-private:
-    u_int32_t GetCount();
-    bool LoadBlockIndexGuts();
+
+// by Simone: these functions are needed here only once during splitting of the index on disk 
+	bool EraseBlockIndex(uint256 hash);
+	bool SpliceTxIndex();
 };
 
 

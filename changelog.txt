@@ -17,6 +17,11 @@
 - BLOATFIX: removed all unused functions from CBlockLocator class
 - rpcwallet.cpp: do not use CBlockLocator to find blocks, use boost/map
 - CBlockLocator::Set: instead of the mega heavy loop, just init to last 30 blocks + genesis one
+- Removed separate boost at startup
+- Added CBlkDB class
+- Splitting blkindex.dat and txindex.dat files: one contains block index, the other transactions
+- Automatic upgrade procedure when running the first time and it does not find the separate index
+- CDiskBlockIndexV2: store hash of current block for wasting much less CPU at boot
 
 
 ***** Version 3.3.2.13 (DEV version, preparing for 4.0.0.1)

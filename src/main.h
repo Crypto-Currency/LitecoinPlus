@@ -1340,8 +1340,6 @@ public:
     }
 };
 
-
-
 /** Used to marshal pointers into hashes for db storage. */
 class CDiskBlockIndex : public CBlockIndex
 {
@@ -1412,6 +1410,103 @@ public:
     std::string ToString() const
     {
         std::string str = "CDiskBlockIndex(";
+        str += CBlockIndex::ToString();
+        str += strprintf("\n                hashBlock=%s, hashPrev=%s, hashNext=%s)",
+            GetBlockHash().ToString().c_str(),
+            hashPrev.ToString().c_str(),
+            hashNext.ToString().c_str());
+        return str;
+    }
+
+    void print() const
+    {
+        printf("%s\n", ToString().c_str());
+    }
+};
+
+
+/** by Simone: v2, we cache also the hash directly, it saves a lot of resources around the code */
+class CDiskBlockIndexV2 : public CBlockIndex
+{
+public:
+	uint256 hash;
+    uint256 hashPrev;
+    uint256 hashNext;
+
+    CDiskBlockIndexV2()
+    {
+        hash = 0;
+        hashPrev = 0;
+        hashNext = 0;
+    }
+
+    explicit CDiskBlockIndexV2(CBlockIndex* pindex) : CBlockIndex(*pindex)
+    {
+        hashPrev = (pprev ? pprev->GetBlockHash() : 0);
+        hashNext = (pnext ? pnext->GetBlockHash() : 0);
+    }
+
+    IMPLEMENT_SERIALIZE
+    (
+        if (!(nType & SER_GETHASH))
+            READWRITE(nVersion);
+
+        READWRITE(hashNext);
+        READWRITE(nFile);
+        READWRITE(nBlockPos);
+        READWRITE(nHeight);
+        READWRITE(nMint);
+        READWRITE(nMoneySupply);
+        READWRITE(nFlags);
+        READWRITE(nStakeModifier);
+        if (IsProofOfStake())
+        {
+            READWRITE(prevoutStake);
+            READWRITE(nStakeTime);
+            READWRITE(hashProofOfStake);
+        }
+        else if (fRead)
+        {
+            const_cast<CDiskBlockIndexV2*>(this)->prevoutStake.SetNull();
+            const_cast<CDiskBlockIndexV2*>(this)->nStakeTime = 0;
+            const_cast<CDiskBlockIndexV2*>(this)->hashProofOfStake = 0;
+        }
+
+        // block header
+        READWRITE(this->nVersion);
+        READWRITE(hashPrev);
+        READWRITE(hashMerkleRoot);
+        READWRITE(nTime);
+        READWRITE(nBits);
+        READWRITE(nNonce);
+
+		// add the hash of the current block
+		READWRITE(hash);
+    )
+
+    uint256 GetBlockHash() const
+    {
+		if (hash != 0)
+		{
+			return hash;
+		}
+		else
+		{
+		    CBlock block;
+		    block.nVersion        = nVersion;
+		    block.hashPrevBlock   = hashPrev;
+		    block.hashMerkleRoot  = hashMerkleRoot;
+		    block.nTime           = nTime;
+		    block.nBits           = nBits;
+		    block.nNonce          = nNonce;
+		    return block.GetHash();
+		}
+    }
+
+
+    std::string ToString() const
+    {
+        std::string str = "CDiskBlockIndexV2(";
         str += CBlockIndex::ToString();
         str += strprintf("\n                hashBlock=%s, hashPrev=%s, hashNext=%s)",
             GetBlockHash().ToString().c_str(),
