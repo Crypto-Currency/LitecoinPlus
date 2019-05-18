@@ -2312,11 +2312,11 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
 	{
 		gtxdb = new CTxDB();
 	}
-    //if (!gtxdb->TxnBegin())
-    //    return false;
+    if (!gtxdb->blkDb->TxnBegin())
+        return false;
     gtxdb->blkDb->WriteBlockIndexV2(CDiskBlockIndexV2(pindexNew));
-	//if (!gtxdb->TxnCommit())
-	//	return false;
+	if (!gtxdb->blkDb->TxnCommit())
+		return false;
 
 	if (blockSyncingTraceTiming && blockSyncingAddToBlockIndex)
 		fprintf(stderr, "AddToBlockIndex()/[chk 3] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
