@@ -556,7 +556,7 @@ CDB::CDB(const char *pszFile, const char* pszMode) :
 
 static bool IsChainFile(std::string strFile)
 {
-    if (strFile == "blkindex.dat")
+    if ((strFile == "blkindex.dat") || (strFile == "txindex.dat"))
         return true;
 
     return false;
@@ -579,6 +579,8 @@ void CDB::Close()
         nMinutes = 2;
     if (IsChainFile(strFile) && IsInitialBlockDownload())
         nMinutes = 5;
+
+	//fprintf(stderr, "NMIN %s::%d\n", strFile.c_str(), nMinutes);
 
     bitdb.dbenv.txn_checkpoint(nMinutes ? GetArg("-dblogsize", 100)*1024 : 0, nMinutes, 0);
 
@@ -705,6 +707,12 @@ bool CDB::Rewrite(const string& strFile, const char* pszSkip)
     return false;
 }
 
+bool CDB::Compact()
+{
+    if (!pdb)
+		return false;
+	return pdb->compact(activeTxn, NULL, NULL, NULL, DB_FREE_SPACE, NULL);
+}
 
 void CDBEnv::Flush(bool fShutdown)
 {
@@ -1529,6 +1537,9 @@ bool CTxDB::SpliceTxIndex()
 	{
 		EraseBlockIndex((*mi).second);
 	}
+
+	// compact DB
+	Compact();
 
 	// exit with success
 	return true;

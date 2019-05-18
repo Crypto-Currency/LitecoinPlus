@@ -323,6 +323,7 @@ public:
     }
 
     bool static Rewrite(const std::string& strFile, const char* pszSkip = NULL);
+	bool Compact();
 };
 
 
@@ -358,6 +359,7 @@ class CTxDB : public CDB
 public:
     CTxDB(const char* pszMode="r+") : CDB("txindex.dat", pszMode) { blkDb = new CBlkDB(this, pszMode); }
 	CBlkDB *blkDb;
+	void Close() { blkDb->TxnCommit(); blkDb->Close(); CDB::Close(); }
 private:
     CTxDB(const CTxDB&);
     void operator=(const CTxDB&);
