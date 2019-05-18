@@ -335,9 +335,6 @@ class CBlkDB : public CDB
 public:
     CBlkDB(CTxDB *txdb, const char* pszMode="r+") : CDB("blkindex.dat", pszMode) { pTxdb = txdb; }
 	CTxDB *pTxdb;
-private:
-    CBlkDB(const CBlkDB&);
-    void operator=(const CBlkDB&);
 public:
     bool WriteBlockIndex(const CDiskBlockIndex& blockindex, uint256 blockHash = 0);
     bool WriteBlockIndexV2(const CDiskBlockIndexV2& blockindex);
@@ -359,7 +356,8 @@ class CTxDB : public CDB
 public:
     CTxDB(const char* pszMode="r+") : CDB("txindex.dat", pszMode) { blkDb = new CBlkDB(this, pszMode); }
 	CBlkDB *blkDb;
-	void Close() { blkDb->TxnCommit(); blkDb->Close(); CDB::Close(); }
+	void Close() { blkDb->Close(); CDB::Close(); }
+	~CTxDB() { Close(); }
 private:
     CTxDB(const CTxDB&);
     void operator=(const CTxDB&);

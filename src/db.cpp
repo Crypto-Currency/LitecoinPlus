@@ -739,7 +739,9 @@ void CDBEnv::Flush(bool fShutdown)
                 if (!IsChainFile(strFile) || fDetachDB) {
                     printf("%s detach\n", strFile.c_str());
                     if (!fMockDb)
+					{
                         dbenv.lsn_reset(strFile.c_str(), 0);
+					}
                 }
                 printf("%s closed\n", strFile.c_str());
                 mapFileUseCount.erase(mi++);

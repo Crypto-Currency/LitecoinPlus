@@ -2341,10 +2341,10 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
 	static unsigned int countCommits = 9000;
 	if (countCommits == 0)
 	{
-		bitdb.Flush(false);
-		countCommits = 9000;
 		gtxdb->Close();
 		gtxdb = NULL;
+		bitdb.Flush(false);
+		countCommits = 9000;
 		gtxdb = new CTxDB();
 	}
 	countCommits--;
@@ -2612,7 +2612,7 @@ bool CBlock::AcceptBlock(bool lessAggressive)
 		}
 
 		// ppcoin: check pending sync-checkpoint
-		//Checkpoints::AcceptPendingSyncCheckpoint();
+		Checkpoints::AcceptPendingSyncCheckpoint();
 	}
 
 	if (blockSyncingTraceTiming && blockSyncingAcceptBlock)
@@ -3138,12 +3138,12 @@ bool LoadBlockIndex(bool fAllowNew)
             return error("LoadBlockIndex() : genesis block not accepted");
 
         // ppcoin: initialize synchronized checkpoint
-        //if (!Checkpoints::WriteSyncCheckpoint((!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet)))
-        //    return error("LoadBlockIndex() : failed to init sync checkpoint");
+        if (!Checkpoints::WriteSyncCheckpoint((!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet)))
+            return error("LoadBlockIndex() : failed to init sync checkpoint");
     }
 
     // ppcoin: if checkpoint master key changed must reset sync-checkpoint
-    /*{
+    {
         CTxDB txdb;
         string strPubKey = "";
         if (!txdb.ReadCheckpointPubKey(strPubKey) || strPubKey != CSyncCheckpoint::strMasterPubKey)
@@ -3158,7 +3158,7 @@ bool LoadBlockIndex(bool fAllowNew)
                 return error("LoadBlockIndex() : failed to reset sync-checkpoint");
         }
         txdb.Close();
-    }*/
+    }
 
     return true;
 }
