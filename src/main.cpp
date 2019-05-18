@@ -2244,6 +2244,8 @@ bool CBlock::GetCoinAge(uint64& nCoinAge) const
     return true;
 }
 
+// by Simone: global CTxDB object for the below function can save hours of download...
+CTxDB *gtxdb = NULL;
 bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
 {
     // Check for duplicate
@@ -2304,13 +2306,16 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
         setStakeSeen.insert(make_pair(pindexNew->prevoutStake, pindexNew->nStakeTime));
     pindexNew->phashBlock = &((*mi).first);
 
-	// by Simone: the old way
+	// by Simone: use global CTxDB object !
     // Write to disk block index
-    CTxDB txdb;
-    if (!txdb.TxnBegin())
+    if (!gtxdb)
+	{
+		gtxdb = new CTxDB();
+	}
+    if (!gtxdb->TxnBegin())
         return false;
-    txdb.blkDb->WriteBlockIndexV2(CDiskBlockIndexV2(pindexNew));
-	if (!txdb.TxnCommit())
+    gtxdb->blkDb->WriteBlockIndexV2(CDiskBlockIndexV2(pindexNew));
+	if (!gtxdb->TxnCommit())
 		return false;
 
 	if (blockSyncingTraceTiming && blockSyncingAddToBlockIndex)
@@ -2319,14 +2324,14 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
 
     // New best
 	if (pindexNew->bnChainTrust > bnBestChainTrust)
-		if (!SetBestChain(txdb, pindexNew))
+		if (!SetBestChain(*gtxdb, pindexNew))
 			return false;
 
 	if (blockSyncingTraceTiming && blockSyncingAddToBlockIndex)
 		fprintf(stderr, "AddToBlockIndex()/[chk 3.1] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
 	nStart = GetTimeMillis();
 
-    txdb.Close();
+    //txdb.Close();
 
 	if (blockSyncingTraceTiming && blockSyncingAddToBlockIndex)
 		fprintf(stderr, "AddToBlockIndex()/[chk 4] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
