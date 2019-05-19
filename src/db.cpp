@@ -781,7 +781,7 @@ bool CBlkDB::WriteBlockIndex(const CDiskBlockIndex& blockindex, uint256 blockHas
 
 bool CBlkDB::WriteBlockIndexV2(const CDiskBlockIndexV2& blockindex)
 {
-	bool res = Write(make_pair(string("blockindex"), blockindex.GetBlockHash()), blockindex);
+	bool res = Write(make_pair(string("blockindex"), blockindex.hash), blockindex);
     return res; 
 }
 
@@ -1065,6 +1065,7 @@ bool CBlkDB::LoadBlockIndexGuts()
 	cnt = (double)boost::filesystem::file_size(GetDataDir() / "blkindex.dat") / 337.0;
 	fFlags = DB_SET_RANGE;
 	oldProgress = -1;
+	map<unsigned long, CBlockIndex *> repairIndexes;
 	loop
 	{
 	    // Read next record
@@ -1122,6 +1123,12 @@ bool CBlkDB::LoadBlockIndexGuts()
 		        pindexNew->nBits          = diskindex.nBits;
 		        pindexNew->nNonce         = diskindex.nNonce;
 
+				// detect empty hashes
+				if (diskindex.hash == 0)
+				{
+					repairIndexes.insert(make_pair(ccc, pindexNew));
+				}
+
 		        // Watch for genesis block
 		        if (pindexGenesisBlock == NULL && diskindex.GetBlockHash() == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet))
 		            pindexGenesisBlock = pindexNew;
@@ -1143,6 +1150,20 @@ bool CBlkDB::LoadBlockIndexGuts()
 	    }
 	}
 	pcursor->close();
+
+	// now repair index if needed
+#ifdef QT_GUI
+	uiInterface.InitMessage((_("Repairing index...")).c_str());
+#endif
+	for (map<unsigned long, CBlockIndex *>::iterator mi = repairIndexes.begin(); mi != repairIndexes.end(); ++mi)
+	{
+		CDiskBlockIndexV2 repairIndex((*mi).second);
+		WriteBlockIndexV2(repairIndex);
+
+		fprintf(stderr, "EMPTY DAMN HASH\n");
+
+	}
+	repairIndexes.clear();
 	return true;
 
 

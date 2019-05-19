@@ -1442,6 +1442,7 @@ public:
 
     explicit CDiskBlockIndexV2(CBlockIndex* pindex) : CBlockIndex(*pindex)
     {
+		hash = pindex->GetBlockHash();
         hashPrev = (pprev ? pprev->GetBlockHash() : 0);
         hashNext = (pnext ? pnext->GetBlockHash() : 0);
     }
@@ -1486,21 +1487,14 @@ public:
 
     uint256 GetBlockHash() const
     {
-		if (hash != 0)
-		{
-			return hash;
-		}
-		else
-		{
-		    CBlock block;
-		    block.nVersion        = nVersion;
-		    block.hashPrevBlock   = hashPrev;
-		    block.hashMerkleRoot  = hashMerkleRoot;
-		    block.nTime           = nTime;
-		    block.nBits           = nBits;
-		    block.nNonce          = nNonce;
-		    return block.GetHash();
-		}
+	    CBlock block;
+	    block.nVersion        = nVersion;
+	    block.hashPrevBlock   = hashPrev;
+	    block.hashMerkleRoot  = hashMerkleRoot;
+	    block.nTime           = nTime;
+	    block.nBits           = nBits;
+	    block.nNonce          = nNonce;
+	    return (hash != 0) ? hash : block.GetHash();
     }
 
 

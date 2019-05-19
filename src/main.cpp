@@ -3053,7 +3053,7 @@ bool LoadBlockIndex(bool fAllowNew)
     //
     // special opening way in case need splicing on boot
     //
-	CTxDB txdb("cr");
+	CTxDB txdb("cr+");
 	extern bool txIndexFileExists;
 	if (!txIndexFileExists)
 	{
