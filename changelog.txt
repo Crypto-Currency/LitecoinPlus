@@ -22,6 +22,7 @@
 - Splitting blkindex.dat and txindex.dat files: one contains block index, the other transactions
 - Automatic upgrade procedure when running the first time and it does not find the separate index
 - CDiskBlockIndexV2: store hash of current block for wasting much less CPU at boot
+- Drastic improvement of syncing speed (10000 blocks/minute with SSD, same speed as bootstrap file)
 
 
 ***** Version 3.3.2.13 (DEV version, preparing for 4.0.0.1)
