@@ -8,11 +8,18 @@
 // Name of client reported in the 'version' message. Report the same name
 // for both bitcoind and bitcoin-qt, to make it harder for attackers to
 // target servers or GUI users specifically.
-const std::string CLIENT_NAME("LitecoinPlus");
+//const std::string CLIENT_NAME("LitecoinPlus");
 
 // Client version number
 #define CLIENT_VERSION_SUFFIX   ""
 
+#if defined(__arm__)
+const std::string CLIENT_NAME("LitecoinPlus-ARM");
+//#  define CLIENT_NAME "LitecoinPlus-ARM"
+#else
+const std::string CLIENT_NAME("LitecoinPlus");
+//#  define CLIENT_NAME "LitecoinPlus"
+#endif
 
 // The following part of the code determines the CLIENT_BUILD variable.
 // Several mechanisms are used for this:
