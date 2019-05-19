@@ -556,7 +556,7 @@ CDB::CDB(const char *pszFile, const char* pszMode) :
 
 static bool IsChainFile(std::string strFile)
 {
-    if (strFile == "blkindex.dat")
+    if ((strFile == "blkindex.dat") || (strFile == "txindex.dat"))
         return true;
 
     return false;
@@ -579,6 +579,8 @@ void CDB::Close()
         nMinutes = 2;
     if (IsChainFile(strFile) && IsInitialBlockDownload())
         nMinutes = 5;
+
+	//fprintf(stderr, "NMIN %s::%d\n", strFile.c_str(), nMinutes);
 
     bitdb.dbenv.txn_checkpoint(nMinutes ? GetArg("-dblogsize", 100)*1024 : 0, nMinutes, 0);
 
@@ -705,6 +707,12 @@ bool CDB::Rewrite(const string& strFile, const char* pszSkip)
     return false;
 }
 
+bool CDB::Compact()
+{
+    if (!pdb)
+		return false;
+	return pdb->compact(activeTxn, NULL, NULL, NULL, DB_FREE_SPACE, NULL);
+}
 
 void CDBEnv::Flush(bool fShutdown)
 {
@@ -731,7 +739,9 @@ void CDBEnv::Flush(bool fShutdown)
                 if (!IsChainFile(strFile) || fDetachDB) {
                     printf("%s detach\n", strFile.c_str());
                     if (!fMockDb)
+					{
                         dbenv.lsn_reset(strFile.c_str(), 0);
+					}
                 }
                 printf("%s closed\n", strFile.c_str());
                 mapFileUseCount.erase(mi++);
@@ -771,7 +781,7 @@ bool CBlkDB::WriteBlockIndex(const CDiskBlockIndex& blockindex, uint256 blockHas
 
 bool CBlkDB::WriteBlockIndexV2(const CDiskBlockIndexV2& blockindex)
 {
-	bool res = Write(make_pair(string("blockindex"), blockindex.GetBlockHash()), blockindex);
+	bool res = Write(make_pair(string("blockindex"), blockindex.hash), blockindex);
     return res; 
 }
 
@@ -1055,6 +1065,7 @@ bool CBlkDB::LoadBlockIndexGuts()
 	cnt = (double)boost::filesystem::file_size(GetDataDir() / "blkindex.dat") / 337.0;
 	fFlags = DB_SET_RANGE;
 	oldProgress = -1;
+	map<unsigned long, CBlockIndex *> repairIndexes;
 	loop
 	{
 	    // Read next record
@@ -1112,6 +1123,12 @@ bool CBlkDB::LoadBlockIndexGuts()
 		        pindexNew->nBits          = diskindex.nBits;
 		        pindexNew->nNonce         = diskindex.nNonce;
 
+				// detect empty hashes
+				if (diskindex.hash == 0)
+				{
+					repairIndexes.insert(make_pair(ccc, pindexNew));
+				}
+
 		        // Watch for genesis block
 		        if (pindexGenesisBlock == NULL && diskindex.GetBlockHash() == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet))
 		            pindexGenesisBlock = pindexNew;
@@ -1133,6 +1150,20 @@ bool CBlkDB::LoadBlockIndexGuts()
 	    }
 	}
 	pcursor->close();
+
+	// now repair index if needed
+#ifdef QT_GUI
+	uiInterface.InitMessage((_("Repairing index...")).c_str());
+#endif
+	for (map<unsigned long, CBlockIndex *>::iterator mi = repairIndexes.begin(); mi != repairIndexes.end(); ++mi)
+	{
+		CDiskBlockIndexV2 repairIndex((*mi).second);
+		WriteBlockIndexV2(repairIndex);
+
+		fprintf(stderr, "EMPTY DAMN HASH\n");
+
+	}
+	repairIndexes.clear();
 	return true;
 
 
@@ -1529,6 +1560,9 @@ bool CTxDB::SpliceTxIndex()
 	{
 		EraseBlockIndex((*mi).second);
 	}
+
+	// compact DB
+	Compact();
 
 	// exit with success
 	return true;

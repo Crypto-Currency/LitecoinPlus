@@ -2341,10 +2341,10 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
 	static unsigned int countCommits = 9000;
 	if (countCommits == 0)
 	{
-		gtxdb->Close();
-		gtxdb = NULL;
 		bitdb.Flush(false);
 		countCommits = 9000;
+		gtxdb->Close();
+		gtxdb = NULL;
 		gtxdb = new CTxDB();
 	}
 	countCommits--;
@@ -3053,7 +3053,7 @@ bool LoadBlockIndex(bool fAllowNew)
     //
     // special opening way in case need splicing on boot
     //
-	CTxDB txdb("cr+");
+	CTxDB txdb("cr");
 	extern bool txIndexFileExists;
 	if (!txIndexFileExists)
 	{

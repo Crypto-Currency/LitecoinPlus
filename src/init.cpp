@@ -51,6 +51,7 @@ void StartShutdown()
 #endif
 }
 
+extern CTxDB *gtxdb;
 void Shutdown(void* parg)
 {
     static CCriticalSection cs_Shutdown;
@@ -77,6 +78,9 @@ void Shutdown(void* parg)
         bitdb.Flush(false);
         StopNode();
 	    UnregisterNodeSignals(GetNodeSignals());
+		if (gtxdb) {
+			gtxdb->Close();
+		}
         bitdb.Flush(true);
         boost::filesystem::remove(GetPidFile());
         UnregisterWallet(pwalletMain);
