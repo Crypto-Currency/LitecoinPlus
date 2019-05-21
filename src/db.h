@@ -356,8 +356,8 @@ class CTxDB : public CDB
 public:
     CTxDB(const char* pszMode="r+") : CDB("txindex.dat", pszMode) { blkDb = new CBlkDB(this, pszMode); }
 	CBlkDB *blkDb;
-	void Close() { blkDb->Close(); CDB::Close(); }
-	~CTxDB() { Close(); }
+//	void Close() { blkDb->Close(); CDB::Close(); }
+	~CTxDB() { delete blkDb; Close(); }
 private:
     CTxDB(const CTxDB&);
     void operator=(const CTxDB&);
