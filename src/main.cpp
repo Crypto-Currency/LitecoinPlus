@@ -2342,6 +2342,7 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
 	if (countCommits == 0)
 	{
 		gtxdb->Close();
+		delete gtxdb;
 		gtxdb = NULL;
 		bitdb.Flush(false);
 		countCommits = 9000;
