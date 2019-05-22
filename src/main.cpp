@@ -4035,7 +4035,7 @@ std::string testver=incomingver.substr(index); // first chr should be ':'
 #ifdef QT_GUI
 		extern void RefreshQtGui();
 		static int blockCount = 0;
-		if (blockCount > 20)
+		if (blockCount > 100)
 		{
 			RefreshQtGui();
 			blockCount = 0;
