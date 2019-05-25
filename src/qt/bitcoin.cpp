@@ -156,6 +156,7 @@ static std::string Translate(const char* psz)
 
 /* by SIMONE: connect Session Manager of PC to the quit command, so no more forced quits ! */
 ShutdownWindow *sdwRef;
+#ifndef WIN32
 void QApplication::commitData(QSessionManager& manager)
 {
 // if we enter in a first phase, request a second one, and do operations there
@@ -182,6 +183,7 @@ void QApplication::commitData(QSessionManager& manager)
 		manager.release();
 	}
 }
+#endif
 
 /* Handle runaway exceptions. Shows a message box with the problem and quits the program.
  */
