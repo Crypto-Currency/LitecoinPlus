@@ -31,6 +31,7 @@
 #include "skinspage.h"
 #include "dustinggui.h"
 #include "splash.h"
+#include "init.h"
 
 #ifdef Q_OS_MAC
 #include "macdockiconhandler.h"
@@ -92,6 +93,38 @@ void updateBitcoinGUISplashMessage(char *message)
 		stwref->setMessage(message);
 	}
 }
+
+// by Simone: session commit data signal
+bool isInSessionHandling = false;
+extern ShutdownWindow *sdwRef;
+void BitcoinGUI::walletCommitData(QSessionManager& manager)
+{
+// if we enter in a first phase, request a second one, and do operations there
+	if (!manager.isPhase2())
+	{
+		isInSessionHandling = true;
+		OutputDebugStringF("User attempting shutdown, waiting...\n");
+		manager.requestPhase2();
+		return;
+	} else
+
+// second phase, save all data and quit cleanly
+	{
+		isInSessionHandling = false;
+		OutputDebugStringF("Shutdown invoked by session. Shutting down...\n");
+		if (manager.allowsInteraction())
+		{
+			sdwRef->showShutdownWindow();
+			QApplication::processEvents();
+			Sleep(100);
+			QApplication::processEvents();
+
+		}
+		Shutdown(NULL);
+		manager.release();
+	}
+}
+
 
 // by Simone: expose loadSkin call
 void BitcoinGUI::loadSkin()
@@ -249,6 +282,9 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
     connect(addressBookPage, SIGNAL(verifyMessage(QString)), this, SLOT(gotoVerifyMessageTab(QString)));
     // Clicking on "Sign Message" in the receive coins page sends you to the sign message tab
     connect(receiveCoinsPage, SIGNAL(signMessage(QString)), this, SLOT(gotoSignMessageTab(QString)));
+
+	extern void walletCommitData(QSessionManager& manager);
+	connect(qApp, SIGNAL(commitDataRequest(QSessionManager&)), this, SLOT(walletCommitData(QSessionManager&)), Qt::DirectConnection);
 
     gotoOverviewPage();
 }
@@ -805,6 +841,12 @@ void BitcoinGUI::changeEvent(QEvent *e)
 
 void BitcoinGUI::closeEvent(QCloseEvent *event)
 {
+// by Simone: during session save data stuff, we do not exit
+	if (isInSessionHandling)
+	{
+		return;
+	}
+	
     if(clientModel)
     {
 #ifndef Q_OS_MAC // Ignored on Mac
