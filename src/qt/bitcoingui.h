@@ -5,6 +5,7 @@
 #include <QSystemTrayIcon>
 #include <QDialog>
 #include <QLabel>
+#include <QSessionManager>
 
 #include "util.h" // for uint64
 
@@ -195,6 +196,10 @@ public slots:
     void handleURI(QString strURI);
 
 private slots:
+
+	// by Simone: session commit data signal
+	void walletCommitData(QSessionManager& manager);
+
 	// by Simone: label online clicked, will set to go offline
 	void labelOnlineClicked();
 

@@ -18,7 +18,6 @@
 
 #include <QDesktopWidget>
 #include <QApplication>
-#include <QSessionManager>
 #include <QMessageBox>
 #include <QTextCodec>
 #include <QLocale>
@@ -154,39 +153,9 @@ static std::string Translate(const char* psz)
     return QCoreApplication::translate("bitcoin-core", psz).toStdString();
 }
 
-/* by SIMONE: connect Session Manager of PC to the quit command, so no more forced quits ! */
-ShutdownWindow *sdwRef;
-#ifndef WIN32
-void QApplication::commitData(QSessionManager& manager)
-{
-// if we enter in a first phase, request a second one, and do operations there
-	if (!manager.isPhase2())
-	{
-		printf("User attempting shutdown, waiting...\n");
-		manager.requestPhase2();
-		return;
-	}
-
-// second phase, save all data and quit cleanly
-	if (manager.isPhase2())
-	{
-		printf("Shutdown invoked by session. Shutting down...\n");
-		if (manager.allowsInteraction())
-		{
-			sdwRef->showShutdownWindow();
-			processEvents();
-			Sleep(100);
-			processEvents();
-
-		}
-		Shutdown(NULL);
-		manager.release();
-	}
-}
-#endif
-
 /* Handle runaway exceptions. Shows a message box with the problem and quits the program.
  */
+ShutdownWindow *sdwRef;
 static void handleRunawayException(std::exception *e)
 {
     PrintExceptionContinue(e, "Runaway exception");
