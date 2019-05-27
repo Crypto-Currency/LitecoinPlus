@@ -303,23 +303,10 @@ bool RecvLine(SOCKET hSocket, string& strLine)
 
 int GetnScore(const CService& addr)
 {
-    loop
-	{
-		{
-			TRY_LOCK(cs_mapLocalHost, lockMLH);
-			if (lockMLH)
-			{
-				if (mapLocalHost.count(addr) == LOCAL_NONE)
-					return 0;
-				return mapLocalHost[addr].nScore;
-			}
-			else
-			{
-				Sleep(20);
-				continue;
-			}
-		}
-	}
+	LOCK(cs_mapLocalHost);
+	if (mapLocalHost.count(addr) == LOCAL_NONE)
+		return 0;
+	return mapLocalHost[addr].nScore;
 }
 
 // Is our peer's addrLocal potentially useful as an external IP source?
@@ -1925,18 +1912,10 @@ void ThreadMessageHandler2(void* parg)
 		// by Simone: let's try a TRY_LOCK approach here in case of busy situations
         vector<CNode*> vNodesCopy;
 		{
-			TRY_LOCK(cs_vNodes, lockVNodes);
-			if (lockVNodes)
-			{
-		        vNodesCopy = vNodes;
-		        BOOST_FOREACH(CNode* pnode, vNodesCopy)
-		            pnode->AddRef();
-        	}
-			else
-			{
-				Sleep(50);
-				continue;
-			}
+			LOCK(cs_vNodes);
+	        vNodesCopy = vNodes;
+	        BOOST_FOREACH(CNode* pnode, vNodesCopy)
+	            pnode->AddRef();
 		}
 
         // Poll the connected nodes for messages*/
@@ -1969,26 +1948,10 @@ void ThreadMessageHandler2(void* parg)
         }
 
 
-		// by Simone: this approach also change to a try lock, but this one cannot be skipped, must be done
-		loop
 		{
-			{
-			    TRY_LOCK(cs_vNodes, lockVNodes);
-				if (lockVNodes)
-				{
-					BOOST_FOREACH(CNode* pnode, vNodesCopy)
-					    pnode->Release();
-
-					// exit the loop
-					break;
-				}
-				else
-				{
-					// wait for a moment then retry
-					Sleep(50);
-					continue;
-				}
-			}
+		    LOCK(cs_vNodes);
+			BOOST_FOREACH(CNode* pnode, vNodesCopy)
+			    pnode->Release();
 		}
 
         // Wait and allow messages to bunch up.
