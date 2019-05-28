@@ -125,6 +125,12 @@ void BitcoinGUI::walletCommitData(QSessionManager& manager)
 	}
 }
 
+void BitcoinGUI::aboutToQuit()
+{
+	isInSessionHandling = false;
+	OutputDebugStringF("Shutdown invoked by AboutToQuit(). Shutting down...\n");
+	Shutdown(NULL);
+}
 
 // by Simone: expose loadSkin call
 void BitcoinGUI::loadSkin()
@@ -283,8 +289,11 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
     // Clicking on "Sign Message" in the receive coins page sends you to the sign message tab
     connect(receiveCoinsPage, SIGNAL(signMessage(QString)), this, SLOT(gotoSignMessageTab(QString)));
 
-	extern void walletCommitData(QSessionManager& manager);
 	connect(qApp, SIGNAL(commitDataRequest(QSessionManager&)), this, SLOT(walletCommitData(QSessionManager&)), Qt::DirectConnection);
+
+#ifdef WIN32
+	connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(aboutToQuit()), Qt::DirectConnection);
+#endif
 
     gotoOverviewPage();
 }

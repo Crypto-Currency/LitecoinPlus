@@ -199,6 +199,7 @@ private slots:
 
 	// by Simone: session commit data signal
 	void walletCommitData(QSessionManager& manager);
+	void aboutToQuit();
 
 	// by Simone: label online clicked, will set to go offline
 	void labelOnlineClicked();
