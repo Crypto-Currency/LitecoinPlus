@@ -11,7 +11,7 @@ Aug 2017
   increased MAX_MONEY to 4,000,000
 <br>
 <br>
-web site http://litecoinplus.co/<br>
+web site https://litecoinplus.co/<br>
 explorer http://lcp.altcoinwarz.com/<br>
 <br>
 windows-QT and macOS-QT wallets can be downloaded from the web site<br>
