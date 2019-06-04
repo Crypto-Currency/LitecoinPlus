@@ -1,3 +1,8 @@
+***** Version 4.0.0.2
+- Changed version to avoid testing confusion
+- Read initial database load in bulk (128M chunks), greatly speeding boot on all drives, especially old HDD
+
+
 ***** Version 4.0.0.1
 - Major overall improvement release
 - Changed alert broadcasting private key (only known by two persons)
