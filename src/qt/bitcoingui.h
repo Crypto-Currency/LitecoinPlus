@@ -123,6 +123,7 @@ private:
     QAction *addressBookAction;
 	QAction *skinsPageAction;
 	QAction *dustingPageAction;
+	QAction* openConfigAction;
     QAction *signMessageAction;
     QAction *verifyMessageAction;
     QAction *aboutAction;
@@ -214,6 +215,8 @@ private slots:
     void gotoSkinsPage();
     /** Switch to skins page */
     void gotoDustingPage();
+    // Open LitecoinPlus.conf
+    void openConfig();
     /** Switch to receive coins page */
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */

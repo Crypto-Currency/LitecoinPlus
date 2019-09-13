@@ -295,6 +295,8 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
 	connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(aboutToQuit()), Qt::DirectConnection);
 #endif
 
+    connect(openConfigAction, SIGNAL(triggered()), this, SLOT(openConfig()));
+
     gotoOverviewPage();
 }
 
@@ -404,6 +406,9 @@ void BitcoinGUI::createActions()
     skinsPageAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
     tabGroup->addAction(skinsPageAction);
 
+    openConfigAction = new QAction(QIcon(":/icons/edit"), tr("Open Wallet &Configuration File"), this);
+    openConfigAction->setStatusTip(tr("Open wallet configuration file"));
+
     dustingPageAction = new QAction(QIcon(":/icons/dusting"), tr("&Dusting"), this);
     dustingPageAction->setToolTip(tr("Monitor the dusting of your wallet"));
     dustingPageAction->setCheckable(true);
@@ -499,6 +504,8 @@ void BitcoinGUI::createMenuBar()
 
     // Configure the menus
     QMenu *file = appMenuBar->addMenu(tr("&File"));
+    file->addAction(openConfigAction);
+    file->addSeparator();
     file->addAction(exportAction);
     file->addSeparator();
     file->addAction(quitAction);
@@ -642,6 +649,7 @@ void BitcoinGUI::createTrayIcon()
     trayIconMenu->addAction(signMessageAction);
     trayIconMenu->addAction(verifyMessageAction);
     trayIconMenu->addSeparator();
+    trayIconMenu->addAction(openConfigAction);
     trayIconMenu->addAction(optionsAction);
     trayIconMenu->addAction(openRPCConsoleAction);
 #ifndef Q_OS_MAC // This is built-in on Mac
@@ -1498,4 +1506,12 @@ void BitcoinGUI::updateMintingWeights()
 
         nNetworkWeight = GetPoSKernelPS();
     }
+}
+
+void BitcoinGUI::openConfig()
+{
+  boost::filesystem::path pathConfig = GetConfigFile();
+  /* Open LitecoinPlus.conf with the associated application */
+  if (boost::filesystem::exists(pathConfig))
+    QDesktopServices::openUrl(QUrl::fromLocalFile(pathConfig.string().c_str()));
 }

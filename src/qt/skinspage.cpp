@@ -253,13 +253,14 @@ void SkinsPage::loadSettings()
  
 void SkinsPage::loadSkin()
 {
-	QFile styleFile(inipath+"/"+inifname);
-	styleFile.open(QFile::ReadOnly);
-	QByteArray bytes = styleFile.readAll();
-	QString newStyleSheet(bytes);
-	QApplication *app = (QApplication*)QApplication::instance();
-	app->setStyleSheet(NULL);
-	app->setStyleSheet(newStyleSheet);
+  QFile styleFile(inipath+"/"+inifname);
+  styleFile.open(QFile::ReadOnly);
+  QByteArray bytes = styleFile.readAll();
+  QString newStyleSheet(bytes);
+  newStyleSheet.replace("myimages",inipath+"/images"); // deal with relative path
+  QApplication *app = (QApplication*)QApplication::instance();
+  app->setStyleSheet(NULL);
+  app->setStyleSheet(newStyleSheet);
 }
 
 void SkinsPage::resizeEvent(QResizeEvent* event)
