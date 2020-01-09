@@ -97,6 +97,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="hideNotifications">
+         <property name="toolTip">
+          <string>Hide all notifications to system, this is system specific according to the OS you're using. Only critical notifications cannot be suppressed, and will still be shown.</string>
+         </property>
+         <property name="text">
+          <string>Do not show &amp;notifications</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer_Main">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
