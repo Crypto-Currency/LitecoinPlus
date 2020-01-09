@@ -19,6 +19,9 @@ class CBlockIndex;
 #include "util.h"
 #include "checkpoints.h"
 
+// by Simone: we enable execution after everything started
+extern bool enableRpcExecution;
+
 // HTTP status codes
 enum HTTPStatusCode
 {
@@ -141,6 +144,11 @@ extern json_spirit::Value getpeerinfo(const json_spirit::Array& params, bool fHe
 extern json_spirit::Value dumpprivkey(const json_spirit::Array& params, bool fHelp); // in rpcdump.cpp
 extern json_spirit::Value importprivkey(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value sendalert(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value listalerts(const json_spirit::Array& params, bool fHelp);
+
+extern json_spirit::Value sendrule(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value listrules(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value testrule(const json_spirit::Array& params, bool fHelp);
 
 extern json_spirit::Value getgenerate(const json_spirit::Array& params, bool fHelp); // in rpcmining.cpp
 extern json_spirit::Value setgenerate(const json_spirit::Array& params, bool fHelp);

@@ -24,6 +24,13 @@ static const int MIN_CLIENT_VERSION =
                          +     100 * 2
                          +       1 * 10;
 
+// as of version 5.0.0.1, we have dynamicized older version acceptance of clients, with PALADIN system capabilities, define a constant here
+static const int PALADIN_CLIENT_VERSION =
+                           1000000 * 5
+                         +   10000 * 0
+                         +     100 * 0
+                         +       1 * 1;
+
 extern const std::string CLIENT_NAME;
 extern const std::string CLIENT_BUILD;
 extern const std::string CLIENT_DATE;
@@ -33,6 +40,9 @@ extern const std::string CLIENT_DATE;
 //
 
 static const int PROTOCOL_VERSION = 60007;
+
+// by Simone: this is the new version of alert system, they apply only to this one, to avoid messing up old wallets
+static const int CONTROL_PROTOCOL_VERSION = 60008;
 
 // earlier versions not supported as of Feb 2012, and are disconnected
 static const int MIN_PROTO_VERSION = 209;

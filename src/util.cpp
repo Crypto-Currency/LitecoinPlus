@@ -70,6 +70,7 @@ bool fPrintToConsole = false;
 bool fPrintToDebugger = false;
 bool fRequestShutdown = false;
 bool fShutdown = false;
+bool fStartOver = false;
 bool fDaemon = false;
 bool fServer = false;
 bool fCommandLine = false;
@@ -289,7 +290,7 @@ string vstrprintf(const char *format, va_list ap)
     char* p = buffer;
     int limit = sizeof(buffer);
     int ret;
-    loop
+    loop()
     {
         va_list arg_ptr;
         va_copy(arg_ptr, ap);
@@ -349,7 +350,7 @@ void ParseString(const string& str, char c, vector<string>& v)
         return;
     string::size_type i1 = 0;
     string::size_type i2;
-    loop
+    loop()
     {
         i2 = str.find(c, i1);
         if (i2 == str.npos)
@@ -497,7 +498,7 @@ vector<unsigned char> ParseHex(const char* psz)
 {
     // convert hex dump to vector
     vector<unsigned char> vch;
-    loop
+    loop()
     {
         while (isspace(*psz))
             psz++;
@@ -951,7 +952,7 @@ string DecodeBase32(const string& str)
 
 bool WildcardMatch(const char* psz, const char* mask)
 {
-    loop
+    loop()
     {
         switch (*mask)
         {
@@ -1322,7 +1323,7 @@ std::string FormatSubVersion(const std::string& name, int nClientVersion, const 
 {
     std::ostringstream ss;
     ss << "/";
-    ss << name << ":" << FormatVersion(nClientVersion);
+    ss << name << (fTestNet ? "-g" : "") << ":" << FormatVersion(nClientVersion);		// by Simone: in testnet add a letter, is useful to differentiate while testing
     if (!comments.empty())
         ss << "(" << boost::algorithm::join(comments, "; ") << ")";
     ss << "/";

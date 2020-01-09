@@ -18,6 +18,9 @@
 #include "util.h"
 #include "walletdb.h"
 
+// by Simone: suspend all sending, emergency flag
+extern bool nSendSuspended;
+
 class CAccountingEntry;
 class CWalletTx;
 class CReserveKey;

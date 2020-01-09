@@ -12,7 +12,9 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #else
+#ifndef WIN64
 typedef int pid_t; /* define for Windows compatibility */
+#endif
 #endif
 #include <map>
 #include <vector>
@@ -35,7 +37,7 @@ typedef unsigned long long  uint64;
 static const int64 COIN = 1000000;
 static const int64 CENT = 10000;
 
-#define loop                for (;;)
+#define loop()				for(;;)
 #define BEGIN(a)            ((char*)&(a))
 #define END(a)              ((char*)&((&(a))[1]))
 #define UBEGIN(a)           ((unsigned char*)&(a))
@@ -149,6 +151,7 @@ extern bool fPrintToConsole;
 extern bool fPrintToDebugger;
 extern bool fRequestShutdown;
 extern bool fShutdown;
+extern bool fStartOver;
 extern bool fDaemon;
 extern bool fServer;
 extern bool fCommandLine;
@@ -552,17 +555,13 @@ public:
         nSize(size)
     {
         vValues.reserve(size);
-        vValues.push_back(initial_value);
 		iniValue = initial_value;
         vSorted = vValues;
     }
 
     void clear()
 	{
-		for (unsigned int i = 0; i < nSize; i++)
-		{
-			vValues.push_back(iniValue);
-		}
+		vValues.clear();
         vSorted = vValues;
 	}
 
@@ -582,7 +581,10 @@ public:
     T median() const
     {
         int size = vSorted.size();
-        assert(size>0);
+        if (size == 0)
+		{
+			return 0;
+		}
         if(size & 1) // Odd number of elements
         {
             return vSorted[size/2];

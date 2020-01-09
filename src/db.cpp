@@ -25,6 +25,49 @@ extern CClientUIInterface uiInterface;
 
 unsigned int nWalletDBUpdated;
 
+// by Simone: extend the class for conversion for >= 4.1.0.1
+class CDiskBlockIndexV3Conv : public CDiskBlockIndexV3
+{
+public:
+    IMPLEMENT_SERIALIZE
+    (
+        if (!(nType & SER_GETHASH))
+            READWRITE(nVersion);
+
+        READWRITE(hashNext);
+        READWRITE(nFile);
+        READWRITE(nBlockPos);
+        READWRITE(nHeight);
+        READWRITE(nMint);
+        READWRITE(nMoneySupply);
+        READWRITE(nFlags);
+        READWRITE(nStakeModifier);
+        if (const_cast<CDiskBlockIndexV3Conv*>(this)->IsProofOfStake())
+        {
+            READWRITE(prevoutStake);
+            READWRITE(nStakeTime);
+            READWRITE(hashProofOfStake);
+        }
+        else if (fRead)
+        {
+            const_cast<CDiskBlockIndexV3Conv*>(this)->prevoutStake.SetNull();
+            const_cast<CDiskBlockIndexV3Conv*>(this)->nStakeTime = 0;
+            const_cast<CDiskBlockIndexV3Conv*>(this)->hashProofOfStake = 0;
+        }
+
+        // block header
+        READWRITE(this->nVersion);
+        READWRITE(hashPrev);
+        READWRITE(hashMerkleRoot);
+        READWRITE(nTime);
+        READWRITE(nBits);
+        READWRITE(nNonce);
+
+		// add the hash of the current block
+		READWRITE(hash);
+    )
+};
+
 // by Simone: startup boost system (see LoadBlockIndexGuts() below)
 struct BoostBlockIndex {
 	uint256 hash;
@@ -785,6 +828,12 @@ bool CBlkDB::WriteBlockIndexV2(const CDiskBlockIndexV2& blockindex)
     return res; 
 }
 
+bool CBlkDB::WriteBlockIndexV3(const CDiskBlockIndexV3& blockindex)
+{
+	bool res = Write(make_pair(string("blockindex"), blockindex.hash), blockindex);
+    return res; 
+}
+
 bool CBlkDB::ReadBlockIndex(uint256 hash, CDiskBlockIndex& blockindex)
 {
     assert(!fClient);
@@ -817,6 +866,49 @@ CBlockIndex static * InsertBlockIndex(uint256 hash)
     return pindexNew;
 }
 
+bool CBlkDB::convertToV3Index()
+{
+    unsigned int tempcount=0;
+    string tempmess;
+
+   // Calculate bnChainTrust
+    vector<pair<int, CBlockIndex*> > vSortedByHeight;
+    vSortedByHeight.reserve(mapBlockIndex.size());
+    BOOST_FOREACH(const PAIRTYPE(uint256, CBlockIndex*)& item, mapBlockIndex)
+    {
+        CBlockIndex* pindex = item.second;
+        vSortedByHeight.push_back(make_pair(pindex->nHeight, pindex));
+      tempcount++;
+      if(tempcount>=10000)
+      {
+        tempmess = "Upgrading pairs / " + boost::to_string(pindex) + " [DO NOT INTERRUPT]";
+        uiInterface.InitMessage(_(tempmess.c_str()));
+        tempcount=0;
+      }
+    }
+    sort(vSortedByHeight.begin(), vSortedByHeight.end());
+    BOOST_FOREACH(const PAIRTYPE(int, CBlockIndex*)& item, vSortedByHeight)
+    {
+        CBlockIndex* pindex = item.second;
+        pindex->bnChainTrust = (pindex->pprev ? pindex->pprev->bnChainTrust : 0) + pindex->GetBlockTrust();
+      tempcount++;
+      if(tempcount>=30000)
+      {
+        tempmess = "Upgrading stake modifiers / " + pindex->bnChainTrust.ToString() + " [DO NOT INTERRUPT]";
+        uiInterface.InitMessage(_(tempmess.c_str()));
+        tempcount=0;
+      }
+        // ppcoin: calculate stake modifier checksum
+        pindex->nStakeModifierChecksum = GetStakeModifierChecksum(pindex);
+        if (!CheckStakeModifierCheckpoints(pindex->nHeight, pindex->nStakeModifierChecksum))
+            return error("CTxDB::LoadBlockIndex() : Failed stake modifier checkpoint height=%d, modifier=0x%016" PRI64x, pindex->nHeight, pindex->nStakeModifier);
+
+		// store calculated checksum
+		WriteBlockIndexV3(CDiskBlockIndexV3(pindex));
+    }
+	return true;
+}
+
 bool CBlkDB::LoadBlockIndex()
 {
     if (!LoadBlockIndexGuts())
@@ -830,40 +922,6 @@ bool CBlkDB::LoadBlockIndex()
     string tempmess;
     string mess = "Calculating best chain...";
     uiInterface.InitMessage(_(mess.c_str()));
-    // Calculate bnChainTrust
-    vector<pair<int, CBlockIndex*> > vSortedByHeight;
-    vSortedByHeight.reserve(mapBlockIndex.size());
-    BOOST_FOREACH(const PAIRTYPE(uint256, CBlockIndex*)& item, mapBlockIndex)
-    {
-        CBlockIndex* pindex = item.second;
-        vSortedByHeight.push_back(make_pair(pindex->nHeight, pindex));
-      tempcount++;
-      if(tempcount>=10000)
-      {
-//        steptemp ++;
-        tempmess = "Loading pairs / "+ boost::to_string(pindex);
-        uiInterface.InitMessage(_(tempmess.c_str()));
-        tempcount=0;
-      }
-    }
-    sort(vSortedByHeight.begin(), vSortedByHeight.end());
-    BOOST_FOREACH(const PAIRTYPE(int, CBlockIndex*)& item, vSortedByHeight)
-    {
-        CBlockIndex* pindex = item.second;
-        pindex->bnChainTrust = (pindex->pprev ? pindex->pprev->bnChainTrust : 0) + pindex->GetBlockTrust();
-      tempcount++;
-      if(tempcount>=30000)
-      {
-//        steptemp ++;
-        tempmess = "Calculating stake modifiers / "+ boost::to_string(pindex);
-        uiInterface.InitMessage(_(tempmess.c_str()));
-        tempcount=0;
-      }
-        // ppcoin: calculate stake modifier checksum
-        pindex->nStakeModifierChecksum = GetStakeModifierChecksum(pindex);
-        if (!CheckStakeModifierCheckpoints(pindex->nHeight, pindex->nStakeModifierChecksum))
-            return error("CTxDB::LoadBlockIndex() : Failed stake modifier checkpoint height=%d, modifier=0x%016" PRI64x, pindex->nHeight, pindex->nStakeModifier);
-    }
 
     // Load hashBestChain pointer to end of best chain
     if (!pTxdb->ReadHashBestChain(hashBestChain))
@@ -1050,15 +1108,6 @@ bool CBlkDB::LoadBlockIndexGuts()
 		DestroyCachedIndex();
 		pTxdb->SpliceTxIndex();
 	}
-
-    // loop control variables
-	double ccc = 0;
-	double cnt = 0;
-	int oldProgress = -1;
-
-	// instead of counting the number of records, which is pointless and VERY slow on old machines, we just set an approximate number
-	cnt = (double)boost::filesystem::file_size(GetDataDir() / "blkindex.dat") / 337.0;
-	oldProgress = -1;
 	map<unsigned long, CBlockIndex *> repairIndexes;
 
 	// use bulk suggested way to loop entire DB
@@ -1069,6 +1118,16 @@ bool CBlkDB::LoadBlockIndexGuts()
 	unsigned char *retkey, *retdata;
 	int ret;
 	void *p;
+
+	// identify the start of the loading process
+	bool needUpgradeV3 = false;
+	loading_process:
+
+    // loop control variables
+	double ccc = 0;
+	double cnt = 0;
+	int oldProgress = -1;
+	cnt = (double)boost::filesystem::file_size(GetDataDir() / "blkindex.dat") / 432.0;
 
 	// prepare for loop
 	memset(&key, 0, sizeof(key));
@@ -1086,7 +1145,8 @@ bool CBlkDB::LoadBlockIndexGuts()
 	}
 
 	// loop all data in big chunks
-	loop {
+	loop()
+	{
 
 	// get the chunk
 		if ((ret = dbcp->c_get(dbcp, &key, &data, DB_MULTIPLE_KEY | DB_NEXT)) != 0) {
@@ -1105,7 +1165,10 @@ bool CBlkDB::LoadBlockIndexGuts()
 			}
 			if (progress != oldProgress) {
 				char pString[256];
-				sprintf(pString, (_("Loading block index (%d%%)...")).c_str(), progress);
+				if (needUpgradeV3)
+					sprintf(pString, (_("Upgrading index (%d%%)... [DO NOT INTERRUPT]")).c_str(), progress);
+				else
+					sprintf(pString, (_("Loading block index (%d%%)...")).c_str(), progress);
 		#ifdef QT_GUI
 				uiInterface.InitMessage(pString);
 		#endif
@@ -1128,162 +1191,142 @@ bool CBlkDB::LoadBlockIndexGuts()
 		    {
 
 	// then into objects
-			    CDiskBlockIndexV2 diskindex;
-			    ssValue >> diskindex;
+		        CDiskBlockIndexV3 diskindex;
+				CDiskBlockIndexV3Conv diskindexPrior41;
 
-    // construct block index object
-			    CBlockIndex* pindexNew = InsertBlockIndex(diskindex.GetBlockHash());
-			    pindexNew->pprev          = InsertBlockIndex(diskindex.hashPrev);
-			    pindexNew->pnext          = InsertBlockIndex(diskindex.hashNext);
-			    pindexNew->nFile          = diskindex.nFile;
-			    pindexNew->nBlockPos      = diskindex.nBlockPos;
-			    pindexNew->nHeight        = diskindex.nHeight;
-			    pindexNew->nMint          = diskindex.nMint;
-			    pindexNew->nMoneySupply   = diskindex.nMoneySupply;
-			    pindexNew->nFlags         = diskindex.nFlags;
-			    pindexNew->nStakeModifier = diskindex.nStakeModifier;
-			    pindexNew->prevoutStake   = diskindex.prevoutStake;
-			    pindexNew->nStakeTime     = diskindex.nStakeTime;
-			    pindexNew->hashProofOfStake = diskindex.hashProofOfStake;
-			    pindexNew->nVersion       = diskindex.nVersion;
-			    pindexNew->hashMerkleRoot = diskindex.hashMerkleRoot;
-			    pindexNew->nTime          = diskindex.nTime;
-			    pindexNew->nBits          = diskindex.nBits;
-			    pindexNew->nNonce         = diskindex.nNonce;
-
-	// detect empty hashes
-				if (diskindex.hash == 0)
+	// if already flagged for conversion, just read conversion data
+				if (needUpgradeV3)
 				{
-					repairIndexes.insert(make_pair(ccc, pindexNew));
+					ssValue >> diskindexPrior41;
+				}
+				else
+				{	
+					try {
+				    	ssValue >> diskindex;
+					} catch (std::exception &e) {
+
+	// it may be necessary to convert the data from previous 4.1.0.1 versions, let's try to squeeze the stream like this
+						try {
+							CDataStream ssValue41(SER_DISK, CLIENT_VERSION);
+							ssValue41.SetType(SER_DISK);
+							ssValue41.clear();
+							ssValue41.write((char*)retdata, (int)retdlen);
+							ssValue41 >> diskindexPrior41;
+
+	// if logic reaches here, then we need to updgrade after the loop
+							needUpgradeV3 = true;
+						} catch (std::exception &e) {
+
+	// nope, it really is an error, so we need to live with it
+							return false;
+						}
+					}
 				}
 
-    // watch for genesis block
-			    if (pindexGenesisBlock == NULL && diskindex.GetBlockHash() == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet))
-			        pindexGenesisBlock = pindexNew;
+    // construct block index object
+		        CBlockIndex* pindexNew;
+				uint256 hash;
+				if (needUpgradeV3)
+				{
+					hash                      = diskindexPrior41.GetBlockHash();
+				    pindexNew                 = InsertBlockIndex(hash);
+				    pindexNew->pprev          = InsertBlockIndex(diskindexPrior41.hashPrev);
+				    pindexNew->pnext          = InsertBlockIndex(diskindexPrior41.hashNext);
+				    pindexNew->nFlags         = diskindexPrior41.nFlags;
+				    pindexNew->nStakeModifier = diskindexPrior41.nStakeModifier;
+				    pindexNew->nFile          = diskindexPrior41.nFile;
+				    pindexNew->nBlockPos      = diskindexPrior41.nBlockPos;
+				    pindexNew->nHeight        = diskindexPrior41.nHeight;
+				    pindexNew->nMint          = diskindexPrior41.nMint;
+				    pindexNew->nMoneySupply   = diskindexPrior41.nMoneySupply;
+				    pindexNew->prevoutStake   = diskindexPrior41.prevoutStake;
+				    pindexNew->nStakeTime     = diskindexPrior41.nStakeTime;
+				    pindexNew->hashProofOfStake = diskindexPrior41.hashProofOfStake;
+				    pindexNew->nVersion       = diskindexPrior41.nVersion;
+				    pindexNew->hashMerkleRoot = diskindexPrior41.hashMerkleRoot;
+				    pindexNew->nTime          = diskindexPrior41.nTime;
+				    pindexNew->nBits          = diskindexPrior41.nBits;
+				    pindexNew->nNonce         = diskindexPrior41.nNonce;
 
-			    if (!pindexNew->CheckIndex())
-			        return error("LoadBlockIndex() : CheckIndex failed at %d", pindexNew->nHeight);
+    // watch for genesis block
+				    if (pindexGenesisBlock == NULL && hash == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet))
+				        pindexGenesisBlock = pindexNew;
 
     // ppcoin: build setStakeSeen
-			    if (pindexNew->IsProofOfStake())
-			        setStakeSeen.insert(make_pair(pindexNew->prevoutStake, pindexNew->nStakeTime));
+				    if (pindexNew->IsProofOfStake())
+				        setStakeSeen.insert(make_pair(diskindexPrior41.prevoutStake, diskindexPrior41.nStakeTime));
+				}
+				else
+				{
+					hash                      = diskindex.GetBlockHash();
+				    pindexNew                 = InsertBlockIndex(hash);
+				    pindexNew->pprev          = InsertBlockIndex(diskindex.hashPrev);
+				    pindexNew->pnext          = InsertBlockIndex(diskindex.hashNext);
+				    pindexNew->nFlags         = diskindex.nFlags;
+				    pindexNew->nStakeModifier = diskindex.nStakeModifier;
+				    pindexNew->nFile          = diskindex.nFile;
+				    pindexNew->nBlockPos      = diskindex.nBlockPos;
+				    pindexNew->nHeight        = diskindex.nHeight;
+				    pindexNew->nMint          = diskindex.nMint;
+				    pindexNew->nMoneySupply   = diskindex.nMoneySupply;
+				    pindexNew->prevoutStake   = diskindex.prevoutStake;
+				    pindexNew->nStakeTime     = diskindex.nStakeTime;
+				    pindexNew->hashProofOfStake = diskindex.hashProofOfStake;
+				    pindexNew->nVersion       = diskindex.nVersion;
+				    pindexNew->hashMerkleRoot = diskindex.hashMerkleRoot;
+				    pindexNew->nTime          = diskindex.nTime;
+				    pindexNew->nBits          = diskindex.nBits;
+				    pindexNew->nNonce         = diskindex.nNonce;
+
+	// the two new things that are loaded as well
+					pindexNew->bnChainTrust = diskindex.bnChainTrust;
+			        pindexNew->nStakeModifierChecksum = diskindex.nStakeModifierChecksum;
+
+	// detect empty hashes
+					if (diskindex.hash == 0)
+					{
+						repairIndexes.insert(make_pair(ccc, pindexNew));
+					}
+
+    // watch for genesis block
+				    if (pindexGenesisBlock == NULL && diskindex.GetBlockHash() == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet))
+				        pindexGenesisBlock = pindexNew;
+
+    // ppcoin: build setStakeSeen
+				    if (pindexNew->IsProofOfStake())
+				        setStakeSeen.insert(make_pair(diskindex.prevoutStake, diskindex.nStakeTime));
+				}
 			}			
 		}
 	}
 	dbcp->c_close(dbcp);
 	free(data.data);
 
+	// test 4.1.0.1 or above upgrade needed, then just do it
+	if (needUpgradeV3)
+	{
+		if (convertToV3Index())
+		{
+			needUpgradeV3 = false;
+			goto loading_process;		// jump to the beginning of the loop, effectively loading once more the correct chain
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	// now repair index if needed
 #ifdef QT_GUI
 	uiInterface.InitMessage((_("Repairing index...")).c_str());
 #endif
 	for (map<unsigned long, CBlockIndex *>::iterator mi = repairIndexes.begin(); mi != repairIndexes.end(); ++mi)
 	{
-		CDiskBlockIndexV2 repairIndex((*mi).second);
-		WriteBlockIndexV2(repairIndex);
+		CDiskBlockIndexV3 repairIndex((*mi).second);
+		WriteBlockIndexV3(repairIndex);
 	}
 	repairIndexes.clear();
 	return true;
-
-
-/*
-
-	loop
-	{
-	    // Read next record
-		CDataStream ssKey(SER_DISK, CLIENT_VERSION);
-	    if (fFlags == DB_SET_RANGE) {
-	        ssKey << make_pair(string("blockindex"), uint256(0));
-		}
-		CDataStream ssValue(SER_DISK, CLIENT_VERSION);
-	    int ret = ReadAtCursor(pcursor, ssKey, ssValue, fFlags);
-	    fFlags = DB_NEXT;
-		if (ret == DB_NOTFOUND)
-			break;
-		else if (ret != 0)
-			return false;
-		int progress = (ccc / cnt) * 100;
-		if (progress > 100) {
-			progress = 100;
-		}
-		if (progress != oldProgress) {
-			char pString[256];
-			sprintf(pString, (_("Loading block index (%d%%)...")).c_str(), progress);
-	#ifdef QT_GUI
-			uiInterface.InitMessage(pString);
-	#endif
-			oldProgress = progress;
-		}
-		ccc += 1.0;
-
-	    // Unserialize
-	    try {
-		    string strType;
-		    ssKey >> strType;
-		    if (strType == "blockindex" && !fRequestShutdown)
-		    {
-		        CDiskBlockIndexV2 diskindex;
-		        ssValue >> diskindex;
-
-		        // Construct block index object
-		        CBlockIndex* pindexNew = InsertBlockIndex(diskindex.GetBlockHash());
-		        pindexNew->pprev          = InsertBlockIndex(diskindex.hashPrev);
-		        pindexNew->pnext          = InsertBlockIndex(diskindex.hashNext);
-		        pindexNew->nFile          = diskindex.nFile;
-		        pindexNew->nBlockPos      = diskindex.nBlockPos;
-		        pindexNew->nHeight        = diskindex.nHeight;
-		        pindexNew->nMint          = diskindex.nMint;
-		        pindexNew->nMoneySupply   = diskindex.nMoneySupply;
-		        pindexNew->nFlags         = diskindex.nFlags;
-		        pindexNew->nStakeModifier = diskindex.nStakeModifier;
-		        pindexNew->prevoutStake   = diskindex.prevoutStake;
-		        pindexNew->nStakeTime     = diskindex.nStakeTime;
-		        pindexNew->hashProofOfStake = diskindex.hashProofOfStake;
-		        pindexNew->nVersion       = diskindex.nVersion;
-		        pindexNew->hashMerkleRoot = diskindex.hashMerkleRoot;
-		        pindexNew->nTime          = diskindex.nTime;
-		        pindexNew->nBits          = diskindex.nBits;
-		        pindexNew->nNonce         = diskindex.nNonce;
-
-				// detect empty hashes
-				if (diskindex.hash == 0)
-				{
-					repairIndexes.insert(make_pair(ccc, pindexNew));
-				}
-
-		        // Watch for genesis block
-		        if (pindexGenesisBlock == NULL && diskindex.GetBlockHash() == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet))
-		            pindexGenesisBlock = pindexNew;
-
-		        if (!pindexNew->CheckIndex())
-		            return error("LoadBlockIndex() : CheckIndex failed at %d", pindexNew->nHeight);
-
-		        // ppcoin: build setStakeSeen
-		        if (pindexNew->IsProofOfStake())
-		            setStakeSeen.insert(make_pair(pindexNew->prevoutStake, pindexNew->nStakeTime));
-		    }
-		    else
-		    {
-		        break; // if shutdown requested or finished loading block index
-		    }
-	    }    // try
-	    catch (std::exception &e) {
-	        return error("%s() : deserialize error", __PRETTY_FUNCTION__);
-	    }
-	}
-	pcursor->close();
-
-	// now repair index if needed
-#ifdef QT_GUI
-	uiInterface.InitMessage((_("Repairing index...")).c_str());
-#endif
-	for (map<unsigned long, CBlockIndex *>::iterator mi = repairIndexes.begin(); mi != repairIndexes.end(); ++mi)
-	{
-		CDiskBlockIndexV2 repairIndex((*mi).second);
-		WriteBlockIndexV2(repairIndex);
-	}
-	repairIndexes.clear();
-	return true;*/
 }
 
 
@@ -1420,7 +1463,7 @@ bool CTxDB::SpliceTxIndex()
 	fFlags = DB_SET_RANGE;
 	oldProgress = -1;
 	map<unsigned long, uint256> eraseHashes;
-	loop
+	loop()
 	{
 		// Read next record
 		CDataStream ssKey(SER_DISK, CLIENT_VERSION);
@@ -1611,6 +1654,112 @@ bool CAddrDB::Read(CAddrMan& addr)
     }
     catch (std::exception &e) {
         return error("CAddrman::Read() : I/O error or stream data corrupted");
+    }
+
+    return true;
+}
+
+//
+// CRulesDB
+//
+
+
+CRulesDB::CRulesDB()
+{
+    pathAddr = GetDataDir() / "rules.dat";
+}
+
+bool CRulesDB::Write(CDiskRules& dr)
+{
+    // Generate random temporary filename
+    unsigned short randv = 0;
+    RAND_bytes((unsigned char *)&randv, sizeof(randv));
+    std::string tmpfn = strprintf("rules.dat.%04x", randv);
+
+    // serialize addresses, checksum data up to that point, then append csum
+    CDataStream ssRules(SER_DISK, CLIENT_VERSION);
+    ssRules << FLATDATA(pchMessageStart);
+    ssRules << dr;
+    uint256 hash = Hash(ssRules.begin(), ssRules.end());
+    ssRules << hash;
+
+    // open temp output file, and associate with CAutoFile
+    boost::filesystem::path pathTmp = GetDataDir() / tmpfn;
+    FILE *file = fopen(pathTmp.string().c_str(), "wb");
+    CAutoFile fileout = CAutoFile(file, SER_DISK, CLIENT_VERSION);
+    if (!fileout)
+        return error("CDiskRules::Write() : open failed");
+
+    // Write and commit header, data
+    try {
+        fileout << ssRules;
+    }
+    catch (std::exception &e) {
+        return error("CDiskRules::Write() : I/O error");
+    }
+    FileCommit(fileout);
+    fileout.fclose();
+
+    // replace existing peers.dat, if any, with new peers.dat.XXXX
+    if (!RenameOver(pathTmp, pathAddr))
+        return error("CDiskRules::Write() : Rename-into-place failed");
+
+    return true;
+}
+
+bool CRulesDB::Read(CDiskRules& dr)
+{
+	// if file doesn't exist, just ignore it, it is not mandatory to have rules
+	if (!boost::filesystem::exists(pathAddr))
+		return true;
+
+    // open input file, and associate with CAutoFile
+    FILE *file = fopen(pathAddr.string().c_str(), "rb");
+    CAutoFile filein = CAutoFile(file, SER_DISK, CLIENT_VERSION);
+    if (!filein)
+        return error("CDiskRules::Read() : open failed");
+
+    // use file size to size memory buffer
+    int fileSize = GetFilesize(filein);
+    int dataSize = fileSize - sizeof(uint256);
+    vector<unsigned char> vchData;
+    vchData.resize(dataSize);
+    uint256 hashIn;
+
+    // read data and checksum from file
+    try {
+        filein.read((char *)&vchData[0], dataSize);
+        filein >> hashIn;
+    }
+    catch (std::exception &e) {
+        return error("CDiskRules::Read() 2 : I/O error or stream data corrupted");
+    }
+    filein.fclose();
+
+    CDataStream ssRules(vchData, SER_DISK, CLIENT_VERSION);
+
+    // verify stored checksum matches input data
+    uint256 hashTmp = Hash(ssRules.begin(), ssRules.end());
+    if (hashIn != hashTmp)
+        return error("CDiskRules::Read() : checksum mismatch; data corrupted");
+
+    unsigned char pchMsgTmp[4];
+    try {
+        // de-serialize file header (pchMessageStart magic number) and
+        ssRules >> FLATDATA(pchMsgTmp);
+
+        // verify the network matches ours
+		if (pchMsgTmp[0] != pchMessageStart[0] ||
+			pchMsgTmp[1] != pchMessageStart[1] ||
+			pchMsgTmp[2] != pchMessageStart[2] ||
+			pchMsgTmp[3] != pchMessageStart[3])
+			return error("CDiskRules::Read() : invalid network magic number");
+
+        // de-serialize address data into one CAddrMan object
+        ssRules >> dr;
+    }
+    catch (std::exception &e) {
+        return error("CDiskRules::Read() : I/O error or stream data corrupted");
     }
 
     return true;

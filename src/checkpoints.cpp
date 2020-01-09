@@ -332,7 +332,7 @@ namespace Checkpoints
         }
 
         // Relay checkpoint
-		loop
+		loop()
 		{
 		    {
 				// by Simone: a TRY LOCK here, not a LOCK..... Seems like two different threads may bite their back on this lock in some rare cases

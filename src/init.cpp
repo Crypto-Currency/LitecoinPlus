@@ -17,8 +17,11 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <openssl/crypto.h>
 
-#ifndef WIN32
+//#ifndef WIN32 && __APPLE__
+#if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(__APPLE__))
 #include <signal.h>
+#include <execinfo.h>
+#include <ucontext.h>
 #endif
 
 using namespace std;
@@ -90,6 +93,30 @@ void Shutdown(void* parg)
         printf("LitecoinPlus exited\n\n");
         fExit = true;
 		fShutdown = false;
+
+	// by Simone: if the fStartOver flag is raised, we dump all the blockchain files securely after the database is close and detached
+		if (fStartOver)
+		{
+			boost::filesystem::path p = GetDataDir();
+			boost::filesystem::directory_iterator end_itr;
+			for (boost::filesystem::directory_iterator itr(p / "database"); itr != end_itr; ++itr)
+			{
+				boost::filesystem::remove(*itr);
+			}
+			boost::filesystem::remove(p / "database");
+			for (int i = 1; ; i++)
+			{
+				char s[64];
+				sprintf(s, "blk%04d.dat", i);
+				if (!boost::filesystem::exists(p / s))
+				{
+					break;
+				}
+				boost::filesystem::remove(p / s);
+			}
+			boost::filesystem::remove(p / "blkindex.dat");
+			boost::filesystem::remove(p / "txindex.dat");
+		}
 
 #ifndef QT_GUI
         // ensure non-UI client gets exited here, but let Bitcoin-Qt reach 'return 0;' in bitcoin.cpp
@@ -273,6 +300,7 @@ std::string HelpMessage()
         "  -daemon                " + _("Run in the background as a daemon and accept commands") + "\n" +
 #endif
         "  -testnet               " + _("Use the test network") + "\n" +
+        "  -netoffline            " + _("Starts with the wallet offline (default: starts online)") + "\n" +
         "  -debug                 " + _("Output extra debugging information. Implies all other -debug* options") + "\n" +
         "  -debugnet              " + _("Output extra network debugging information") + "\n" +
         "  -logtimestamps         " + _("Prepend debug output with timestamp") + "\n" +
@@ -314,11 +342,84 @@ std::string HelpMessage()
 // by Simone: before doing anything, let's capture this status
 bool txIndexFileExists = true;
 
+// by Simone: core dump handler
+//#ifndef WIN32
+#if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(__APPLE__))
+/* This structure mirrors the one found in /usr/include/asm/ucontext.h */
+typedef struct _sig_ucontext {
+ unsigned long     uc_flags;
+ struct ucontext   *uc_link;
+ stack_t           uc_stack;
+ struct sigcontext uc_mcontext;
+ sigset_t          uc_sigmask;
+} sig_ucontext_t;
+
+void crit_err_hdlr(int sig_num, siginfo_t * info, void * ucontext)
+{
+ void *             array[50];
+ void *             caller_address;
+ char **            messages;
+ int                size, i;
+ sig_ucontext_t *   uc;
+
+ uc = (sig_ucontext_t *)ucontext;
+
+ /* Get the address at the time the signal was raised */
+#if defined(__i386__) // gcc specific
+ caller_address = (void *) uc->uc_mcontext.eip; // EIP: x86 specific
+#elif defined(__x86_64__) // gcc specific
+ caller_address = (void *) uc->uc_mcontext.rip; // RIP: x86_64 specific
+#elif defined(__arm__)   // gcc specific
+ caller_address = (void *) uc->uc_mcontext.arm_ip;	// ARM specific
+#else
+ caller_address = NULL;
+#endif
+
+ fprintf(stderr, "signal %d (%s), address is %p from %p\n", 
+  sig_num, strsignal(sig_num), info->si_addr, 
+  (void *)caller_address);
+
+ size = backtrace(array, 50);
+
+ /* overwrite sigaction with caller's address */
+ array[1] = caller_address;
+
+ messages = backtrace_symbols(array, size);
+
+ /* skip first stack frame (points here) */
+ for (i = 1; i < size && messages != NULL; ++i)
+ {
+  fprintf(stderr, "[bt]: (%d) %s\n", i, messages[i]);
+ }
+
+ free(messages);
+
+ exit(EXIT_FAILURE);
+}
+#endif
+
 /** Initialize bitcoin.
  *  @pre Parameters should be parsed and config file should be read.
  */
 bool AppInit2()
 {
+//#ifndef WIN32
+#if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(__APPLE__))
+	// by Simone: adding core dumps handler, at least in Linux
+	struct sigaction sigact;
+
+	sigact.sa_sigaction = crit_err_hdlr;
+	sigact.sa_flags = SA_RESTART | SA_SIGINFO;
+
+	if (sigaction(SIGSEGV, &sigact, (struct sigaction *)NULL) != 0)
+	{
+		fprintf(stderr, "error setting signal handler for %d (%s)\n",
+		SIGSEGV, strsignal(SIGSEGV));
+
+		exit(EXIT_FAILURE);
+	}
+#endif
+
     // ********************************************************* Step 1: setup
 #ifdef _MSC_VER
     // Turn off Microsoft heap dump noise
@@ -342,7 +443,8 @@ bool AppInit2()
     PSETPROCDEPPOL setProcDEPPol = (PSETPROCDEPPOL)GetProcAddress(GetModuleHandleA("Kernel32.dll"), "SetProcessDEPPolicy");
     if (setProcDEPPol != NULL) setProcDEPPol(PROCESS_DEP_ENABLE);
 #endif
-#ifndef WIN32
+//#ifndef WIN32
+#if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(__APPLE__))
     umask(077);
 
     // Clean shutdown on SIGTERM
@@ -365,6 +467,10 @@ bool AppInit2()
     SoftSetBoolArg("-listen", true); // just making sure
 
     fTestNet = GetBoolArg("-testnet");
+
+	extern bool netOffline;
+	netOffline = GetBoolArg("-netoffline", false);
+	setOnlineStatus(!netOffline);
 
     if (mapArgs.count("-bind")) {
         // when specifying an explicit binding address, you want to listen on it
@@ -699,6 +805,10 @@ bool AppInit2()
         return InitError(msg);
     }
 
+	// by Simone: start RPC server before loading the blockchain
+	if (fServer)
+		NewThread(ThreadRPCServer, NULL);
+
     if (GetBoolArg("-loadblockindextest"))
     {
         CTxDB txdb("r");
@@ -707,11 +817,30 @@ bool AppInit2()
         return false;
     }
 
+	// by Simone: put this here, otherwise the rule file doesn't load in testnet !
+    if (fTestNet)
+    {
+        pchMessageStart[0] = 0xcd;
+        pchMessageStart[1] = 0xf1;
+        pchMessageStart[2] = 0xc0;
+        pchMessageStart[3] = 0xef;
+	}
+
+	// by Simone: load rules here, exit on failure
+    uiInterface.InitMessage(_("Loading PALADIN rules..."));
+	CDiskRules rules;
+	CRulesDB rdb;
+	if (!rdb.Read(rules))
+		return InitError(_("Error loading PALADIN rules"));
+
     uiInterface.InitMessage(_("Loading block index..."));
     printf("Loading block index...\n");
     nStart = GetTimeMillis();
-    if (!LoadBlockIndex())
-        return InitError(_("Error loading blkindex.dat"));
+	if (!LoadBlockIndex())
+		return InitError(_("Error loading blkindex.dat"));
+
+	// by Simone: set generic rules once immediately after loading the index
+	CRules::parseGenericRules(nBestHeight);
 
     // as LoadBlockIndex can take several minutes, it's possible the user
     // requested to kill bitcoin-qt during the last operation. If so, exit.
@@ -841,14 +970,9 @@ bool AppInit2()
 
     CBlockIndex *pindexRescan = pindexBest;
     if (GetBoolArg("-rescan"))
+	{
         pindexRescan = pindexGenesisBlock;
-    else
-    {
-        CWalletDB walletdb("wallet.dat");
-        CBlockLocator locator;
-        if (walletdb.ReadBestBlock(locator))
-            pindexRescan = locator.GetBlockIndex();
-    }
+	}
     if (pindexBest != pindexRescan && pindexBest && pindexRescan && pindexBest->nHeight > pindexRescan->nHeight)
     {
         uiInterface.InitMessage(_("Rescanning..."));
@@ -935,11 +1059,11 @@ bool AppInit2()
     printf("mapWallet.size() = %" PRIszu "\n",       pwalletMain->mapWallet.size());
     printf("mapAddressBook.size() = %" PRIszu "\n",  pwalletMain->mapAddressBook.size());
 
-    if (!NewThread(StartNode, NULL))
-        InitError(_("Error: could not start node"));
+	if (!NewThread(StartNode, NULL))
+		InitError(_("Error: could not start node"));
 
-    if (fServer)
-        NewThread(ThreadRPCServer, NULL);
+	// by Simone: starting the RPC thread was here, instead we just unleash it
+	enableRpcExecution = true;
 
     // ********************************************************* Step 12: finished
 

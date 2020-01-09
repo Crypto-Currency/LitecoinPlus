@@ -426,7 +426,7 @@ public:
 
     void AddInventoryKnown(const CInv& inv)
     {
-		loop
+		loop()
 		{
 		    {
 		        TRY_LOCK(cs_inventory, lockInv);
@@ -446,7 +446,7 @@ public:
 
     void PushInventory(const CInv& inv)
     {
-		loop
+		loop()
 		{
 		    {
 		        TRY_LOCK(cs_inventory, lockInv);
@@ -824,7 +824,7 @@ public:
 inline void RelayInventory(const CInv& inv)
 {
     // Put on lists to offer to the other nodes
-	loop
+	loop()
 	{
 		{
 		    TRY_LOCK(cs_vNodes, lockNodes);

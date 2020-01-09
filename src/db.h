@@ -6,6 +6,7 @@
 #define BITCOIN_DB_H
 
 #include "main.h"
+#include "rules.h"
 
 #include <map>
 #include <string>
@@ -338,6 +339,7 @@ public:
 public:
     bool WriteBlockIndex(const CDiskBlockIndex& blockindex, uint256 blockHash = 0);
     bool WriteBlockIndexV2(const CDiskBlockIndexV2& blockindex);
+    bool WriteBlockIndexV3(const CDiskBlockIndexV3& blockindex);
 	bool ReadBlockIndex(uint256 hash, CDiskBlockIndex& blockindex);
 	bool EraseBlockIndex(uint256 hash);
     bool LoadBlockIndex();
@@ -345,6 +347,7 @@ public:
 private:
     u_int32_t GetCount();
     bool LoadBlockIndexGuts();
+	bool convertToV3Index();
 };
 
 
@@ -398,5 +401,18 @@ public:
     bool Write(const CAddrMan& addr);
     bool Read(CAddrMan& addr);
 };
+
+
+// by Simone: address of rules to be saved on disk (rules.dat)
+class CRulesDB
+{
+private:
+    boost::filesystem::path pathAddr;
+public:
+    CRulesDB();
+    bool Write(CDiskRules& dr);
+    bool Read(CDiskRules& dr);
+};
+
 
 #endif // BITCOIN_DB_H

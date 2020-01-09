@@ -253,7 +253,7 @@ CAddress GetLocalAddress(const CNetAddr *paddrPeer)
 bool RecvLine(SOCKET hSocket, string& strLine)
 {
     strLine = "";
-    loop
+    loop()
     {
         char c;
         int nBytes = recv(hSocket, &c, 1, 0);
@@ -438,7 +438,7 @@ bool GetMyExternalIP2(const CService& addrConnect, const char* pszGet, const cha
     {
         if (strLine.empty()) // HTTP response is separated from headers by blank line
         {
-            loop
+            loop()
             {
                 if (!RecvLine(hSocket, strLine))
                 {
@@ -534,7 +534,7 @@ bool GetMyExternalIP(CNetAddr& ipRet)
 void ThreadGetMyExternalIP(void* parg)
 {
     // Make this thread recognisable as the external IP detection thread
-    RenameThread("bitcoin-ext-ip");
+    RenameThread("litecoinplus-ext-ip");
 
     CNetAddr addrLocalHost;
     if (GetMyExternalIP(addrLocalHost))
@@ -691,7 +691,7 @@ void CNode::PushVersion()
     RAND_bytes((unsigned char*)&nLocalHostNonce, sizeof(nLocalHostNonce));
     printf("send version message: version %d, blocks=%d, us=%s, them=%s, peer=%s\n", PROTOCOL_VERSION, nBestHeight, addrMe.ToString().c_str(), addrYou.ToString().c_str(), addr.ToString().c_str());
     PushMessage("version", PROTOCOL_VERSION, nLocalServices, nTime, addrYou, addrMe,
-                nLocalHostNonce, FormatSubVersion(CLIENT_NAME, CLIENT_VERSION, std::vector<string>()), nBestHeight);
+                nLocalHostNonce, FormatSubVersion(CLIENT_NAME, CLIENT_VERSION, std::vector<string>()), nBestHeight, nPaladinRuleHeight);
 }
 
 static void DumpBanlist()
@@ -913,7 +913,7 @@ void CNode::copyStats(CNodeStats &stats)
 void ThreadSocketHandler(void* parg)
 {
     // Make this thread recognisable as the networking thread
-    RenameThread("bitcoin-net");
+    RenameThread("litecoinplus-net");
 
     try
     {
@@ -937,7 +937,7 @@ void ThreadSocketHandler2(void* parg)
     list<CNode*> vNodesDisconnected;
     unsigned int nPrevNodeCount = 0;
 
-    loop
+    loop()
     {
         //
         // Disconnect nodes
@@ -1297,7 +1297,7 @@ void ThreadSocketHandler2(void* parg)
 void ThreadMapPort(void* parg)
 {
     // Make this thread recognisable as the UPnP thread
-    RenameThread("bitcoin-UPnP");
+    RenameThread("litecoinplus-UPnP");
 
     try
     {
@@ -1375,7 +1375,8 @@ void ThreadMapPort2(void* parg)
         else
             printf("UPnP Port Mapping successful.\n");
         int i = 1;
-        loop {
+		loop()
+		{
             if (fShutdown || !fUseUPnP)
             {
                 r = UPNP_DeletePortMapping(urls.controlURL, data.first.servicetype, port.c_str(), "TCP", 0);
@@ -1410,7 +1411,8 @@ void ThreadMapPort2(void* parg)
         freeUPNPDevlist(devlist); devlist = 0;
         if (r != 0)
             FreeUPNPUrls(&urls);
-        loop {
+		loop()
+		{
             if (fShutdown || !fUseUPnP)
                 return;
             Sleep(2000);
@@ -1453,7 +1455,7 @@ static const char *strDNSSeed[][2] = {
 void ThreadDNSAddressSeed(void* parg)
 {
     // Make this thread recognisable as the DNS seeding thread
-    RenameThread("bitcoin-dnsseed");
+    RenameThread("litecoinplus-dnsseed");
 
     try
     {
@@ -1537,6 +1539,10 @@ void ThreadDumpAddress2(void* parg)
     while (!fShutdown)
     {
         DumpAddresses();
+
+	// by Simone: do a periodic check of alert map here, to remove expired ones
+		CAlert::ProcessAlerts();
+
         vnThreadsRunning[THREAD_DUMPADDRESS]--;
         Sleep(100000);
         vnThreadsRunning[THREAD_DUMPADDRESS]++;
@@ -1547,7 +1553,7 @@ void ThreadDumpAddress2(void* parg)
 void ThreadDumpAddress(void* parg)
 {
     // Make this thread recognisable as the address dumping thread
-    RenameThread("bitcoin-adrdump");
+    RenameThread("litecoinplus-adrdump");
 
     try
     {
@@ -1562,7 +1568,7 @@ void ThreadDumpAddress(void* parg)
 void ThreadOpenConnections(void* parg)
 {
     // Make this thread recognisable as the connection opening thread
-    RenameThread("bitcoin-opencon");
+    RenameThread("litecoinplus-opencon");
 
     try
     {
@@ -1646,7 +1652,7 @@ void ThreadOpenConnections2(void* parg)
 
     // Initiate network connections
     int64 nStart = GetTime();
-    loop
+    loop()
     {
         ProcessOneShot();
 
@@ -1702,7 +1708,7 @@ void ThreadOpenConnections2(void* parg)
         int64 nANow = GetAdjustedTime();
 
         int nTries = 0;
-        loop
+        loop()
         {
             // use an nUnkBias between 10 (no outgoing connections) and 90 (8 outgoing connections)
             CAddress addr = addrman.Select(10 + min(nOutbound,8)*10);
@@ -1740,7 +1746,7 @@ void ThreadOpenConnections2(void* parg)
 void ThreadOpenAddedConnections(void* parg)
 {
     // Make this thread recognisable as the connection opening thread
-    RenameThread("bitcoin-opencon");
+    RenameThread("litecoinplus-opencon");
 
     try
     {
@@ -1794,7 +1800,7 @@ void ThreadOpenAddedConnections2(void* parg)
             }
         }
     }
-    loop
+    loop()
     {
         vector<vector<CService> > vservConnectAddresses = vservAddressesToAdd;
         // Attempt to connect to each IP for each addnode entry until at least one is successful per addnode entry
@@ -1877,7 +1883,7 @@ bool OpenNetworkConnection(const CAddress& addrConnect, CSemaphoreGrant *grantOu
 void ThreadMessageHandler(void* parg)
 {
     // Make this thread recognisable as the message handling thread
-    RenameThread("bitcoin-msghand");
+    RenameThread("litecoinplus-msghand");
 
     try
     {
@@ -2142,7 +2148,7 @@ void static Discover()
 void StartNode(void* parg)
 {
     // Make this thread recognisable as the startup thread
-    RenameThread("bitcoin-start");
+    RenameThread("litecoinplus-start");
 
     if (semOutbound == NULL) {
         // initialize semaphore

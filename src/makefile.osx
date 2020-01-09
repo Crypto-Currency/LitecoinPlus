@@ -71,6 +71,7 @@ CFLAGS += -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter \
 
 OBJS= \
     obj/alert.o \
+    obj/rules.o \
     obj/version.o \
     obj/checkpoints.o \
     obj/netbase.o \

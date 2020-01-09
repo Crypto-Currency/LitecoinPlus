@@ -18,6 +18,12 @@ extern int nStakeMaxAge;
 extern bool fWalletUnlockMintOnly;
 extern void updateBitcoinGUISplashMessage(char *);
 
+// by Simone: trace timing of transaction creation
+static bool walletTraceTiming = false;
+
+// by Simone: suspend all sending, emergency flag
+bool nSendSuspended = false;
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // mapWallet
@@ -356,7 +362,7 @@ void CWallet::WalletUpdateSpent(const CTransaction &tx)
                     printf("WalletUpdateSpent found spent coin %s LCP %s\n", FormatMoney(wtx.GetCredit()).c_str(), wtx.GetHash().ToString().c_str());
                     wtx.MarkSpent(txin.prevout.n);
                     wtx.WriteToDisk();
-                    NotifyTransactionChanged(this, txin.prevout.hash, CT_UPDATED);
+                    //NotifyTransactionChanged(this, txin.prevout.hash, CT_UPDATED);		// by Simone: this should NOT be unleashed when updating spent coins !!
                 }
             }
         }
@@ -1257,6 +1263,7 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, int64> >& vecSend, CW
     if (vecSend.empty() || nValue < 0)
         return false;
 
+    int64 nStart = GetTimeMillis();
     wtxNew.BindWallet(this);
 		
     {
@@ -1265,8 +1272,12 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, int64> >& vecSend, CW
         CTxDB txdb("r");
         {
             nFeeRet = nTransactionFee;
-            loop
+            loop()
             {
+                if (walletTraceTiming)
+                    fprintf(stderr, "CreateTransaction()/[chk 1] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+                nStart = GetTimeMillis();
+
                 wtxNew.vin.clear();
                 wtxNew.vout.clear();
                 wtxNew.fFromMe = true;
@@ -1277,16 +1288,29 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, int64> >& vecSend, CW
                 BOOST_FOREACH (const PAIRTYPE(CScript, int64)& s, vecSend)
                     wtxNew.vout.push_back(CTxOut(s.second, s.first));
 
+                if (walletTraceTiming)
+                    fprintf(stderr, "CreateTransaction()/[chk 2] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+                nStart = GetTimeMillis();
+
                 // Choose coins to use
                 set<pair<const CWalletTx*,unsigned int> > setCoins;
                 int64 nValueIn = 0;
                 if (!SelectCoins(nTotalValue, wtxNew.nTime, setCoins, nValueIn, coinControl))
                     return false;
+
+                if (walletTraceTiming)
+                    fprintf(stderr, "CreateTransaction()/[chk 3] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+                nStart = GetTimeMillis();
+
                 BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int) pcoin, setCoins)
                 {
                     int64 nCredit = pcoin.first->vout[pcoin.second].nValue;
                     dPriority += (double)nCredit * pcoin.first->GetDepthInMainChain();
                 }
+
+                if (walletTraceTiming)
+                    fprintf(stderr, "CreateTransaction()/[chk 4] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+                nStart = GetTimeMillis();
 
                 int64 nChange = nValueIn - nValue - nFeeRet;
                 // if sub-cent change is required, the fee must be raised to at least MIN_TX_FEE
@@ -1298,6 +1322,10 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, int64> >& vecSend, CW
                     nChange -= nMoveToFee;
                     nFeeRet += nMoveToFee;
                 }
+
+                if (walletTraceTiming)
+                    fprintf(stderr, "CreateTransaction()/[chk 5] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+                nStart = GetTimeMillis();
 
                 // ppcoin: sub-cent change is moved to fee
                 if (nChange > 0 && nChange < MIN_TXOUT_AMOUNT)
@@ -1338,9 +1366,17 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, int64> >& vecSend, CW
                 else
                     reservekey.ReturnKey();
 
+                if (walletTraceTiming)
+                    fprintf(stderr, "CreateTransaction()/[chk 6] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+                nStart = GetTimeMillis();
+
                 // Fill vin
                 BOOST_FOREACH(const PAIRTYPE(const CWalletTx*,unsigned int)& coin, setCoins)
                     wtxNew.vin.push_back(CTxIn(coin.first->GetHash(),coin.second));
+
+                if (walletTraceTiming)
+                    fprintf(stderr, "CreateTransaction()/[chk 7] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+                nStart = GetTimeMillis();
 
                 // Sign
                 int nIn = 0;
@@ -1348,15 +1384,27 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, int64> >& vecSend, CW
                     if (!SignSignature(*this, *coin.first, wtxNew, nIn++))
                         return false;
 
+                if (walletTraceTiming)
+                    fprintf(stderr, "CreateTransaction()/[chk 8] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+                nStart = GetTimeMillis();
+
                 // Limit size
                 unsigned int nBytes = ::GetSerializeSize(*(CTransaction*)&wtxNew, SER_NETWORK, PROTOCOL_VERSION);
                 if (nBytes >= MAX_BLOCK_SIZE_GEN/5)
                     return false;
                 dPriority /= nBytes;
 
+                if (walletTraceTiming)
+                    fprintf(stderr, "CreateTransaction()/[chk 9] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+                nStart = GetTimeMillis();
+
                 // Check that enough fee is included
                 int64 nPayFee = nTransactionFee * (1 + (int64)nBytes / 1000);
                 int64 nMinFee = wtxNew.GetMinFee(1, false, GMF_SEND, nBytes);
+
+                if (walletTraceTiming)
+                    fprintf(stderr, "CreateTransaction()/[chk 10] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+                nStart = GetTimeMillis();
 
                 if (nFeeRet < max(nPayFee, nMinFee))
                 {
@@ -1367,6 +1415,10 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, int64> >& vecSend, CW
                 // Fill vtxPrev by copying from previous transactions vtxPrev
                 wtxNew.AddSupportingTransactions(txdb);
                 wtxNew.fTimeReceivedIsTxTime = true;
+
+                if (walletTraceTiming)
+                    fprintf(stderr, "CreateTransaction()/[chk 11] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+                nStart = GetTimeMillis();
 
                 break;
             }
@@ -1629,7 +1681,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     }
 
     int64 nMinFee = 0;
-    loop
+    loop()
     {
         // Set output amount
         if (txNew.vout.size() == 3)
@@ -1675,6 +1727,8 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 // Call after CreateTransaction unless you want to abort
 bool CWallet::CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey)
 {
+	int64 nStart = GetTimeMillis();
+
     {
         LOCK2(cs_main, cs_wallet);
         printf("CommitTransaction:\n%s", wtxNew.ToString().c_str());
@@ -1684,12 +1738,24 @@ bool CWallet::CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey)
             // maybe makes sense; please don't do it anywhere else.
             CWalletDB* pwalletdb = fFileBacked ? new CWalletDB(strWalletFile,"r") : NULL;
 
+            if (walletTraceTiming)
+                fprintf(stderr, "CommitTransaction()/[chk 1] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+            nStart = GetTimeMillis();
+
             // Take key pair from key pool so it won't be used again
             reservekey.KeepKey();
+
+            if (walletTraceTiming)
+                fprintf(stderr, "CommitTransaction()/[chk 2] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+            nStart = GetTimeMillis();
 
             // Add tx to wallet, because if it has change it's also ours,
             // otherwise just for transaction history.
             AddToWallet(wtxNew);
+
+            if (walletTraceTiming)
+                fprintf(stderr, "CommitTransaction()/[chk 3] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+            nStart = GetTimeMillis();
 
             // Mark old coins as spent
             set<CWalletTx*> setCoins;
@@ -1697,9 +1763,21 @@ bool CWallet::CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey)
             {
                 CWalletTx &coin = mapWallet[txin.prevout.hash];
                 coin.BindWallet(this);
+		        if (walletTraceTiming)
+		            fprintf(stderr, "CommitTransaction()/[chk 4.1] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+		        nStart = GetTimeMillis();
                 coin.MarkSpent(txin.prevout.n);
+		        if (walletTraceTiming)
+		            fprintf(stderr, "CommitTransaction()/[chk 4.2] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+		        nStart = GetTimeMillis();
                 coin.WriteToDisk();
-                NotifyTransactionChanged(this, coin.GetHash(), CT_UPDATED);
+		        if (walletTraceTiming)
+		            fprintf(stderr, "CommitTransaction()/[chk 4.3] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+		        nStart = GetTimeMillis();
+                //NotifyTransactionChanged(this, coin.GetHash(), CT_UPDATED);		// by Simone: this should NOT be unleashed when committing transactions, is useless ! Anyway they will be updated by the chain itself
+		        if (walletTraceTiming)
+		            fprintf(stderr, "CommitTransaction()/[chk 4.4] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+		        nStart = GetTimeMillis();
             }
 
             if (fFileBacked)
@@ -1716,7 +1794,13 @@ bool CWallet::CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey)
             printf("CommitTransaction() : Error: Transaction not valid");
             return false;
         }
+        if (walletTraceTiming)
+            fprintf(stderr, "CommitTransaction()/[chk 5] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+        nStart = GetTimeMillis();
         wtxNew.RelayWalletTransaction();
+        if (walletTraceTiming)
+            fprintf(stderr, "CommitTransaction()/[chk 6] lasted %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+        nStart = GetTimeMillis();
     }
     return true;
 }
@@ -1766,6 +1850,8 @@ string CWallet::SendMoney(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew,
 string CWallet::SendMoneyToDestination(const CTxDestination& address, int64 nValue, CWalletTx& wtxNew, bool fAskFee)
 {
     // Check amount
+    if (nSendSuspended)
+        return _("Sending has been temporary suspended across entire network");
     if (nValue <= 0)
         return _("Invalid amount");
     if (nValue + nTransactionFee > GetBalance())
