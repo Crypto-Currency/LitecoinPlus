@@ -21,6 +21,8 @@
 extern bool qt_mac_execute_apple_script(const QString &script, AEDesc *ret);
 #endif
 
+bool fNotificationDisabled = false;
+
 // https://wiki.ubuntu.com/NotificationDevelopmentGuidelines recommends at least 128
 const int FREEDESKTOP_NOTIFICATION_ICON_SIZE = 128;
 
@@ -275,6 +277,13 @@ void Notificator::notifyGrowl(Class cls, const QString &title, const QString &te
 
 void Notificator::notify(Class cls, const QString &title, const QString &text, const QIcon &icon, int millisTimeout)
 {
+// by Simone: if notifications are disabled, just allow critical stuff to pass
+	if (fNotificationDisabled && (cls != Critical))
+	{
+		return;
+	}
+
+// if we arrive here, let's just process the notification
     switch(mode)
     {
 #ifdef USE_DBUS
@@ -292,7 +301,7 @@ void Notificator::notify(Class cls, const QString &title, const QString &text, c
         break;
 #endif
     default:
-        if(cls == Critical)
+        if (cls == Critical)
         {
             // Fall back to old fashioned pop-up dialog if critical and no other notification available
             QMessageBox::critical(parent, title, text, QMessageBox::Ok, QMessageBox::Ok);

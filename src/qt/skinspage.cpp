@@ -19,6 +19,7 @@
 #include "ui_interface.h"
 #include <QVector>
 #include <QRegExp>
+#include <QHeaderView>
 
 #include <QDebug>
 using namespace std;

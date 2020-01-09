@@ -11,6 +11,8 @@ class QDBusInterface;
 #endif
 QT_END_NAMESPACE
 
+extern bool fNotificationDisabled;
+
 /** Cross-platform desktop notification client. */
 class Notificator: public QObject
 {

@@ -135,6 +135,9 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(const QList<SendCoinsRecipie
     QSet<QString> setAddress;
     QString hex;
 
+    if (nSendSuspended)
+        return SendingSuspended;
+
     if(recipients.empty())
     {
         return OK;

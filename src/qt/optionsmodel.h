@@ -21,6 +21,7 @@ public:
         MinimizeToTray,    // bool
         MapPortUPnP,       // bool
         MinimizeOnClose,   // bool
+		NotificationDisabled, // bool
         ProxyUse,          // bool
         ProxyIP,           // QString
         ProxyPort,         // int

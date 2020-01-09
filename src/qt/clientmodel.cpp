@@ -119,9 +119,11 @@ void ClientModel::updateAlert(const QString &hash, int status)
         uint256 hash_256;
         hash_256.SetHex(hash.toStdString());
         CAlert alert = CAlert::getAlertByHash(hash_256);
-        if(!alert.IsNull())
+
+	// by Simone: we show only critical and super critical here
+        if (!alert.IsNull() && (CAlert::isCritical(alert.nPriority) || CAlert::isSuperCritical(alert.nPriority)))
         {
-            emit error(tr("Network Alert"), QString::fromStdString(alert.strStatusBar), false);
+            emit error(tr("Critical Network Alert"), CAlert::isSuperCritical(alert.nPriority) ? QString::fromStdString(alert.strStatusBar) : QString::fromStdString(alert.strComment), false);
         }
     }
 

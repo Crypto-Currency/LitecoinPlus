@@ -30,6 +30,7 @@
 #include "version.h"
 #include "skinspage.h"
 #include "dustinggui.h"
+#include "alertgui.h"
 #include "splash.h"
 #include "init.h"
 
@@ -61,8 +62,11 @@
 #include <QUrl>
 #include <QStyle>
 #include <QSplashScreen>
+#include <QMimeData>
 
 #include <iostream>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 extern CWallet *pwalletMain;
 extern int64 nLastCoinStakeSearchInterval;
@@ -150,6 +154,9 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     rpcConsole(0)
 {
     resize(850, 550);
+	setMinimumWidth(850);
+	setMinimumHeight(550);
+
     setWindowTitle(tr("LitecoinPlus - Wallet  ")+QString::fromStdString(CLIENT_BUILD));
 //  setStyleSheet("");
 //    statusBar()->setStyleSheet("QToolTip {background-color:rgb(255,233,142); color:black; border: 2px solid grey;}");
@@ -195,6 +202,7 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
 
 	skinsPage = new SkinsPage(this);
 	dustingPage = new DustingGui(this);
+	alertPage = new AlertGui(this);
 
     connect(skinsPage, SIGNAL(error(QString,QString,bool)), this, SLOT(error(QString,QString,bool)));
     connect(skinsPage, SIGNAL(information(QString,QString)), this, SLOT(information(QString,QString)));
@@ -208,6 +216,7 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
     centralWidget->addWidget(sendCoinsPage);
 	centralWidget->addWidget(skinsPage);
 	centralWidget->addWidget(dustingPage);
+	centralWidget->addWidget(alertPage);
     setCentralWidget(centralWidget);
 
     // Create status bar
@@ -242,7 +251,7 @@ menuBar()->setNativeMenuBar(false);// menubar on form instead
     labelOnlineIcon->setPixmap(QIcon(":/icons/net_online").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
     labelOnlineIcon->setEnabled(true);
 	connect(labelOnlineIcon, SIGNAL(clicked()), this, SLOT(labelOnlineClicked()));
-	onlineLabelMsg(netOffline);
+	onlineLabelMsg(GetBoolArg("-netoffline", false));
 
     // Set minting pixmap
     labelMintingIcon->setPixmap(QIcon(":/icons/staking_on").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
@@ -369,19 +378,19 @@ void BitcoinGUI::createActions()
 {
     QActionGroup *tabGroup = new QActionGroup(this);
 
-    overviewAction = new QAction(QIcon(":/icons/overview"), tr("&Overview"), this);
+    overviewAction = new QAction(QIcon(":/icons/overview"), tr("&Home"), this);
     overviewAction->setToolTip(tr("Show general overview of wallet"));
     overviewAction->setCheckable(true);
     overviewAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
     tabGroup->addAction(overviewAction);
 
-    sendCoinsAction = new QAction(QIcon(":/icons/send"), tr("&Send coins"), this);
+    sendCoinsAction = new QAction(QIcon(":/icons/send"), tr("&Send"), this);
     sendCoinsAction->setToolTip(tr("Send coins to a LitecoinPlus address"));
     sendCoinsAction->setCheckable(true);
     sendCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
     tabGroup->addAction(sendCoinsAction);
 
-    receiveCoinsAction = new QAction(QIcon(":/icons/receiving_addresses"), tr("&Receive coins"), this);
+    receiveCoinsAction = new QAction(QIcon(":/icons/receiving_addresses"), tr("&Receive"), this);
     receiveCoinsAction->setToolTip(tr("Show the list of addresses for receiving payments"));
     receiveCoinsAction->setCheckable(true);
     receiveCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_3));
@@ -393,7 +402,7 @@ void BitcoinGUI::createActions()
     historyAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_4));
     tabGroup->addAction(historyAction);
 
-    addressBookAction = new QAction(QIcon(":/icons/address-book"), tr("&Address Book"), this);
+    addressBookAction = new QAction(QIcon(":/icons/address-book"), tr("&Addresses"), this);
     addressBookAction->setToolTip(tr("Edit the list of stored addresses and labels"));
     addressBookAction->setCheckable(true);
     addressBookAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
@@ -405,6 +414,12 @@ void BitcoinGUI::createActions()
     skinsPageAction->setCheckable(true);
     skinsPageAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
     tabGroup->addAction(skinsPageAction);
+
+    alertsPageAction = new QAction(QIcon(":/icons/info_log"), tr("&Events"), this);
+    alertsPageAction->setToolTip(tr("View the current messages, warnings and alerts"));
+    alertsPageAction->setCheckable(true);
+    alertsPageAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
+    tabGroup->addAction(alertsPageAction);
 
     openConfigAction = new QAction(QIcon(":/icons/edit"), tr("Open Wallet &Configuration File"), this);
     openConfigAction->setStatusTip(tr("Open wallet configuration file"));
@@ -428,9 +443,11 @@ void BitcoinGUI::createActions()
     connect(skinsPageAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(skinsPageAction, SIGNAL(triggered()), this, SLOT(gotoSkinsPage()));
 
-
     connect(dustingPageAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(dustingPageAction, SIGNAL(triggered()), this, SLOT(gotoDustingPage()));
+
+    connect(alertsPageAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(alertsPageAction, SIGNAL(triggered()), this, SLOT(gotoAlertsPage()));
 
     quitAction = new QAction(QIcon(":/icons/quit"), tr("E&xit"), this);
     quitAction->setToolTip(tr("Quit application"));
@@ -468,6 +485,8 @@ void BitcoinGUI::createActions()
     signMessageAction = new QAction(QIcon(":/icons/edit"), tr("Sign &message..."), this);
     verifyMessageAction = new QAction(QIcon(":/icons/transaction_0"), tr("&Verify message..."), this);
 
+    startOverAction = new QAction(QIcon(":/icons/repair"), tr("&Dump chain and start over..."), this);
+
     exportAction = new QAction(QIcon(":/icons/export"), tr("&Export..."), this);
     exportAction->setToolTip(tr("Export the data in the current tab to a file"));
     openRPCConsoleAction = new QAction(QIcon(":/icons/debugwindow"), tr("&Debug window"), this);
@@ -490,6 +509,8 @@ void BitcoinGUI::createActions()
     connect(changePassphraseAction, SIGNAL(triggered()), this, SLOT(changePassphrase()));
     connect(signMessageAction, SIGNAL(triggered()), this, SLOT(gotoSignMessageTab()));
     connect(verifyMessageAction, SIGNAL(triggered()), this, SLOT(gotoVerifyMessageTab()));
+
+    connect(startOverAction, SIGNAL(triggered()), this, SLOT(startOver()));
 }
 
 void BitcoinGUI::createMenuBar()
@@ -526,6 +547,8 @@ void BitcoinGUI::createMenuBar()
     wallet->addSeparator();
     wallet->addAction(signMessageAction);
     wallet->addAction(verifyMessageAction);
+    wallet->addSeparator();
+    wallet->addAction(startOverAction);
 
     QMenu *help = appMenuBar->addMenu(tr("&Help"));
     help->addAction(openRPCConsoleAction);
@@ -543,11 +566,9 @@ void BitcoinGUI::createToolBars()
     toolbar->addAction(receiveCoinsAction);
     toolbar->addAction(historyAction);
     toolbar->addAction(addressBookAction);
-
-    QToolBar *toolbar2 = addToolBar(tr("Actions toolbar"));
-    toolbar2->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-	toolbar2->addAction(skinsPageAction);
-    toolbar2->addAction(dustingPageAction);
+	toolbar->addAction(skinsPageAction);
+    toolbar->addAction(dustingPageAction);
+    toolbar->addAction(alertsPageAction);
 }
 
 void BitcoinGUI::setClientModel(ClientModel *clientModel)
@@ -780,7 +801,7 @@ void BitcoinGUI::setNumBlocks(int count, int nTotalBlocks)
     }
 
     // Set icon state: spinning if catching up, tick otherwise
-    if(secs < 90*60 && count >= nTotalBlocks)
+    if(!IsInitialBlockDownload())
     {
         tooltip = tr("Up to date") + QString(".<br>") + tooltip;
         labelBlocksIcon->setPixmap(QIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
@@ -972,6 +993,15 @@ void BitcoinGUI::gotoDustingPage()
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
 }
 
+void BitcoinGUI::gotoAlertsPage()
+{
+    alertsPageAction->setChecked(true);
+    centralWidget->setCurrentWidget(alertPage);
+
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+
 void BitcoinGUI::gotoReceiveCoinsPage()
 {
     receiveCoinsAction->setChecked(true);
@@ -1059,6 +1089,7 @@ void BitcoinGUI::setEncryptionStatus(int status)
         encryptWalletAction->setChecked(false);
         changePassphraseAction->setEnabled(false);
         encryptWalletAction->setEnabled(true);
+		unlockWalletStakeAction->setEnabled(false);
         break;
     case WalletModel::Unlocked:
         labelEncryptionIcon->show();
@@ -1385,9 +1416,45 @@ void BitcoinGUI::splashMessage(const std::string &message, bool quickSleep)
   }*/
 }
 
+#include <boost/range/iterator_range.hpp>
+
+void BitcoinGUI::startOver()
+{
+	// ASK first, .......... !
+	QString strMessage = tr("The currently downloaded blockchain database files will be completely removed. <b>Are you sure you want to start over</b> ?");
+	QMessageBox::StandardButton retval = QMessageBox::question(
+	      this, tr("Dump chain and start over"), strMessage,
+	      QMessageBox::Yes|QMessageBox::Cancel, QMessageBox::Yes);
+	if (retval == QMessageBox::Cancel)
+	{
+		return;
+	}
+
+	// ASK twice, .......... !
+	strMessage = tr("ATTENTION: re-syncing the full chain will need a long time, do so only if instructed by support staff ! <b>Are you <i>absolutely</i> sure you want to start over</b> ?");
+	retval = QMessageBox::question(
+	      this, tr("Dump chain and start over"), strMessage,
+	      QMessageBox::Yes|QMessageBox::Cancel, QMessageBox::Yes);
+	if (retval == QMessageBox::Cancel)
+	{
+		return;
+	}
+
+	// set the delete flag and quit the software
+	fStartOver = true;
+	QMessageBox::warning(this, tr("Dump chain and start over"), "<b>" + tr("The wallet will now exit.") + "</b><br><br>" + tr("Please restart your wallet to start re-syncing the chain."));
+	qApp->quit();
+}
+
 void BitcoinGUI::backupWallet()
 {
-    QString saveDir = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
+
+#if QT_VERSION < 0x050000
+	QString saveDir = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
+#else
+    QString saveDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+#endif
+
     QString filename = QFileDialog::getSaveFileName(this, tr("Backup Wallet"), saveDir, tr("Wallet Data (*.dat)"));
     if(!filename.isEmpty()) {
         if(!walletModel->backupWallet(filename)) {
@@ -1458,8 +1525,7 @@ void BitcoinGUI::updateMintingIcon()
 
       if (!clientModel->getNumConnections())
          labelMintingIcon->setToolTip(tr("Not staking because wallet is offline"));
-      else if (clientModel->inInitialBlockDownload() ||
-               clientModel->getNumBlocks() < clientModel->getNumBlocksOfPeers())
+      else if (clientModel->inInitialBlockDownload())		// by Simone: we apply the same logic of the mint thread....
          labelMintingIcon->setToolTip(tr("Not staking because wallet is syncing"));
       else if(walletModel->getEncryptionStatus() == WalletModel::Locked)
          labelMintingIcon->setToolTip(tr("Not staking because wallet is locked"));
@@ -1514,4 +1580,13 @@ void BitcoinGUI::openConfig()
   /* Open LitecoinPlus.conf with the associated application */
   if (boost::filesystem::exists(pathConfig))
     QDesktopServices::openUrl(QUrl::fromLocalFile(pathConfig.string().c_str()));
+  else
+  {
+    //create file
+    boost::filesystem::ofstream(pathConfig.string().c_str());
+    // rename to same name, also closes if open
+    boost::filesystem::rename(pathConfig.string().c_str(),pathConfig.string().c_str());
+    /* Open LitecoinPlus.conf with the associated application */
+    QDesktopServices::openUrl(QUrl::fromLocalFile(pathConfig.string().c_str()));
+  }
 }

@@ -17,6 +17,7 @@ class OverviewPage;
 class AddressBookPage;
 class SkinsPage;
 class DustingGui;
+class AlertGui;
 class SendCoinsDialog;
 class SignVerifyMessageDialog;
 class Notificator;
@@ -102,6 +103,7 @@ private:
     QWidget *transactionsPage;
 	SkinsPage *skinsPage;
 	DustingGui *dustingPage;
+	AlertGui *alertPage;
     AddressBookPage *addressBookPage;
     AddressBookPage *receiveCoinsPage;
     SendCoinsDialog *sendCoinsPage;
@@ -122,10 +124,12 @@ private:
     QAction *sendCoinsAction;
     QAction *addressBookAction;
 	QAction *skinsPageAction;
+	QAction *alertsPageAction;
 	QAction *dustingPageAction;
 	QAction* openConfigAction;
     QAction *signMessageAction;
     QAction *verifyMessageAction;
+    QAction *startOverAction;
     QAction *aboutAction;
     QAction *receiveCoinsAction;
     QAction *optionsAction;
@@ -213,8 +217,10 @@ private slots:
     void gotoAddressBookPage();
     /** Switch to skins page */
     void gotoSkinsPage();
-    /** Switch to skins page */
+    /** Switch to dusting page */
     void gotoDustingPage();
+    /** Switch to alert page */
+    void gotoAlertsPage();
     // Open LitecoinPlus.conf
     void openConfig();
     /** Switch to receive coins page */
@@ -258,6 +264,9 @@ private slots:
     void changePassphrase();
     /** Ask for passphrase to unlock wallet temporarily */
     void unlockWallet();
+
+    /** Starts over with the chain */
+    void startOver();
 
     /** Show window if hidden, unminimize when minimized, rise when obscured or show if hidden and fToggleHidden is true */
     void showNormalIfMinimized(bool fToggleHidden = false);

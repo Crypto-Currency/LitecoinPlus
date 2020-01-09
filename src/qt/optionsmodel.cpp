@@ -5,6 +5,7 @@
 #include "init.h"
 #include "walletdb.h"
 #include "guiutil.h"
+#include "notificator.h"
 
 OptionsModel::OptionsModel(QObject *parent) :
     QAbstractListModel(parent)
@@ -45,6 +46,7 @@ void OptionsModel::Init()
     bDisplayAddresses = settings.value("bDisplayAddresses", false).toBool();
     fMinimizeToTray = settings.value("fMinimizeToTray", false).toBool();
     fMinimizeOnClose = settings.value("fMinimizeOnClose", false).toBool();
+    fNotificationDisabled = settings.value("fNotificationDisabled", false).toBool();
 	fCoinControlFeatures = settings.value("fCoinControlFeatures", false).toBool();
     nTransactionFee = settings.value("nTransactionFee").toLongLong();
     language = settings.value("language", "").toString();
@@ -143,6 +145,8 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
             return settings.value("fUseUPnP", GetBoolArg("-upnp", true));
         case MinimizeOnClose:
             return QVariant(fMinimizeOnClose);
+        case NotificationDisabled:
+            return QVariant(fNotificationDisabled);
         case ProxyUse:
             return settings.value("fUseProxy", false);
         case ProxyIP: {
@@ -204,6 +208,10 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
         case MinimizeOnClose:
             fMinimizeOnClose = value.toBool();
             settings.setValue("fMinimizeOnClose", fMinimizeOnClose);
+            break;
+        case NotificationDisabled:
+            fNotificationDisabled = value.toBool();
+            settings.setValue("fNotificationDisabled", fNotificationDisabled);
             break;
         case ProxyUse:
             settings.setValue("fUseProxy", value.toBool());
