@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="en">
-<defaultcodec>UTF-8</defaultcodec>
+<TS version="2.1" language="en">
 <context>
     <name>AboutDialog</name>
     <message>
@@ -10,12 +9,12 @@
         <translation>Informazioni su LitecoinPlus</translation>
     </message>
     <message>
-        <location line="+53"/>
+        <location line="+39"/>
         <source>&lt;b&gt;LitecoinPlus&lt;/b&gt; version</source>
         <translation>Versione &lt;b&gt;LitecoinPlus&lt;/b&gt;</translation>
     </message>
     <message>
-        <location line="+94"/>
+        <location line="+41"/>
         <source>
 Copyright © 2009-2012 Bitcoin Developers
 Copyright © 2012 PeerCoin Developers
@@ -28,14 +27,14 @@ Copyright © 2014 Sviluppatori LitecoinPlus
 </translation>
     </message>
     <message>
-        <location line="+111"/>
+        <location line="+17"/>
         <source>
 This is experimental software.
 
 Distributed under the MIT/X11 software license, see the accompanying file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit (http://www.openssl.org/) and cryptographic software written by Eric Young (eay@cryptsoft.com) and UPnP software written by Thomas Bernard.</source>
-        <translation>Questo software e' sperimentale.
+        <translation>Questo software e&apos; sperimentale.
 
 Distribuito dietro licenza MIT/X11, per maggiori informazioni controllare il file COPYING oppure http://www.opensource.org/licenses/mit-license.php.
 
@@ -62,7 +61,7 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
     <message>
         <location line="+14"/>
         <source>Copy the currently selected address to the system clipboard</source>
-        <translation>Copia l'indirizzo selezionato nella clipboard di sistema</translation>
+        <translation>Copia l&apos;indirizzo selezionato nella clipboard di sistema</translation>
     </message>
     <message>
         <location line="-11"/>
@@ -87,7 +86,7 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
     <message>
         <location line="+11"/>
         <source>Sign a message to prove you own a LitecoinPlus address</source>
-        <translation>Firma messaggio per comprovare la ownership dell'indirizzo LitecoinPlus</translation>
+        <translation>Firma messaggio per comprovare la ownership dell&apos;indirizzo LitecoinPlus</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -97,7 +96,7 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
     <message>
         <location line="+25"/>
         <source>Delete the currently selected address from the list</source>
-        <translation>Cancella l'indirizzo selezionato dalla lista</translation>
+        <translation>Cancella l&apos;indirizzo selezionato dalla lista</translation>
     </message>
     <message>
         <location line="-14"/>
@@ -164,31 +163,59 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
     </message>
 </context>
 <context>
+    <name>AlertGui</name>
+    <message>
+        <location filename="../forms/alertgui.ui" line="+14"/>
+        <source>Events and messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../alertgui.cpp" line="+188"/>
+        <source>Info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Warning</source>
+        <translation type="unfinished">Attenzione</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Critical</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>URGENT!</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>AskPassphraseDialog</name>
     <message>
         <location filename="../forms/askpassphrasedialog.ui" line="+26"/>
         <source>Passphrase Dialog</source>
-        <translation>Parola D'ordine</translation>
+        <translation>Parola D&apos;ordine</translation>
     </message>
     <message>
         <location line="+21"/>
         <source>Enter passphrase</source>
-        <translation>Inserire parola d'ordine</translation>
+        <translation>Inserire parola d&apos;ordine</translation>
     </message>
     <message>
         <location line="+14"/>
         <source>New passphrase</source>
-        <translation>Nuova parola d'ordine</translation>
+        <translation>Nuova parola d&apos;ordine</translation>
     </message>
     <message>
         <location line="+14"/>
         <source>Repeat new passphrase</source>
-        <translation>Re-inserire nuova parola d'ordine</translation>
+        <translation>Re-inserire nuova parola d&apos;ordine</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="+33"/>
         <source>Enter the new passphrase to the wallet.&lt;br/&gt;Please use a passphrase of &lt;b&gt;10 or more random characters&lt;/b&gt;, or &lt;b&gt;eight or more words&lt;/b&gt;.</source>
-        <translation>Inserire la nuova parola d'ordine per il portafoglio.&lt;br/&gt;Si prega di usare una sequenza di &lt;b&gt;10 o piu' caratteri casuali&lt;/b&gt;, oppure &lt;b&gt;otto o piu' parole&lt;/b&gt;.</translation>
+        <translation>Inserire la nuova parola d&apos;ordine per il portafoglio.&lt;br/&gt;Si prega di usare una sequenza di &lt;b&gt;10 o piu&apos; caratteri casuali&lt;/b&gt;, oppure &lt;b&gt;otto o piu&apos; parole&lt;/b&gt;.</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -198,7 +225,7 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
     <message>
         <location line="+3"/>
         <source>This operation needs your wallet passphrase to unlock the wallet.</source>
-        <translation>Questa operazione necessita della parola d'ordine per sbloccare il portafoglio.</translation>
+        <translation>Questa operazione necessita della parola d&apos;ordine per sbloccare il portafoglio.</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -208,7 +235,7 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
     <message>
         <location line="+3"/>
         <source>This operation needs your wallet passphrase to decrypt the wallet.</source>
-        <translation>Questa operazione necessita della parola d'ordine per decifrare il portafoglio.</translation>
+        <translation>Questa operazione necessita della parola d&apos;ordine per decifrare il portafoglio.</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -218,12 +245,12 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
     <message>
         <location line="+3"/>
         <source>Change passphrase</source>
-        <translation>Cambia parola d'ordine</translation>
+        <translation>Cambia parola d&apos;ordine</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Enter the old and new passphrase to the wallet.</source>
-        <translation>Inserisci l'attuale e nuova parola d'ordine.</translation>
+        <translation>Inserisci l&apos;attuale e nuova parola d&apos;ordine.</translation>
     </message>
     <message>
         <location line="+46"/>
@@ -233,7 +260,7 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
     <message>
         <location line="+1"/>
         <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR COINS&lt;/b&gt;!</source>
-        <translation>Attenzione: Se esegui la cifratura del portafoglio e ti dimentichi la tua parola d'ordine, questo comporta &lt;b&gt;LA PERDITA DI TUTTI I TUOI COINS&lt;/b&gt;!</translation>
+        <translation>Attenzione: Se esegui la cifratura del portafoglio e ti dimentichi la tua parola d&apos;ordine, questo comporta &lt;b&gt;LA PERDITA DI TUTTI I TUOI COINS&lt;/b&gt;!</translation>
     </message>
     <message>
         <location line="+0"/>
@@ -249,7 +276,7 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
         <location line="+100"/>
         <location line="+24"/>
         <source>Warning: The Caps Lock key is on!</source>
-        <translation>Attenzione: il Blocco Maiuscole e' attivo !</translation>
+        <translation>Attenzione: il Blocco Maiuscole e&apos; attivo !</translation>
     </message>
     <message>
         <location line="-130"/>
@@ -260,7 +287,7 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
     <message>
         <location line="-56"/>
         <source>LitecoinPlus will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your coins from being stolen by malware infecting your computer.</source>
-        <translation>LitecoinPlus si chiudera' per completare il processo di cifratura. Ricorda che la cifratura non protegge mai completamente i tuoi coins dall'essere rubati da malware nel computer.</translation>
+        <translation>LitecoinPlus si chiudera&apos; per completare il processo di cifratura. Ricorda che la cifratura non protegge mai completamente i tuoi coins dall&apos;essere rubati da malware nel computer.</translation>
     </message>
     <message>
         <location line="+13"/>
@@ -273,13 +300,13 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
     <message>
         <location line="-54"/>
         <source>Wallet encryption failed due to an internal error. Your wallet was not encrypted.</source>
-        <translation>Cifratura del portafoglio fallita a causa di un errore interno. Il portafoglio non e' criptato.</translation>
+        <translation>Cifratura del portafoglio fallita a causa di un errore interno. Il portafoglio non e&apos; criptato.</translation>
     </message>
     <message>
         <location line="+7"/>
         <location line="+48"/>
         <source>The supplied passphrases do not match.</source>
-        <translation>La parola d'ordine fornita non e' corretta.</translation>
+        <translation>La parola d&apos;ordine fornita non e&apos; corretta.</translation>
     </message>
     <message>
         <location line="-37"/>
@@ -291,7 +318,7 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
         <location line="+11"/>
         <location line="+19"/>
         <source>The passphrase entered for the wallet decryption was incorrect.</source>
-        <translation>La parola d'ordine fornita non e' corretta.</translation>
+        <translation>La parola d&apos;ordine fornita non e&apos; corretta.</translation>
     </message>
     <message>
         <location line="-20"/>
@@ -301,89 +328,133 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
     <message>
         <location line="+14"/>
         <source>Wallet passphrase was successfully changed.</source>
-        <translation>La parola d'ordne e' stata cambiata con successo.</translation>
+        <translation>La parola d&apos;ordne e&apos; stata cambiata con successo.</translation>
+    </message>
+</context>
+<context>
+    <name>BanTableModel</name>
+    <message>
+        <location filename="../bantablemodel.cpp" line="+87"/>
+        <source>IP/Netmask</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Banned Until</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>BitcoinGUI</name>
     <message>
-        <location filename="../bitcoingui.cpp" line="+257"/>
+        <location filename="../bitcoingui.cpp" line="+483"/>
         <source>Sign &amp;message...</source>
         <translation>Firma &amp;messaggio...</translation>
     </message>
     <message>
-        <location line="+81"/>
+        <location line="-325"/>
         <source>LitecoinPlus - Wallet  </source>
         <translation>Portafoglio - LitecoinPlus  </translation>
     </message>
     <message>
-        <location line="+579"/>
+        <location line="+615"/>
         <source>Current difficulty is %1.</source>
-        <translation>Difficolta' rete attuale e' %1.</translation>
+        <translation>Difficolta&apos; rete attuale e&apos; %1.</translation>
     </message>
     <message>
-        <location line="+1165"/>
+        <location line="+746"/>
         <source>Not staking because wallet is offline</source>
-        <translation>Staking non attivo perche' il portafoglio e' offline</translation>
+        <translation>Staking non attivo perche&apos; il portafoglio e&apos; offline</translation>
     </message>
     <message>
-        <location line="+1168"/>
+        <location line="+3"/>
         <source>Not staking because wallet is syncing</source>
-        <translation>Staking non attivo perche' il portafoglio si sta sincronizzando</translation>
+        <translation>Staking non attivo perche&apos; il portafoglio si sta sincronizzando</translation>
     </message>
     <message>
-        <location line="+1170"/>
+        <location line="+2"/>
         <source>Not staking because wallet is locked</source>
-        <translation>Staking non attivo perche' il portafoglio e' bloccato (usate il tasto sblocca)</translation>
+        <translation>Staking non attivo perche&apos; il portafoglio e&apos; bloccato (usate il tasto sblocca)</translation>
     </message>
     <message>
-        <location line="+1177"/>
-        <source>Not staking because you don't have mature coins</source>
-        <translation>Staking non attivo perche' non ci sono coin maturi</translation>
+        <location line="+7"/>
+        <source>Not staking because you don&apos;t have mature coins</source>
+        <translation>Staking non attivo perche&apos; non ci sono coin maturi</translation>
+    </message>
+    <message numerus="yes">
+        <location line="+7"/>
+        <source>%n second(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+2"/>
+        <source>%n minute(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+2"/>
+        <source>%n hour(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+2"/>
+        <source>%n day(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
     <message>
-        <location line="+1194"/>
+        <location line="+4"/>
         <source>Staking.
  Your weight is %1
  Network weight is %2
  You have 50% chance of producing a stake within %3</source>
         <translation>Staking.
- Il tuo peso e' %1
- Il peso della rete e' %2
- Hai 50% di possibilita' di produrre un blocco da stake in %3</translation>
+ Il tuo peso e&apos; %1
+ Il peso della rete e&apos; %2
+ Hai 50% di possibilita&apos; di produrre un blocco da stake in %3</translation>
     </message>
     <message>
-        <location line="+237"/>
+        <location line="-802"/>
         <source>Synchronizing with network...</source>
         <translation>Sincronizzazione con la rete...</translation>
     </message>
     <message>
-        <location line="+283"/>
+        <location line="-279"/>
         <source>&amp;Unlock To Stake...</source>
         <translation>&amp;Sblocca Per Fare Stake...</translation>
     </message>
     <message>
-        <location line="+286"/>
+        <location line="+3"/>
         <source>&amp;Check Wallet...</source>
         <translation>&amp;Verifica portafoglio...</translation>
     </message>
     <message>
-        <location line="+289"/>
+        <location line="+3"/>
         <source>&amp;Repair Wallet...</source>
         <translation>&amp;Ripara portafoglio...</translation>
     </message>
     <message>
-        <location line="+292"/>
+        <location line="+3"/>
         <source>&amp;Zap Wallet...</source>
         <translation>&amp;Ricostruisci portafoglio...</translation>
     </message>
     <message>
-        <location line="-299"/>
         <source>&amp;Overview</source>
-        <translation>&amp;Generale</translation>
+        <translation type="vanished">&amp;Generale</translation>
     </message>
     <message>
-        <location line="+1"/>
+        <location line="-96"/>
         <source>Show general overview of wallet</source>
         <translation>Mostra dettagli generali del portafoglio</translation>
     </message>
@@ -398,32 +469,109 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
         <translation>Esplora storico delle transazioni</translation>
     </message>
     <message>
-        <location line="+5"/>
         <source>&amp;Address Book</source>
-        <translation>&amp;Rubrica</translation>
+        <translation type="vanished">&amp;Rubrica</translation>
     </message>
     <message>
-        <location line="+1"/>
+        <location line="+6"/>
         <source>Edit the list of stored addresses and labels</source>
         <translation>Modifica la lista degli indirizzi ed etichette salvati</translation>
     </message>
     <message>
-        <location line="-13"/>
         <source>&amp;Receive coins</source>
-        <translation>&amp;Ricezione coins</translation>
+        <translation type="vanished">&amp;Ricezione coins</translation>
     </message>
     <message>
-        <location line="+1"/>
+        <location line="-12"/>
         <source>Show the list of addresses for receiving payments</source>
         <translation>Mostra la lista degli indirizzi per ricevere pagamenti</translation>
     </message>
     <message>
-        <location line="-7"/>
         <source>&amp;Send coins</source>
-        <translation>&amp;Invio coins</translation>
+        <translation type="vanished">&amp;Invio coins</translation>
     </message>
     <message>
-        <location line="+35"/>
+        <location line="-67"/>
+        <source>The wallet is now OFFLINE</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>The wallet is now ONLINE</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>The wallet will now go OFFLINE, meaning that syncing and staking will stop. Are you sure ?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Confirm offline action</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+34"/>
+        <source>&amp;Home</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>&amp;Send</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>&amp;Receive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>&amp;Addresses</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>&amp;Themes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Change the look of your wallet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>&amp;Events</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>View the current messages, warnings and alerts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Open Wallet &amp;Configuration File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Open wallet configuration file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>&amp;Dusting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Monitor the dusting of your wallet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+24"/>
         <source>E&amp;xit</source>
         <translation>E&amp;sci</translation>
     </message>
@@ -458,17 +606,22 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
         <translation>&amp;Cifra Portafoglio...</translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location line="+15"/>
         <source>&amp;Backup Wallet...</source>
         <translation>&amp;Backup Portafoglio...</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>&amp;Change Passphrase...</source>
-        <translation>&amp;Cambia Parola D'ordine...</translation>
+        <translation>&amp;Cambia Parola D&apos;ordine...</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>&amp;Dump chain and start over...</source>
+        <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location line="+241"/>
+        <location line="+262"/>
         <source>~%n block(s) remaining</source>
         <translation>
             <numerusform>~%n blocco rimanente</numerusform>
@@ -481,42 +634,42 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
         <translation>Scaricato %1 di %2 blocchi di storico transazioni (%3% completato).</translation>
     </message>
     <message>
-        <location line="-242"/>
+        <location line="-266"/>
         <source>&amp;Export...</source>
         <translation>&amp;Esporta...</translation>
     </message>
     <message>
-        <location line="-58"/>
+        <location line="-102"/>
         <source>Send coins to a LitecoinPlus address</source>
         <translation>Invia coins ad un indirizzo LitecoinPlus</translation>
     </message>
     <message>
-        <location line="+45"/>
+        <location line="+75"/>
         <source>Modify configuration options for LitecoinPlus</source>
         <translation>Modifica opzioni di configurazione di LitecoinPlus</translation>
     </message>
     <message>
-        <location line="+14"/>
+        <location line="+28"/>
         <source>Export the data in the current tab to a file</source>
         <translation>Esporta i dati del tab corrente in un file</translation>
     </message>
     <message>
-        <location line="-10"/>
+        <location line="-24"/>
         <source>Encrypt or decrypt wallet</source>
         <translation>Cifra o decifra portafoglio</translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location line="+15"/>
         <source>Backup wallet to another location</source>
-        <translation>Backup portafoglio in un'altra posizione</translation>
+        <translation>Backup portafoglio in un&apos;altra posizione</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Change the passphrase used for wallet encryption</source>
-        <translation>Cambia la parola d'ordine usata per la cifratura del portafoglio</translation>
+        <translation>Cambia la parola d&apos;ordine usata per la cifratura del portafoglio</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="+8"/>
         <source>&amp;Debug window</source>
         <translation>&amp;Finestra di debug</translation>
     </message>
@@ -526,22 +679,20 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
         <translation>Apri la finestra di debug e console diagnostica</translation>
     </message>
     <message>
-        <location line="-5"/>
+        <location line="-7"/>
         <source>&amp;Verify message...</source>
         <translation>&amp;Verifica messaggio...</translation>
     </message>
     <message>
-        <location line="-186"/>
         <source>LitecoinPlus</source>
-        <translation>LitecoinPlus</translation>
+        <translation type="vanished">LitecoinPlus</translation>
     </message>
     <message>
-        <location line="+0"/>
         <source>Wallet</source>
-        <translation>Portafoglio</translation>
+        <translation type="vanished">Portafoglio</translation>
     </message>
     <message>
-        <location line="+168"/>
+        <location line="-30"/>
         <source>&amp;About LitecoinPlus</source>
         <translation>&amp;Dettagli LitecoinPlus</translation>
     </message>
@@ -551,17 +702,22 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
         <translation>&amp;Mostra / Nascondi</translation>
     </message>
     <message>
-        <location line="+39"/>
+        <location line="+62"/>
         <source>&amp;File</source>
         <translation>&amp;File</translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+7"/>
         <source>&amp;Settings</source>
         <translation>&amp;Impostazioni</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="+3"/>
+        <source>&amp;Wallet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+16"/>
         <source>&amp;Help</source>
         <translation>&amp;Aiuto</translation>
     </message>
@@ -571,24 +727,23 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
         <translation>Strumenti tabs</translation>
     </message>
     <message>
-        <location line="+8"/>
         <source>Actions toolbar</source>
-        <translation>Strumenti azioni</translation>
+        <translation type="vanished">Strumenti azioni</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+20"/>
         <location line="+9"/>
         <source>[testnet]</source>
         <translation>[testnet]</translation>
     </message>
     <message>
         <location line="+0"/>
-        <location line="+60"/>
+        <location line="+61"/>
         <source>LitecoinPlus client</source>
         <translation>LitecoinPlus client</translation>
     </message>
     <message numerus="yes">
-        <location line="+69"/>
+        <location line="+71"/>
         <source>%n active connection(s) to LitecoinPlus network</source>
         <translation>
             <numerusform>%n connessione attiva alla rete LitecoinPlus</numerusform>
@@ -596,12 +751,12 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
         </translation>
     </message>
     <message>
-        <location line="+40"/>
+        <location line="+41"/>
         <source>Downloaded %1 blocks of transaction history.</source>
         <translation>Scaricato %1 blocchi di storico transazioni.</translation>
     </message>
     <message numerus="yes">
-        <location line="+22"/>
+        <location line="+24"/>
         <source>%n second(s) ago</source>
         <translation>
             <numerusform>%n secondo fa</numerusform>
@@ -645,12 +800,12 @@ Questo prodotto include software sviluppato dal progetto OpenSSL, per utilizzo i
     <message>
         <location line="+10"/>
         <source>Last received block was generated %1.</source>
-        <translation>L'ultimo blocco e' stato generato il %1.</translation>
+        <translation>L&apos;ultimo blocco e&apos; stato generato il %1.</translation>
     </message>
     <message>
-        <location line="+59"/>
+        <location line="+81"/>
         <source>This transaction is over the size limit.  You can still send it for a fee of %1, which goes to the nodes that process your transaction and helps to support the network.  Do you want to pay the fee?</source>
-        <translation>Questa transazione e' oltre il limite massimo. Puoi ancora spedirla con un fee di %1, che andra' al nodo che la processa e aiutera' a supportare la rete. Vuoi pagare il fee?</translation>
+        <translation>Questa transazione e&apos; oltre il limite massimo. Puoi ancora spedirla con un fee di %1, che andra&apos; al nodo che la processa e aiutera&apos; a supportare la rete. Vuoi pagare il fee?</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -681,7 +836,7 @@ Indirizzo: %4
 </translation>
     </message>
     <message>
-        <location line="+100"/>
+        <location line="+127"/>
         <location line="+15"/>
         <source>URI handling</source>
         <translation>Gestione URI</translation>
@@ -690,20 +845,179 @@ Indirizzo: %4
         <location line="-15"/>
         <location line="+15"/>
         <source>URI can not be parsed! This can be caused by an invalid LitecoinPlus address or malformed URI parameters.</source>
-        <translation>L'URI non puo' essere interpretato! Questo puo' essere causato da un indirizzo invalido oppure un URI malformato.</translation>
+        <translation>L&apos;URI non puo&apos; essere interpretato! Questo puo&apos; essere causato da un indirizzo invalido oppure un URI malformato.</translation>
     </message>
     <message>
-        <location line="+16"/>
+        <location line="+17"/>
+        <location line="+5"/>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>Il portafoglio e' &lt;b&gt;cifrato&lt;/b&gt; e correntemente &lt;b&gt;sbloccato&lt;/b&gt;</translation>
+        <translation>Il portafoglio e&apos; &lt;b&gt;cifrato&lt;/b&gt; e correntemente &lt;b&gt;sbloccato&lt;/b&gt;</translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+3"/>
+        <location line="+10"/>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt; for Staking only.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-3"/>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>Il portafoglio e' &lt;b&gt;cifrato&lt;/b&gt; e correntemente &lt;b&gt;bloccato&lt;/b&gt;</translation>
+        <translation>Il portafoglio e&apos; &lt;b&gt;cifrato&lt;/b&gt; e correntemente &lt;b&gt;bloccato&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>The wallet will now be set offline and the wallet.dat file encrypted. The operation may require some time, after which the wallet will quit and will need to be restarted. &lt;b&gt;Are you sure you want to do it now&lt;/b&gt; ?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Encrypt Wallet warning</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <location line="+121"/>
+        <source>Set Offline Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-120"/>
+        <location line="+121"/>
+        <source>Error, cannot bring the wallet offline at this time. Try again in a few seconds.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-109"/>
+        <source>Cancelled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>The encryption was cancelled, the wallet is still unencrypted. The software will go back to online status now.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <source>Unlock Wallet Information</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Wallet has been unlocked. 
+Proof of Stake has started.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <location line="+4"/>
+        <source>Check Wallet Information</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-3"/>
+        <location line="+28"/>
+        <source>Wallet passed integrity test!
+Nothing found to fix.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-24"/>
+        <source>Wallet failed integrity test!
+
+Mismatched coin(s) found: %1.
+Amount in question: %2.
+Orphans found: %3.
+
+Please backup wallet and run repair wallet.
+</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+23"/>
+        <location line="+4"/>
+        <source>Repair Wallet Information</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Wallet failed integrity test and has been repaired!
+Mismatched coin(s) found: %1
+Amount affected by repair: %2
+Orphans removed: %3
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>The wallet will be set offline and the operation will require a LONG time (more than a few minutes). &lt;b&gt;Are you sure you want to do it now&lt;/b&gt; ?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>ZAP Wallet warning</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+74"/>
+        <source>Warning: error reading wallet.dat! All keys read correctly, but transaction data or address book entries might be missing or incorrect.</source>
+        <translation type="unfinished">Attenzione: Errore durante lettura di wallet.dat! Tutte le chiavi sono lette, ma le informazioni di transazione o la rubrica non possono essere recuperate.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Error loading wallet.dat: Wallet requires newer version of BitBar</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Wallet needed to be rewritten: restart BitBar to complete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Error loading wallet.dat</source>
+        <translation type="unfinished">Errore durante il caricamento di wallet.dat</translation>
+    </message>
+    <message>
+        <location line="+44"/>
+        <source>Zap Wallet Finished.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <location line="+54"/>
+        <source>The wallet will now exit.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-54"/>
+        <source>Please restart your wallet for changes to take effect.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+33"/>
+        <source>The currently downloaded blockchain database files will be completely removed. &lt;b&gt;Are you sure you want to start over&lt;/b&gt; ?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <location line="+10"/>
+        <location line="+9"/>
+        <source>Dump chain and start over</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-11"/>
+        <source>ATTENTION: re-syncing the full chain will need a long time, do so only if instructed by support staff ! &lt;b&gt;Are you &lt;i&gt;absolutely&lt;/i&gt; sure you want to start over&lt;/b&gt; ?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Please restart your wallet to start re-syncing the chain.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
         <source>Backup Wallet</source>
         <translation>Backup Portafoglio</translation>
     </message>
@@ -720,25 +1034,460 @@ Indirizzo: %4
     <message>
         <location line="+0"/>
         <source>There was an error trying to save the wallet data to the new location.</source>
-        <translation>C'e' stato un errore durante il salvataggio del portafoglio nella posizione indicata.</translation>
+        <translation>C&apos;e&apos; stato un errore durante il salvataggio del portafoglio nella posizione indicata.</translation>
     </message>
     <message>
-        <location filename="../bitcoin.cpp" line="+109"/>
+        <location filename="../bitcoin.cpp" line="+162"/>
         <source>A fatal error occurred. LitecoinPlus can no longer continue safely and will quit.</source>
-        <translation>E' occorso un errore di sistema. LitecoinPlus non puo' continuare in sicurezza e sara' terminato.</translation>
+        <translation>E&apos; occorso un errore di sistema. LitecoinPlus non puo&apos; continuare in sicurezza e sara&apos; terminato.</translation>
     </message>
     <message>
-        <location line="+62"/>
-        <source>"Do NOT shutdown your PC until this window disappears"</source>
-        <translation>NON spegnere il PC fino a che questa finestra scompare</translation>
+        <source>&quot;Do NOT shutdown your PC until this window disappears&quot;</source>
+        <translation type="vanished">NON spegnere il PC fino a che questa finestra scompare</translation>
     </message>
 </context>
 <context>
     <name>ClientModel</name>
     <message>
-        <location filename="../clientmodel.cpp" line="+87"/>
+        <location filename="../clientmodel.cpp" line="+124"/>
         <source>Network Alert</source>
         <translation>Allerta Rete</translation>
+    </message>
+</context>
+<context>
+    <name>CoinControlDialog</name>
+    <message>
+        <location filename="../forms/coincontroldialog.ui" line="+14"/>
+        <source>Coin Control</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+31"/>
+        <source>Quantity:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <location line="+32"/>
+        <source>0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-19"/>
+        <source>Bytes:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+48"/>
+        <source>Amount:</source>
+        <translation type="unfinished">Ammontare:</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <location line="+80"/>
+        <location line="+86"/>
+        <location line="+38"/>
+        <source>0.00 MINT</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-191"/>
+        <source>Priority:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+48"/>
+        <source>Fee:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+35"/>
+        <source>Low Output:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <location filename="../coincontroldialog.cpp" line="+551"/>
+        <source>no</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>After Fee:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+35"/>
+        <source>Change:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+69"/>
+        <source>(un)select all</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Tree mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>List mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+45"/>
+        <source>Amount</source>
+        <translation type="unfinished">Ammontare</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Label</source>
+        <translation type="unfinished">Etichetta</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Address</source>
+        <translation type="unfinished">Indirizzo</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Date</source>
+        <translation type="unfinished">Data</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Confirmations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Confirmed</source>
+        <translation type="unfinished">Confermata</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Priority</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../coincontroldialog.cpp" line="-515"/>
+        <source>Copy address</source>
+        <translation type="unfinished">Copia indirizzo</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy label</source>
+        <translation type="unfinished">Copia etichetta</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <location line="+26"/>
+        <source>Copy amount</source>
+        <translation type="unfinished">Copia ammontare</translation>
+    </message>
+    <message>
+        <location line="-25"/>
+        <source>Copy transaction ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>Copy quantity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Copy fee</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy after fee</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy bytes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy priority</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy low output</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy change</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+317"/>
+        <source>highest</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>high</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>medium-high</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>medium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>low-medium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>low</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>lowest</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+155"/>
+        <source>DUST</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>yes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>This label turns red, if the transaction size is bigger than 10000 bytes.
+
+ This means a fee of at least %1 per kb is required.
+
+ Can vary +/- 1 Byte per input.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Transactions with higher priority get more likely into a block.
+
+This label turns red, if the priority is smaller than &quot;medium&quot;.
+
+ This means a fee of at least %1 per kb is required.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>This label turns red, if any recipient receives an amount smaller than %1.
+
+ This means a fee of at least %2 is required. 
+
+ Amounts below 0.546 times the minimum relay fee are shown as DUST.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>This label turns red, if the change is smaller than %1.
+
+ This means a fee of at least %2 is required.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+37"/>
+        <location line="+66"/>
+        <source>(no label)</source>
+        <translation type="unfinished">(nessuna etichetta)</translation>
+    </message>
+    <message>
+        <location line="-9"/>
+        <source>change from %1 (%2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>(change)</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DustingGui</name>
+    <message>
+        <location filename="../forms/dustinggui.ui" line="+14"/>
+        <source>Dusting control widget</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Dusting address:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Choose address from address book</source>
+        <translation type="unfinished">Scegliere un indirizzo dalla rubrica</translation>
+    </message>
+    <message>
+        <location filename="../dustinggui.cpp" line="+59"/>
+        <source>&amp;Refresh</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>&amp;Dust now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+47"/>
+        <source>Amount</source>
+        <translation type="unfinished">Ammontare</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Date</source>
+        <translation type="unfinished">Data</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Label</source>
+        <translation type="unfinished">Etichetta</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Received with</source>
+        <translation type="unfinished">Ricevuto con</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Confirmations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>_transaction_id</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>_amount_int_64</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>_vout_index</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+53"/>
+        <location line="+54"/>
+        <source>(no label)</source>
+        <translation type="unfinished">(nessuna etichetta)</translation>
+    </message>
+    <message>
+        <location line="-9"/>
+        <source>change from %1 (%2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>(change)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+57"/>
+        <source>The wallet is clean.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Found </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source> blocks to compact.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+33"/>
+        <location line="+7"/>
+        <source>Wallet Dusting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-7"/>
+        <source>The wallet is already optimized.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>The wallet will now be dusted. If any block start staking, dust will stop with some error, simply start it again. Enter the passphrase only once, if your wallet is encrypted. &lt;b&gt;Are you sure you want to do it now&lt;/b&gt; ?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+34"/>
+        <location line="+60"/>
+        <location line="+5"/>
+        <location line="+5"/>
+        <location line="+5"/>
+        <location line="+6"/>
+        <location line="+5"/>
+        <location line="+5"/>
+        <source>Send Coins</source>
+        <translation type="unfinished">Invia Coins</translation>
+    </message>
+    <message>
+        <location line="-90"/>
+        <source>Cannot unlock wallet at this time, please try again later.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+60"/>
+        <source>The recipient address is not valid, please recheck.</source>
+        <translation type="unfinished">Indirizzo destinatario non valido, si prega di verificare.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>The amount to pay must be larger than 0.</source>
+        <translation type="unfinished">L&apos;ammontare deve essere superiore a 0.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>The amount exceeds your balance.</source>
+        <translation type="unfinished">L&apos;ammontare eccede il proprio bilancio.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>The total exceeds your balance when the %1 transaction fee is included.</source>
+        <translation type="unfinished">Il totale eccede il bilancio quando %1 di fee per transazione sono inclusi.</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Duplicate address found, can only send to each address once per send operation.</source>
+        <translation type="unfinished">Indirizzo di destinazione duplicato, e&apos; possibile spedire una volta sola per ogni indirizzo in singola operazione.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Error: Transaction creation failed.</source>
+        <translation type="unfinished">Errore: Impossible creare la transazione.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Error: The transaction was rejected. This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.</source>
+        <translation type="unfinished">Errore: La transazione e&apos; stata rifiutata. Questo puo&apos; accadere se alcuni dei coins nel tuo portafoglio sono gia&apos; stati spesi, ad esempio se hai copiato il file di portafoglio e i coins sono marcati come spesi nel vecchio programma ma non nella copia attuale.</translation>
     </message>
 </context>
 <context>
@@ -756,7 +1505,7 @@ Indirizzo: %4
     <message>
         <location line="+10"/>
         <source>The label associated with this address book entry</source>
-        <translation>L'etichetta associata con questo elemento della rubrica indirizzi</translation>
+        <translation>L&apos;etichetta associata con questo elemento della rubrica indirizzi</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -766,7 +1515,7 @@ Indirizzo: %4
     <message>
         <location line="+10"/>
         <source>The address associated with this address book entry. This can only be modified for sending addresses.</source>
-        <translation>L'indirizzo associato con questo elemento. Questo indirizzo puo' essere modificato solo per invio coins.</translation>
+        <translation>L&apos;indirizzo associato con questo elemento. Questo indirizzo puo&apos; essere modificato solo per invio coins.</translation>
     </message>
     <message>
         <location filename="../editaddressdialog.cpp" line="+20"/>
@@ -791,12 +1540,12 @@ Indirizzo: %4
     <message>
         <location line="+60"/>
         <source>The entered address &quot;%1&quot; is already in the address book.</source>
-        <translation>L'indirizzo inserito &quot;%1&quot; e' gia' presente nella rubrica.</translation>
+        <translation>L&apos;indirizzo inserito &quot;%1&quot; e&apos; gia&apos; presente nella rubrica.</translation>
     </message>
     <message>
         <location line="+5"/>
         <source>The entered address &quot;%1&quot; is not a valid LitecoinPlus address.</source>
-        <translation>L'indirizzo inserito &quot;%1&quot; non e' valido per la rete LitecoinPlus.</translation>
+        <translation>L&apos;indirizzo inserito &quot;%1&quot; non e&apos; valido per la rete LitecoinPlus.</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -812,7 +1561,7 @@ Indirizzo: %4
 <context>
     <name>GUIUtil::HelpMessageBox</name>
     <message>
-        <location filename="../guiutil.cpp" line="+419"/>
+        <location filename="../guiutil.cpp" line="+511"/>
         <location line="+12"/>
         <source>LitecoinPlus-Qt</source>
         <translation>LitecoinPlus-Qt</translation>
@@ -850,7 +1599,7 @@ Indirizzo: %4
     <message>
         <location line="+1"/>
         <source>Show splash screen on startup (default: 1)</source>
-        <translation>Mostra lo splash screen all'avvio (default: 1)</translation>
+        <translation>Mostra lo splash screen all&apos;avvio (default: 1)</translation>
     </message>
 </context>
 <context>
@@ -868,7 +1617,7 @@ Indirizzo: %4
     <message>
         <location line="+6"/>
         <source>Optional transaction fee per kB that helps make sure your transactions are processed quickly. Most transactions are 1 kB. Fee 0.01 recommended.</source>
-        <translation>Fee per la transazione opzionale, che aiuta per assicurarsi che le transazioni siano processate velocemente. La maggior parte sono di 1 kB. Fee raccomandato e' 0.01.</translation>
+        <translation>Fee per la transazione opzionale, che aiuta per assicurarsi che le transazioni siano processate velocemente. La maggior parte sono di 1 kB. Fee raccomandato e&apos; 0.01.</translation>
     </message>
     <message>
         <location line="+15"/>
@@ -888,22 +1637,32 @@ Indirizzo: %4
     <message>
         <location line="+7"/>
         <source>Detach block and address databases at shutdown. This means they can be moved to another data directory, but it slows down shutdown. The wallet is always detached.</source>
-        <translation>Distacca database blocchi e indirizzi all'uscita. Questo significa che i files possono essere spostati in un'altra directory, ma rallenta la chiusura del programma. Il portafoglio e' sempre distaccato.</translation>
+        <translation>Distacca database blocchi e indirizzi all&apos;uscita. Questo significa che i files possono essere spostati in un&apos;altra directory, ma rallenta la chiusura del programma. Il portafoglio e&apos; sempre distaccato.</translation>
     </message>
     <message>
         <location line="+3"/>
         <source>&amp;Detach databases at shutdown</source>
-        <translation>&amp;Distacca database all'uscita</translation>
+        <translation>&amp;Distacca database all&apos;uscita</translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location line="+7"/>
+        <source>Hide all notifications to system, this is system specific according to the OS you&apos;re using. Only critical notifications cannot be suppressed, and will still be shown.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Do not show &amp;notifications</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+51"/>
         <source>&amp;Network</source>
         <translation>&amp;Rete</translation>
     </message>
     <message>
         <location line="+6"/>
         <source>Automatically open the LitecoinPlus client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Apri automaticamente la porte LitecoinPlus nel router. Questo funziona solamente se il tuo router supporta UPnP e la funzione e' abilitata.</translation>
+        <translation>Apri automaticamente la porte LitecoinPlus nel router. Questo funziona solamente se il tuo router supporta UPnP e la funzione e&apos; abilitata.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -968,7 +1727,7 @@ Indirizzo: %4
     <message>
         <location line="+7"/>
         <source>Minimize instead of exit the application when the window is closed. When this option is enabled, the application will be closed only after selecting Quit in the menu.</source>
-        <translation>Riduci a icona invece di chiudere quando il tasto di chiusra finestra e' cliccato. Quando questa opzione e' attiva, per uscire basta andare su File / Esci.</translation>
+        <translation>Riduci a icona invece di chiudere quando il tasto di chiusra finestra e&apos; cliccato. Quando questa opzione e&apos; attiva, per uscire basta andare su File / Esci.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -988,12 +1747,12 @@ Indirizzo: %4
     <message>
         <location line="+13"/>
         <source>The user interface language can be set here. This setting will take effect after restarting LitecoinPlus.</source>
-        <translation>La lingua dell'interfaccia utente puo' essere impostata qui. Questo settaggio richiede il riavvio di LitecoinPlus.</translation>
+        <translation>La lingua dell&apos;interfaccia utente puo&apos; essere impostata qui. Questo settaggio richiede il riavvio di LitecoinPlus.</translation>
     </message>
     <message>
         <location line="+11"/>
         <source>&amp;Unit to show amounts in:</source>
-        <translation>&amp;Unita' di misura dei coins:</translation>
+        <translation>&amp;Unita&apos; di misura dei coins:</translation>
     </message>
     <message>
         <location line="+13"/>
@@ -1011,6 +1770,16 @@ Indirizzo: %4
         <translation>&amp;Mostra indirizzi in lista transazioni</translation>
     </message>
     <message>
+        <location line="+7"/>
+        <source>Whether to show coin control features or not.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Display coin &amp;control features (experts only!)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location line="+71"/>
         <source>&amp;OK</source>
         <translation>&amp;OK</translation>
@@ -1026,12 +1795,12 @@ Indirizzo: %4
         <translation>&amp;Applica</translation>
     </message>
     <message>
-        <location filename="../optionsdialog.cpp" line="+55"/>
+        <location filename="../optionsdialog.cpp" line="+57"/>
         <source>default</source>
         <translation>default</translation>
     </message>
     <message>
-        <location line="+147"/>
+        <location line="+149"/>
         <location line="+9"/>
         <source>Warning</source>
         <translation>Attenzione</translation>
@@ -1040,102 +1809,187 @@ Indirizzo: %4
         <location line="-9"/>
         <location line="+9"/>
         <source>This setting will take effect after restarting LitecoinPlus.</source>
-        <translation>Questa impostazione avra' effetto solo dopo il riavvio di LitecoinPlus.</translation>
+        <translation>Questa impostazione avra&apos; effetto solo dopo il riavvio di LitecoinPlus.</translation>
     </message>
     <message>
         <location line="+29"/>
         <source>The supplied proxy address is invalid.</source>
-        <translation>L'indirizzo del proxy fornito non e' valido.</translation>
+        <translation>L&apos;indirizzo del proxy fornito non e&apos; valido.</translation>
     </message>
 </context>
 <context>
     <name>OverviewPage</name>
     <message>
-        <location filename="../forms/overviewpage.ui" line="+14"/>
+        <location filename="../forms/overviewpage.ui" line="+19"/>
         <source>Form</source>
         <translation>Form</translation>
     </message>
     <message>
-        <location line="+255"/>
         <source> Click to go to LitecoinPlus Home page. </source>
-        <translation> Clicca qui per andare al Sito di LitecoinPlus. </translation>
+        <translation type="vanished"> Clicca qui per andare al Sito di LitecoinPlus. </translation>
     </message>
     <message>
-        <location line="+33"/>
-        <location line="+183"/>
+        <location line="+48"/>
+        <location line="+292"/>
         <source>The displayed information may be out of date. Your wallet automatically synchronizes with the LitecoinPlus network after a connection is established, but this process has not completed yet.</source>
-        <translation>Le informazioni mostrate possono non essere accurate. Il tuo portafoglio si sincronizza automaticamente alla rete LitecoinPlus dopo che una connessione e' stabilita, ma questo processo non e' ancora completo.</translation>
+        <translation>Le informazioni mostrate possono non essere accurate. Il tuo portafoglio si sincronizza automaticamente alla rete LitecoinPlus dopo che una connessione e&apos; stabilita, ma questo processo non e&apos; ancora completo.</translation>
     </message>
     <message>
-        <location line="-141"/>
+        <location line="-247"/>
         <source>Balance:</source>
         <translation>Bilancio:</translation>
     </message>
     <message>
-        <location line="+118"/>
+        <location line="+29"/>
         <source>Stake:</source>
         <translation>Stake:</translation>
     </message>
     <message>
-        <location line="+58"/>
+        <location line="+84"/>
         <source>Number of transactions:</source>
         <translation>Numero di transazioni:</translation>
     </message>
     <message>
-        <location line="-29"/>
+        <location line="-55"/>
         <source>Unconfirmed:</source>
         <translation>Non confermato:</translation>
     </message>
     <message>
-        <location line="-78"/>
+        <location line="-110"/>
         <source>Wallet</source>
         <translation>Portafoglio</translation>
     </message>
     <message>
-        <location line="+124"/>
+        <location line="+139"/>
         <source>Immature:</source>
         <translation>Non maturate:</translation>
     </message>
     <message>
         <location line="+13"/>
         <source>Mined balance that has not yet matured</source>
-        <translation>Bilancio di coins minato che non e' ancora maturo</translation>
+        <translation>Bilancio di coins minato che non e&apos; ancora maturo</translation>
     </message>
     <message>
-        <location line="+46"/>
+        <location line="+86"/>
+        <source> Click to go to Litecoin Plus Home page. </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+54"/>
         <source>&lt;b&gt;Recent transactions&lt;/b&gt;</source>
         <translation>&lt;b&gt;Transazioni recenti&lt;/b&gt;</translation>
     </message>
     <message>
-        <location line="-118"/>
+        <location line="-224"/>
         <source>Your current balance</source>
         <translation>Bilancio attuale</translation>
     </message>
     <message>
-        <location line="+29"/>
+        <location line="+58"/>
         <source>Total of transactions that have yet to be confirmed, and do not yet count toward the current balance</source>
         <translation>Totale delle transazioni che devono ancora essere confermate, e non sono ancora incluse nel bilancio</translation>
     </message>
     <message>
-        <location line="+134"/>
+        <location line="-29"/>
         <source>Total of coins that was staked, and do not yet count toward the current balance</source>
         <translation>Totale dei coins che sono in stato di stake, e non sono ancora inclusi nel bilancio</translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+75"/>
         <source>Total number of transactions in wallet</source>
         <translation>Numero totale transazioni nel portafoglio</translation>
     </message>
     <message>
-        <location filename="../overviewpage.cpp" line="+112"/>
+        <location filename="../overviewpage.cpp" line="+118"/>
         <location line="+1"/>
         <source>out of sync</source>
         <translation>non sincronizzato</translation>
     </message>
     <message>
-        <location line="+179"/>
         <source>Unlock Wallet</source>
-        <translation>Sblocca Portafoglio</translation>
+        <translation type="vanished">Sblocca Portafoglio</translation>
+    </message>
+</context>
+<context>
+    <name>PeerTableModel</name>
+    <message>
+        <location filename="../peertablemodel.cpp" line="+119"/>
+        <source>Node/Service</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>User Agent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Ping Time</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>QObject</name>
+    <message>
+        <location filename="../guiutil.cpp" line="-455"/>
+        <source>%1 d</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>%1 h</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>%1 m</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <location line="+71"/>
+        <source>%1 s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-34"/>
+        <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>N/A</source>
+        <translation type="unfinished">N/D</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>%1 ms</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>[standby]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../rpcconsole.cpp" line="+311"/>
+        <source>%1 B</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>%1 KB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>%1 MB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>%1 GB</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1178,12 +2032,12 @@ Indirizzo: %4
     <message>
         <location line="+40"/>
         <source>The entered amount is invalid, please check.</source>
-        <translation>L'ammontare inserito non e' valido, si prega di verificare.</translation>
+        <translation>L&apos;ammontare inserito non e&apos; valido, si prega di verificare.</translation>
     </message>
     <message>
         <location line="+23"/>
         <source>Resulting URI too long, try to reduce the text for label / message.</source>
-        <translation>L'URI risultante e' troppo lungo, si prega di ridurre il testo per l'etichetta / messaggio.</translation>
+        <translation>L&apos;URI risultante e&apos; troppo lungo, si prega di ridurre il testo per l&apos;etichetta / messaggio.</translation>
     </message>
     <message>
         <location line="+25"/>
@@ -1213,12 +2067,28 @@ Indirizzo: %4
         <location line="+53"/>
         <location line="+23"/>
         <location line="+23"/>
-        <location filename="../rpcconsole.cpp" line="+348"/>
+        <location line="+574"/>
+        <location line="+29"/>
+        <location line="+29"/>
+        <location line="+29"/>
+        <location line="+29"/>
+        <location line="+29"/>
+        <location line="+29"/>
+        <location line="+29"/>
+        <location line="+29"/>
+        <location line="+29"/>
+        <location line="+29"/>
+        <location line="+29"/>
+        <location line="+29"/>
+        <location line="+32"/>
+        <location line="+32"/>
+        <location line="+29"/>
+        <location filename="../rpcconsole.cpp" line="+179"/>
         <source>N/A</source>
         <translation>N/D</translation>
     </message>
     <message>
-        <location line="-217"/>
+        <location line="-1232"/>
         <source>Client version</source>
         <translation>Versione client</translation>
     </message>
@@ -1298,7 +2168,130 @@ Indirizzo: %4
         <translation>&amp;Console</translation>
     </message>
     <message>
-        <location line="-260"/>
+        <location line="+75"/>
+        <source>&amp;Network Traffic</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+52"/>
+        <source>&amp;Clear</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>Totals</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+64"/>
+        <location line="+578"/>
+        <source>Received</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-498"/>
+        <location line="+469"/>
+        <source>Sent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-428"/>
+        <source>&amp;Peers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+53"/>
+        <source>Banned peers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+60"/>
+        <location filename="../rpcconsole.cpp" line="+304"/>
+        <source>Select a peer to view detailed information.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+25"/>
+        <source>Whitelisted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Direction</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>User Agent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Services</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Starting Block</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Ban Score</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Connection Time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Last Send</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Last Receive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+87"/>
+        <source>Ping Time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>The duration of a currently outstanding ping.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Ping Wait</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>The minimum recorded ping value for this particular node.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Min Ping</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Time Offset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-1167"/>
         <source>Build date</source>
         <translation>Data di compilazione</translation>
     </message>
@@ -1320,7 +2313,7 @@ Indirizzo: %4
     <message>
         <location line="+7"/>
         <source>Open the LitecoinPlus debug log file from the current data directory. This can take a few seconds for large log files.</source>
-        <translation>Apri il file di debug di LitecoinPlus dalla directory corrente. Questa operazione puo' impiegare qualche secondo se il file e' molto grande.</translation>
+        <translation>Apri il file di debug di LitecoinPlus dalla directory corrente. Questa operazione puo&apos; impiegare qualche secondo se il file e&apos; molto grande.</translation>
     </message>
     <message>
         <location line="+102"/>
@@ -1328,26 +2321,100 @@ Indirizzo: %4
         <translation>Pulisci console</translation>
     </message>
     <message>
-        <location filename="../rpcconsole.cpp" line="-33"/>
+        <location filename="../rpcconsole.cpp" line="-453"/>
+        <source>&amp;Disconnect Node</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <location line="+1"/>
+        <location line="+1"/>
+        <location line="+1"/>
+        <source>Ban Node for</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-3"/>
+        <source>1 &amp;hour</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>1 &amp;day</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>1 &amp;week</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>1 &amp;year</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+46"/>
+        <source>&amp;Unban Node</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+66"/>
         <source>Welcome to the LitecoinPlus RPC console.</source>
         <translation>Benvenuto nella RPC console di LitecoinPlus.</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>Usa i tasti cursore su' e giu' per navigare la storia, e &lt;b&gt;Ctrl-L&lt;/b&gt; per ripulire la console.</translation>
+        <translation>Usa i tasti cursore su&apos; e giu&apos; per navigare la storia, e &lt;b&gt;Ctrl-L&lt;/b&gt; per ripulire la console.</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>Digita &lt;b&gt;help&lt;/b&gt; per una panoramica dei comandi disponibili.</translation>
     </message>
+    <message>
+        <location line="+195"/>
+        <source>(node id: %1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>via %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <location line="+1"/>
+        <source>never</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Inbound</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Outbound</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Yes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>No</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SendCoinsDialog</name>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="+14"/>
-        <location filename="../sendcoinsdialog.cpp" line="+124"/>
+        <location filename="../sendcoinsdialog.cpp" line="+181"/>
         <location line="+5"/>
         <location line="+5"/>
         <location line="+5"/>
@@ -1358,9 +2425,98 @@ Indirizzo: %4
         <translation>Invia Coins</translation>
     </message>
     <message>
+        <location line="+76"/>
+        <source>Coin Control Features</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Inputs...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>automatically selected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>Insufficient funds!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+77"/>
+        <source>Quantity:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <location line="+35"/>
+        <source>0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-19"/>
+        <source>Bytes:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+51"/>
+        <source>Amount:</source>
+        <translation type="unfinished">Ammontare:</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <location line="+86"/>
+        <location line="+86"/>
+        <location line="+32"/>
+        <source>0.00 MINT</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-191"/>
+        <source>Priority:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>medium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+32"/>
+        <source>Fee:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+35"/>
+        <source>Low Output:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>no</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+32"/>
+        <source>After Fee:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+35"/>
+        <source>Change</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location line="+50"/>
+        <source>custom change address</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+106"/>
         <source>Send to multiple recipients at once</source>
-        <translation>Invia a piu' destinatari contemporaneamente</translation>
+        <translation>Invia a piu&apos; destinatari contemporaneamente</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -1378,14 +2534,18 @@ Indirizzo: %4
         <translation>&amp;Pulisci Tutto</translation>
     </message>
     <message>
-        <location line="+22"/>
+        <location line="+28"/>
         <source>Balance:</source>
         <translation>Bilancio:</translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+16"/>
+        <source>123.456 MINT</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>123.456 BTC</source>
-        <translation>123.456 BTC</translation>
+        <translation type="vanished">123.456 BTC</translation>
     </message>
     <message>
         <location line="+31"/>
@@ -1398,7 +2558,52 @@ Indirizzo: %4
         <translation>&amp;Invio</translation>
     </message>
     <message>
-        <location filename="../sendcoinsdialog.cpp" line="-59"/>
+        <location filename="../sendcoinsdialog.cpp" line="-173"/>
+        <source>Enter a LitecoinPlus address</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Copy quantity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy amount</source>
+        <translation type="unfinished">Copia ammontare</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy fee</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy after fee</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy bytes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy priority</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy low output</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy change</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+86"/>
         <source>&lt;b&gt;%1&lt;/b&gt; to %2 (%3)</source>
         <translation>&lt;b&gt;%1&lt;/b&gt; a %2 (%3)</translation>
     </message>
@@ -1418,19 +2623,19 @@ Indirizzo: %4
         <translation> e </translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location line="+29"/>
         <source>The recipient address is not valid, please recheck.</source>
         <translation>Indirizzo destinatario non valido, si prega di verificare.</translation>
     </message>
     <message>
         <location line="+5"/>
         <source>The amount to pay must be larger than 0.</source>
-        <translation>L'ammontare deve essere superiore a 0.</translation>
+        <translation>L&apos;ammontare deve essere superiore a 0.</translation>
     </message>
     <message>
         <location line="+5"/>
         <source>The amount exceeds your balance.</source>
-        <translation>L'ammontare eccede il proprio bilancio.</translation>
+        <translation>L&apos;ammontare eccede il proprio bilancio.</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -1440,7 +2645,7 @@ Indirizzo: %4
     <message>
         <location line="+6"/>
         <source>Duplicate address found, can only send to each address once per send operation.</source>
-        <translation>Indirizzo di destinazione duplicato, e' possibile spedire una volta sola per ogni indirizzo in singola operazione.</translation>
+        <translation>Indirizzo di destinazione duplicato, e&apos; possibile spedire una volta sola per ogni indirizzo in singola operazione.</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -1450,7 +2655,22 @@ Indirizzo: %4
     <message>
         <location line="+5"/>
         <source>Error: The transaction was rejected. This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.</source>
-        <translation>Errore: La transazione e' stata rifiutata. Questo puo' accadere se alcuni dei coins nel tuo portafoglio sono gia' stati spesi, ad esempio se hai copiato il file di portafoglio e i coins sono marcati come spesi nel vecchio programma ma non nella copia attuale.</translation>
+        <translation>Errore: La transazione e&apos; stata rifiutata. Questo puo&apos; accadere se alcuni dei coins nel tuo portafoglio sono gia&apos; stati spesi, ad esempio se hai copiato il file di portafoglio e i coins sono marcati come spesi nel vecchio programma ma non nella copia attuale.</translation>
+    </message>
+    <message>
+        <location line="+252"/>
+        <source>WARNING: Invalid Bitcoin address</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>(no label)</source>
+        <translation type="unfinished">(nessuna etichetta)</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>WARNING: unknown change address</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1474,7 +2694,7 @@ Indirizzo: %4
         <location line="+24"/>
         <location filename="../sendcoinsentry.cpp" line="+25"/>
         <source>Enter a label for this address to add it to your address book</source>
-        <translation>Inserire un'etichetta per l'indirizzo, per essere aggiunto alla rubrica</translation>
+        <translation>Inserire un&apos;etichetta per l&apos;indirizzo, per essere aggiunto alla rubrica</translation>
     </message>
     <message>
         <location line="+9"/>
@@ -1484,7 +2704,7 @@ Indirizzo: %4
     <message>
         <location line="+18"/>
         <source>The address to send the payment to  (e.g. 4Zo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)</source>
-        <translation>L'indirizzo al quale inviare il pagamento (esempio, 4Zo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)</translation>
+        <translation>L&apos;indirizzo al quale inviare il pagamento (esempio, 4Zo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)</translation>
     </message>
     <message>
         <location line="+10"/>
@@ -1518,6 +2738,24 @@ Indirizzo: %4
     </message>
 </context>
 <context>
+    <name>ShutdownWindow</name>
+    <message>
+        <location filename="../bitcoin.cpp" line="-102"/>
+        <source>LitecoinPlus</source>
+        <translation type="unfinished">LitecoinPlus</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>LitecoinPlus Wallet is shutting down, please wait...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>DO NOT shutdown the computer until this window disappears</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>SignVerifyMessageDialog</name>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="+14"/>
@@ -1533,12 +2771,16 @@ Indirizzo: %4
     <message>
         <location line="-118"/>
         <source>You can sign messages with your addresses to prove you own them. Be careful not to sign anything vague, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
-        <translation>Puoi firmare messaggi con il tuo indirizzo per comprovare che sono tuoi. Attenzione a non firmare cose vaghe, in quanto attachhi di phishing potrebbero indurti a consegnare la tua indentita'. Firma solamente dichiarazioni dettagliate con le quali sei completamente d'accordo.</translation>
+        <translation>Puoi firmare messaggi con il tuo indirizzo per comprovare che sono tuoi. Attenzione a non firmare cose vaghe, in quanto attachhi di phishing potrebbero indurti a consegnare la tua indentita&apos;. Firma solamente dichiarazioni dettagliate con le quali sei completamente d&apos;accordo.</translation>
+    </message>
+    <message>
+        <source>The address to sign the message with </source>
+        <translation type="vanished">L&apos;indirizzo con il quale firmare il messaggio </translation>
     </message>
     <message>
         <location line="+18"/>
-        <source>The address to sign the message with </source>
-        <translation>L'indirizzo con il quale firmare il messaggio </translation>
+        <source>The address to sign the message with (e.g. 4Zo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+10"/>
@@ -1570,12 +2812,12 @@ Indirizzo: %4
     <message>
         <location line="+24"/>
         <source>Copy the current signature to the system clipboard</source>
-        <translation>Copia l'attuale firma nella clipboard di sistema</translation>
+        <translation>Copia l&apos;attuale firma nella clipboard di sistema</translation>
     </message>
     <message>
         <location line="+21"/>
         <source>Sign the message to prove you own this LitecoinPlus address</source>
-        <translation>Firma messaggio per comprovare la proprieta' di questo indirizzo LitecoinPlus</translation>
+        <translation>Firma messaggio per comprovare la proprieta&apos; di questo indirizzo LitecoinPlus</translation>
     </message>
     <message>
         <location line="+17"/>
@@ -1597,17 +2839,21 @@ Indirizzo: %4
     <message>
         <location line="-64"/>
         <source>Enter the signing address, message (ensure you copy line breaks, spaces, tabs, etc. exactly) and signature below to verify the message. Be careful not to read more into the signature than what is in the signed message itself, to avoid being tricked by a man-in-the-middle attack.</source>
-        <translation>Inserisci l'indirizzo per la firma, messaggio (assicurati di copiare tutti gli spazi, a capo, tabulazioni ecc. esattamente) e firma qui sotto per verificare il messaggio. Attenzione a non interpretare oltre a quanto scritta nel messaggio firmato stesso, per evitare di essere indotto a un attacco da man-in-the-middle.</translation>
+        <translation>Inserisci l&apos;indirizzo per la firma, messaggio (assicurati di copiare tutti gli spazi, a capo, tabulazioni ecc. esattamente) e firma qui sotto per verificare il messaggio. Attenzione a non interpretare oltre a quanto scritta nel messaggio firmato stesso, per evitare di essere indotto a un attacco da man-in-the-middle.</translation>
     </message>
     <message>
         <location line="+21"/>
+        <source>The address the message was signed with (e.g. 4Zo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>The address the message was signed with </source>
-        <translation>L'indirizzo con il quale il messaggio e' stato firmato </translation>
+        <translation type="vanished">L&apos;indirizzo con il quale il messaggio e&apos; stato firmato </translation>
     </message>
     <message>
         <location line="+40"/>
         <source>Verify the message to ensure it was signed with the specified LitecoinPlus address</source>
-        <translation>Verifica il messaggio per assicurarti che sia stato firmato con l'indirizzo LitecoinPlus specificato</translation>
+        <translation>Verifica il messaggio per assicurarti che sia stato firmato con l&apos;indirizzo LitecoinPlus specificato</translation>
     </message>
     <message>
         <location line="+17"/>
@@ -1634,7 +2880,7 @@ Indirizzo: %4
         <location line="+82"/>
         <location line="+81"/>
         <source>The entered address is invalid.</source>
-        <translation>L'indirizzo inserito non e' valido.</translation>
+        <translation>L&apos;indirizzo inserito non e&apos; valido.</translation>
     </message>
     <message>
         <location line="-81"/>
@@ -1648,17 +2894,17 @@ Indirizzo: %4
         <location line="-81"/>
         <location line="+81"/>
         <source>The entered address does not refer to a key.</source>
-        <translation>L'indirizzo inserito non si riferisce ad alcuna chiave.</translation>
+        <translation>L&apos;indirizzo inserito non si riferisce ad alcuna chiave.</translation>
     </message>
     <message>
         <location line="-73"/>
         <source>Wallet unlock was cancelled.</source>
-        <translation>Lo sblocco del portafoglio e' stato annullato.</translation>
+        <translation>Lo sblocco del portafoglio e&apos; stato annullato.</translation>
     </message>
     <message>
         <location line="+8"/>
         <source>Private key for the entered address is not available.</source>
-        <translation>La chiave privata per l'indirizzo inserito non e' disponibile.</translation>
+        <translation>La chiave privata per l&apos;indirizzo inserito non e&apos; disponibile.</translation>
     </message>
     <message>
         <location line="+12"/>
@@ -1673,7 +2919,7 @@ Indirizzo: %4
     <message>
         <location line="+59"/>
         <source>The signature could not be decoded.</source>
-        <translation>La forma non puo' essere decodificata.</translation>
+        <translation>La forma non puo&apos; essere decodificata.</translation>
     </message>
     <message>
         <location line="+0"/>
@@ -1695,6 +2941,131 @@ Indirizzo: %4
         <location line="+5"/>
         <source>Message verified.</source>
         <translation>Messaggio verificato.</translation>
+    </message>
+</context>
+<context>
+    <name>SkinsPage</name>
+    <message>
+        <location filename="../forms/skinspage.ui" line="+19"/>
+        <source>Skins Pages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../skinspage.cpp" line="+35"/>
+        <source>&amp;Reset to none</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>&amp;Download Themes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+48"/>
+        <source>&amp;Cancel</source>
+        <translation type="unfinished">&amp;Annulla</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Find Files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Searching file number %1 of %2...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+99"/>
+        <source>%1 file(s) found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>Filename</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Description</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+64"/>
+        <source>Downloading themes from http://litecoinplus.co...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <source>Download of </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source> failed: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>HTTP redirect while attempting download of </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+58"/>
+        <source>Could not open </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>File Saving Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Themes Download</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Themes were successfully downloaded and installed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+40"/>
+        <source>Network timeout. Please check your network and try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Themes Download Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Splash</name>
+    <message>
+        <location filename="../forms/splash.ui" line="+31"/>
+        <location filename="../splash.cpp" line="+13"/>
+        <source>LitecoinPlus</source>
+        <translation type="unfinished">LitecoinPlus</translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ffffff;&quot;&gt;[loading]&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TrafficGraphWidget</name>
+    <message>
+        <location filename="../trafficgraphwidget.cpp" line="+79"/>
+        <source>KB/s</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1784,12 +3155,12 @@ Indirizzo: %4
         <location line="+12"/>
         <location line="+45"/>
         <location line="+17"/>
-        <location line="+30"/>
+        <location line="+33"/>
         <source>Credit</source>
         <translation>Credito</translation>
     </message>
     <message numerus="yes">
-        <location line="-102"/>
+        <location line="-105"/>
         <source>matures in %n more block(s)</source>
         <translation>
             <numerusform>maturo in %n blocco</numerusform>
@@ -1805,12 +3176,12 @@ Indirizzo: %4
         <location line="+44"/>
         <location line="+8"/>
         <location line="+15"/>
-        <location line="+30"/>
+        <location line="+33"/>
         <source>Debit</source>
         <translation>Debito</translation>
     </message>
     <message>
-        <location line="-39"/>
+        <location line="-42"/>
         <source>Transaction fee</source>
         <translation>Fee transazione</translation>
     </message>
@@ -1825,7 +3196,7 @@ Indirizzo: %4
         <translation>Messaggio</translation>
     </message>
     <message>
-        <location line="+2"/>
+        <location line="+3"/>
         <source>Comment</source>
         <translation>Commento</translation>
     </message>
@@ -1835,14 +3206,17 @@ Indirizzo: %4
         <translation>ID Transazione</translation>
     </message>
     <message>
-        <location line="+3"/>
-        <source>Generated coins must mature 520 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to &quot;not accepted&quot; and it won&apos;t be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.</source>
-        <translation>I coins generati devono maturare 520 blocchi prima che possano essere utilizzati. Quando avete generato questo blocco, e' stato trasmesso in rete per essere aggiunto ai blocchi. Qualora l'aggiunta dovesse fallire, il suo stato cambiera' in &quot;non accettato&quot; e non sara' utilizzabile. Questo puo' accadere sporadicamente se un altro nodo genera un blocco entro qualche secondo dal vostro.</translation>
+        <location line="+5"/>
+        <source>Generated coins must mature 50 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to &quot;not accepted&quot; and it won&apos;t be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.</source>
+        <translation type="unfinished">I coins generati devono maturare 520 blocchi prima che possano essere utilizzati. Quando avete generato questo blocco, e&apos; stato trasmesso in rete per essere aggiunto ai blocchi. Qualora l&apos;aggiunta dovesse fallire, il suo stato cambiera&apos; in &quot;non accettato&quot; e non sara&apos; utilizzabile. Questo puo&apos; accadere sporadicamente se un altro nodo genera un blocco entro qualche secondo dal vostro. {50 ?}</translation>
     </message>
     <message>
-        <location line="+4"/>
-        <source>Staked coins must wait 520 blocks before they can return to balance and be spent.  When you generated this proof-of-stake block, it was broadcast to the network to be added to the block chain.  If it fails to get into the chain, it will change to \"not accepted\" and not be a valid stake.  This may occasionally happen if another node generates a proof-of-stake block within a few seconds of yours.</source>
-        <translation>I coins in stake devono attendere 520 blocchi prima che possano ritornare nel bilancio ed essere utilizzati. Quando avete generato questo blocco proof-of-stake, e' stato trasmesso alla rete per essere aggiunto ai blocchi. Qualora l'aggiunta dovesse fallire, il suo stato cambiera' in &quot;non accettato&quot; e non sara' utilizzabile. Questo puo' accadere sporadicamente se un altro nodo genera un blocco proof-of-stake entro qualche secondo dal vostro.</translation>
+        <source>Generated coins must mature 520 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to &quot;not accepted&quot; and it won&apos;t be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.</source>
+        <translation type="vanished">I coins generati devono maturare 520 blocchi prima che possano essere utilizzati. Quando avete generato questo blocco, e&apos; stato trasmesso in rete per essere aggiunto ai blocchi. Qualora l&apos;aggiunta dovesse fallire, il suo stato cambiera&apos; in &quot;non accettato&quot; e non sara&apos; utilizzabile. Questo puo&apos; accadere sporadicamente se un altro nodo genera un blocco entro qualche secondo dal vostro.</translation>
+    </message>
+    <message>
+        <source>Staked coins must wait 520 blocks before they can return to balance and be spent.  When you generated this proof-of-stake block, it was broadcast to the network to be added to the block chain.  If it fails to get into the chain, it will change to \&quot;not accepted\&quot; and not be a valid stake.  This may occasionally happen if another node generates a proof-of-stake block within a few seconds of yours.</source>
+        <translation type="vanished">I coins in stake devono attendere 520 blocchi prima che possano ritornare nel bilancio ed essere utilizzati. Quando avete generato questo blocco proof-of-stake, e&apos; stato trasmesso alla rete per essere aggiunto ai blocchi. Qualora l&apos;aggiunta dovesse fallire, il suo stato cambiera&apos; in &quot;non accettato&quot; e non sara&apos; utilizzabile. Questo puo&apos; accadere sporadicamente se un altro nodo genera un blocco proof-of-stake entro qualche secondo dal vostro.</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -1875,9 +3249,9 @@ Indirizzo: %4
         <translation>falso</translation>
     </message>
     <message>
-        <location line="-211"/>
+        <location line="-214"/>
         <source>, has not been successfully broadcast yet</source>
-        <translation>, non e' ancora stata inoltrata con successo</translation>
+        <translation>, non e&apos; ancora stata inoltrata con successo</translation>
     </message>
     <message>
         <location line="+35"/>
@@ -1952,14 +3326,14 @@ Indirizzo: %4
         <location line="+8"/>
         <source>Mined balance will be available when it matures in %n more block(s)</source>
         <translation>
-            <numerusform>Il bilancio minato sara' disponibile quando matura tra %n blocco</numerusform>
-            <numerusform>Il bilancio minato sara' disponibile quando matura tra %n blocchi</numerusform>
+            <numerusform>Il bilancio minato sara&apos; disponibile quando matura tra %n blocco</numerusform>
+            <numerusform>Il bilancio minato sara&apos; disponibile quando matura tra %n blocchi</numerusform>
         </translation>
     </message>
     <message>
         <location line="+5"/>
         <source>This block was not received by any other nodes and will probably not be accepted!</source>
-        <translation>Questo blocco non e' stato ricevuto da nessun altro nodo e verra' molto probabilmente scartato dalla rete!</translation>
+        <translation>Questo blocco non e&apos; stato ricevuto da nessun altro nodo e verra&apos; molto probabilmente scartato dalla rete!</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -1987,12 +3361,12 @@ Indirizzo: %4
         <translation>Pagato a te stesso</translation>
     </message>
     <message>
-        <location line="+2"/>
+        <location line="+3"/>
         <source>Mined</source>
         <translation>Minato</translation>
     </message>
     <message>
-        <location line="+38"/>
+        <location line="+42"/>
         <source>(n/a)</source>
         <translation>(n/d)</translation>
     </message>
@@ -2004,7 +3378,7 @@ Indirizzo: %4
     <message>
         <location line="+2"/>
         <source>Date and time that the transaction was received.</source>
-        <translation>Data e ora in cui la transazione e' stata ricevuta.</translation>
+        <translation>Data e ora in cui la transazione e&apos; stata ricevuta.</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -2053,7 +3427,7 @@ Indirizzo: %4
     <message>
         <location line="+1"/>
         <source>This year</source>
-        <translation>Quest'anno</translation>
+        <translation>Quest&apos;anno</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -2076,6 +3450,7 @@ Indirizzo: %4
         <translation>A te stesso</translation>
     </message>
     <message>
+        <location line="+1"/>
         <location line="+1"/>
         <source>Mined</source>
         <translation>Minato</translation>
@@ -2189,7 +3564,7 @@ Indirizzo: %4
 <context>
     <name>WalletModel</name>
     <message>
-        <location filename="../walletmodel.cpp" line="+192"/>
+        <location filename="../walletmodel.cpp" line="+205"/>
         <source>Sending...</source>
         <translation>Invio...</translation>
     </message>
@@ -2197,32 +3572,31 @@ Indirizzo: %4
 <context>
     <name>bitcoin-core</name>
     <message>
-        <location filename="../bitcoinstrings.cpp" line="+82"/>
+        <location filename="../bitcoinstrings.cpp" line="+126"/>
         <source>LitecoinPlus version</source>
         <translation>LitecoinPlus versione</translation>
     </message>
     <message>
-        <location line="+82"/>
+        <location line="+39"/>
         <source>Usage:</source>
         <translation>Utilizzo:</translation>
     </message>
     <message>
-        <location line="-25"/>
         <source>Send command to -server or bitcoind</source>
-        <translation>Invia comando a -server oppure bitcoind</translation>
+        <translation type="vanished">Invia comando a -server oppure bitcoind</translation>
     </message>
     <message>
-        <location line="-19"/>
+        <location line="-47"/>
         <source>List commands</source>
         <translation>Lista comandi</translation>
     </message>
     <message>
-        <location line="-11"/>
+        <location line="-12"/>
         <source>Get help for a command</source>
         <translation>Mostra aiuto per un comando</translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+23"/>
         <source>Options:</source>
         <translation>Opzioni:</translation>
     </message>
@@ -2237,7 +3611,7 @@ Indirizzo: %4
         <translation>Specifica un pid file (default: LitecoinPlusd.pid)</translation>
     </message>
     <message>
-        <location line="-47"/>
+        <location line="-50"/>
         <source>Generate coins</source>
         <translation>Genera coin</translation>
     </message>
@@ -2247,7 +3621,7 @@ Indirizzo: %4
         <translation>Non genera coins</translation>
     </message>
     <message>
-        <location line="+60"/>
+        <location line="+63"/>
         <source>Specify data directory</source>
         <translation>Specifica una directory per i dati</translation>
     </message>
@@ -2262,42 +3636,41 @@ Indirizzo: %4
         <translation>Setta una dimensione per il log del database su disco (default: 100)</translation>
     </message>
     <message>
-        <location line="-26"/>
         <source>Listen for connections on &lt;port&gt; (default: 7777 oppure testnet: 17777)</source>
-        <translation>Ascolta connessioni su &lt;port&gt; (default: 8333 oppure testnet: 18333)</translation>
+        <translation type="vanished">Ascolta connessioni su &lt;port&gt; (default: 8333 oppure testnet: 18333)</translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="-24"/>
         <source>Maintain at most &lt;n&gt; connections to peers (default: 125)</source>
         <translation>Mantieni almeno &lt;n&gt; connessioni ai peers (default: 125)</translation>
     </message>
     <message>
-        <location line="-33"/>
+        <location line="-34"/>
         <source>Connect to a node to retrieve peer addresses, and disconnect</source>
         <translation>Connetti a un nodo per estrarre la lista dei peers, e poi disconnetti</translation>
     </message>
     <message>
-        <location line="+64"/>
+        <location line="+67"/>
         <source>Specify your own public address</source>
         <translation>Specifica il proprio indirizzo pubblico</translation>
     </message>
     <message>
-        <location line="-75"/>
+        <location line="-76"/>
         <source>Bind to given address. Use [host]:port notation for IPv6</source>
         <translation>Lega a specifico indirizzo. Utilizza [host]:port per IPv6</translation>
     </message>
     <message>
-        <location line="+77"/>
+        <location line="+78"/>
         <source>Threshold for disconnecting misbehaving peers (default: 100)</source>
         <translation>Soglia per disconnessione peers sospetti (default: 100)</translation>
     </message>
     <message>
-        <location line="-112"/>
+        <location line="-110"/>
         <source>Number of seconds to keep misbehaving peers from reconnecting (default: 86400)</source>
         <translation>Numero di secondi di greylist per i peers sospetti (default: 86400)</translation>
     </message>
     <message>
-        <location line="-25"/>
+        <location line="-27"/>
         <source>An error occurred while setting up the RPC port %u for listening on IPv4: %s</source>
         <translation>Errore durante la creazione della porta RPC %u per ascolto su IPv4: %s</translation>
     </message>
@@ -2309,25 +3682,24 @@ Indirizzo: %4
     <message>
         <location line="+5"/>
         <source>Error: The transaction was rejected.  This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.</source>
-        <translation>Errore: La transazione e' stata rifiutata. Questo puo' accadere se alcuni dei coins nel tuo portafoglio sono gia' stati spesi, ad esempio se hai copiato il file di portafoglio e i coins sono marcati come spesi nel vecchio programma ma non nella copia attuale.</translation>
+        <translation>Errore: La transazione e&apos; stata rifiutata. Questo puo&apos; accadere se alcuni dei coins nel tuo portafoglio sono gia&apos; stati spesi, ad esempio se hai copiato il file di portafoglio e i coins sono marcati come spesi nel vecchio programma ma non nella copia attuale.</translation>
     </message>
     <message>
         <location line="+4"/>
         <source>Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds  </source>
-        <translation>Errore: Questa transazione richiede un fee di almeno %s per via del suo ammontare, complessita' oppure perche' utilizza fondi appena ricevuti</translation>
+        <translation>Errore: Questa transazione richiede un fee di almeno %s per via del suo ammontare, complessita&apos; oppure perche&apos; utilizza fondi appena ricevuti</translation>
     </message>
     <message>
-        <location line="+6"/>
         <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 8344 or testnet: 18344)</source>
-        <translation>Ascolto di JSON-RPC sulla porta &lt;port&gt; (default: 8344 oppure testnet: 18344)</translation>
+        <translation type="vanished">Ascolto di JSON-RPC sulla porta &lt;port&gt; (default: 8344 oppure testnet: 18344)</translation>
     </message>
     <message>
-        <location line="+31"/>
+        <location line="+36"/>
         <source>Accept command line and JSON-RPC commands</source>
         <translation>Accetta comandi CLI e anche stile JSON-RPC</translation>
     </message>
     <message>
-        <location line="+26"/>
+        <location line="+24"/>
         <source>Error: Transaction creation failed  </source>
         <translation>Errore: Creazione transazione fallita</translation>
     </message>
@@ -2347,22 +3719,22 @@ Indirizzo: %4
         <translation>Importazione file bootstrap...</translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location line="+26"/>
         <source>Run in the background as a daemon and accept commands</source>
         <translation>Esegui in background come processo ed esegui comandi</translation>
     </message>
     <message>
-        <location line="+33"/>
+        <location line="+34"/>
         <source>Use the test network</source>
         <translation>Utilizza la rete di test</translation>
     </message>
     <message>
-        <location line="-93"/>
+        <location line="-95"/>
         <source>Accept connections from outside (default: 1 if no -proxy or -connect)</source>
         <translation>Accetta connessioni esterne (default: 1 se non -proxy oppure -connect)</translation>
     </message>
     <message>
-        <location line="-53"/>
+        <location line="-52"/>
         <source>An error occurred while setting up the RPC port %u for listening on IPv6, falling back to IPv4: %s</source>
         <translation>Errore durante apertura della porta RPC %u per ascolto su IPv6, fallback a IPv4: %s</translation>
     </message>
@@ -2372,24 +3744,33 @@ Indirizzo: %4
         <translation>Errore durante inizializzazione del database %s! Per recuperare, BACKUP COMPLETO DELLA DIRECTORY IN QUESTIONE, e poi rimuovere tutti i files eccetto wallet.dat.</translation>
     </message>
     <message>
-        <location line="+18"/>
+        <location line="+10"/>
+        <source>Error: Wallet unlocked for block minting only, unable to create transaction.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 20802 or testnet: 30802)</source>
+        <translation type="unfinished">Ascolto di JSON-RPC sulla porta &lt;port&gt; (default: 8344 oppure testnet: 18344) {20802 ?} {30802)?}</translation>
+    </message>
+    <message>
+        <location line="+5"/>
         <source>Set maximum size of high-priority/low-fee transactions in bytes (default: 27000)</source>
-        <translation>Imposta la dimensione massima di alta/bassa priorita' dei fee transazionali, in bytes (default: 27000)</translation>
+        <translation>Imposta la dimensione massima di alta/bassa priorita&apos; dei fee transazionali, in bytes (default: 27000)</translation>
     </message>
     <message>
         <location line="+5"/>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
-        <translation>Attenzione: -paytxfee e' troppo alto! Questo e' il fee che verra' trattenuto se inviate dei coin.</translation>
+        <translation>Attenzione: -paytxfee e&apos; troppo alto! Questo e&apos; il fee che verra&apos; trattenuto se inviate dei coin.</translation>
     </message>
     <message>
-        <location line="+3"/>
         <source>Warning: Displayed transactions may not be correct! You may need to upgrade, or other nodes may need to upgrade.</source>
-        <translation>Attenzione: Le transazioni mostrate possono non essere corrette! Dovete fare un upgrade oppure altri nodi devono fare un upgrade obbligatorio.</translation>
+        <translation type="vanished">Attenzione: Le transazioni mostrate possono non essere corrette! Dovete fare un upgrade oppure altri nodi devono fare un upgrade obbligatorio.</translation>
     </message>
     <message>
         <location line="+3"/>
         <source>Warning: Please check that your computer&apos;s date and time are correct! If your clock is wrong LitecoinPlus will not work properly.</source>
-        <translation>Attenzione: Si prega di controllare che data e ora del PC siano corrette! Se l'orologio non e' corretto LitecoinPlus non funzionera' regolarmente.</translation>
+        <translation>Attenzione: Si prega di controllare che data e ora del PC siano corrette! Se l&apos;orologio non e&apos; corretto LitecoinPlus non funzionera&apos; regolarmente.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -2399,7 +3780,7 @@ Indirizzo: %4
     <message>
         <location line="+3"/>
         <source>Warning: wallet.dat corrupt, data salvaged! Original wallet.dat saved as wallet.{timestamp}.bak in %s; if your balance or transactions are incorrect you should restore from a backup.</source>
-        <translation>Attenzione: wallet.dat corrotto, dati salvati! L'originale e' stato slavato come wallet.{timestamp}.bak in %s; Se il tuo bilancio risulta non corretto, deve essere ripristinato da una copia di backup.</translation>
+        <translation>Attenzione: wallet.dat corrotto, dati salvati! L&apos;originale e&apos; stato slavato come wallet.{timestamp}.bak in %s; Se il tuo bilancio risulta non corretto, deve essere ripristinato da una copia di backup.</translation>
     </message>
     <message>
         <location line="+14"/>
@@ -2407,7 +3788,7 @@ Indirizzo: %4
         <translation>Tentativo di recupero chiavi private da un file wallet.dat corrotto.</translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+2"/>
         <source>Block creation options:</source>
         <translation>Opzioni di creazione blocco:</translation>
     </message>
@@ -2437,7 +3818,17 @@ Indirizzo: %4
         <translation>Indirizzo -tor non valido: &apos;%s&apos;</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+2"/>
+        <source>Invalid amount for -reservebalance=&lt;amount&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Listen for connections on &lt;port&gt; (default: 20801 or testnet: 30801)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
         <source>Maximum per-connection receive buffer, &lt;n&gt;*1000 bytes (default: 5000)</source>
         <translation>Massima dimensione buffer ricezione per-connessione, &lt;n&gt;*1000 bytes (default: 5000)</translation>
     </message>
@@ -2447,14 +3838,14 @@ Indirizzo: %4
         <translation>Massima dimensione buffer spedizione per-connessione, &lt;n&gt;*1000 bytes (default: 1000)</translation>
     </message>
     <message>
-        <location line="+1"/>
+        <location line="+3"/>
         <source>Only connect to nodes in network &lt;net&gt; (IPv4, IPv6 or Tor)</source>
         <translation>Connetti solo a nodi nella rete &lt;net&gt; (IPv4, IPv6 oppure Tor)</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Output extra debugging information. Implies all other -debug* options</source>
-        <translation>Mostra piu' informazioni di debug. Implica tutte le altre opzioni -debug*</translation>
+        <translation>Mostra piu&apos; informazioni di debug. Implica tutte le altre opzioni -debug*</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -2477,7 +3868,12 @@ Indirizzo: %4
         <translation>Seleziona la versione di socks proxy da utilizzare (4-5, default: 5)</translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location line="+1"/>
+        <source>Send command to -server or LitecoinPlusd</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
         <source>Send trace/debug info to console instead of debug.log file</source>
         <translation>Invia le info di trace/debug alla console invece che al file debug.log</translation>
     </message>
@@ -2499,7 +3895,7 @@ Indirizzo: %4
     <message>
         <location line="+1"/>
         <source>Shrink debug.log file on client startup (default: 1 when no -debug)</source>
-        <translation>Riduci debug.log allo startup (default: 1 quando non c'e' opzione -debug)</translation>
+        <translation>Riduci debug.log allo startup (default: 1 quando non c&apos;e&apos; opzione -debug)</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -2507,7 +3903,13 @@ Indirizzo: %4
         <translation>Specifica il timeout alla connessione in millisecondi (default: 5000)</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+8"/>
+        <source>Unable to sign checkpoint, wrong checkpointkey?
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
         <source>Use UPnP to map the listening port (default: 0)</source>
         <translation>Usa UPnP per mappare la porta in ascolto (default: 0)</translation>
     </message>
@@ -2529,7 +3931,7 @@ Indirizzo: %4
     <message>
         <location line="+1"/>
         <source>Verifying database integrity...</source>
-        <translation>Verifica integrita' database...</translation>
+        <translation>Verifica integrita&apos; database...</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -2539,12 +3941,12 @@ Indirizzo: %4
     <message>
         <location line="+1"/>
         <source>Warning: This version is obsolete, upgrade required!</source>
-        <translation>Attenzione: Questa versione e' obsoleta, un upgrade e' necessario!</translation>
+        <translation>Attenzione: Questa versione e&apos; obsoleta, un upgrade e&apos; necessario!</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>wallet.dat corrupt, salvage failed</source>
-        <translation>wallet.dat e' corrotto, recupero fallito</translation>
+        <translation>wallet.dat e&apos; corrotto, recupero fallito</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -2562,32 +3964,37 @@ Indirizzo: %4
         <translation>[non interrompere]</translation>
     </message>
     <message>
-        <location line="-43"/>
+        <location line="+1"/>
+        <source>Scanning transactions %d%%...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-48"/>
         <source>Password for JSON-RPC connections</source>
         <translation>Password per connessione JSON-RPC</translation>
     </message>
     <message>
-        <location line="-53"/>
+        <location line="-54"/>
         <source>Allow JSON-RPC connections from specified IP address</source>
         <translation>Permetti JSON-RPC da uno specifico IP address</translation>
     </message>
     <message>
-        <location line="+61"/>
+        <location line="+62"/>
         <source>Send commands to node running on &lt;ip&gt; (default: 127.0.0.1)</source>
         <translation>Invia comandi al nodo eseguito a &lt;ip&gt; (default: 127.0.0.1)</translation>
     </message>
     <message>
-        <location line="-99"/>
+        <location line="-97"/>
         <source>Execute command when the best block changes (%s in cmd is replaced by block hash)</source>
-        <translation>Esegui comando quando il miglior blocco cambia (%s nel comando e' rimpiazzato dall'hash del blocco)</translation>
+        <translation>Esegui comando quando il miglior blocco cambia (%s nel comando e&apos; rimpiazzato dall&apos;hash del blocco)</translation>
     </message>
     <message>
-        <location line="+122"/>
+        <location line="+121"/>
         <source>Upgrade wallet to latest format</source>
-        <translation>Upgrade del portafoglio all'ultimo formato</translation>
+        <translation>Upgrade del portafoglio all&apos;ultimo formato</translation>
     </message>
     <message>
-        <location line="-15"/>
+        <location line="-16"/>
         <source>Set key pool size to &lt;n&gt; (default: 100)</source>
         <translation>Imposta la dimensione del key pool a &lt;n&gt; (default: 100)</translation>
     </message>
@@ -2597,14 +4004,14 @@ Indirizzo: %4
         <translation>Esegui un rescan della block chain per trovare le transazioni mancanti nel portafoglio</translation>
     </message>
     <message>
-        <location line="-24"/>
+        <location line="-27"/>
         <source>How many blocks to check at startup (default: 2500, 0 = all)</source>
         <translation>Quanti blocchi controllare allo startup (default: 2500, 0 = tutti)</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>How thorough the block verification is (0-6, default: 1)</source>
-        <translation>Livello di profondita' verifica blocchi all'avvio (0-6, default: 1)</translation>
+        <translation>Livello di profondita&apos; verifica blocchi all&apos;avvio (0-6, default: 1)</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -2612,12 +4019,12 @@ Indirizzo: %4
         <translation>Importa blocchi da un file blk000?.dat esterno</translation>
     </message>
     <message>
-        <location line="+51"/>
+        <location line="+55"/>
         <source>Use OpenSSL (https) for JSON-RPC connections</source>
         <translation>Utilizza OpenSSL (https) per connessioni JSON-RPC</translation>
     </message>
     <message>
-        <location line="-21"/>
+        <location line="-22"/>
         <source>Server certificate file (default: server.cert)</source>
         <translation>File certificato per il server (default: server.cert)</translation>
     </message>
@@ -2639,35 +4046,35 @@ Indirizzo: %4
     <message>
         <location line="-131"/>
         <source>Cannot obtain a lock on data directory %s.  LitecoinPlus is probably already running.</source>
-        <translation>Impossibile ottenere un blocco per la directory %s.  LitecoinPlus e' probabilmente gia' in esecuzione.</translation>
+        <translation>Impossibile ottenere un blocco per la directory %s.  LitecoinPlus e&apos; probabilmente gia&apos; in esecuzione.</translation>
     </message>
     <message>
-        <location line="+57"/>
+        <location line="+101"/>
         <source>LitecoinPlus</source>
         <translation>LitecoinPlus</translation>
     </message>
     <message>
-        <location line="+77"/>
+        <location line="+33"/>
         <source>Unable to bind to %s on this computer (bind returned error %d, %s)</source>
         <translation>Impossibile linkare %s su questo computer (bind ha restituto errore %d, %s)</translation>
     </message>
     <message>
-        <location line="-69"/>
+        <location line="-72"/>
         <source>Connect through socks proxy</source>
         <translation>Connessione attraverso socks proxy</translation>
     </message>
     <message>
-        <location line="-13"/>
+        <location line="-11"/>
         <source>Allow DNS lookups for -addnode, -seednode and -connect</source>
         <translation>Permetti lookups DNS per -addnode, -seednode e -connect</translation>
     </message>
     <message>
-        <location line="+44"/>
+        <location line="+43"/>
         <source>Loading addresses...</source>
         <translation>Caricamento indirizzi...</translation>
     </message>
     <message>
-        <location line="-26"/>
+        <location line="-27"/>
         <source>Error loading blkindex.dat</source>
         <translation>Errore durante apertura blkindex.dat</translation>
     </message>
@@ -2682,12 +4089,12 @@ Indirizzo: %4
         <translation>Errore caricamento file wallet.dat: Il portafoglio richiede una nuova versione di LitecoinPlus</translation>
     </message>
     <message>
-        <location line="+73"/>
+        <location line="+77"/>
         <source>Wallet needed to be rewritten: restart LitecoinPlus to complete</source>
-        <translation>Il portafoglio deve essere ricreato: riavviare LitecoinPlus per completare l'operazione</translation>
+        <translation>Il portafoglio deve essere ricreato: riavviare LitecoinPlus per completare l&apos;operazione</translation>
     </message>
     <message>
-        <location line="-75"/>
+        <location line="-79"/>
         <source>Error loading wallet.dat</source>
         <translation>Errore durante il caricamento di wallet.dat</translation>
     </message>
@@ -2697,7 +4104,7 @@ Indirizzo: %4
         <translation>Indirizzo -proxy non valido: &apos;%s&apos;</translation>
     </message>
     <message>
-        <location line="+46"/>
+        <location line="+50"/>
         <source>Unknown network specified in -onlynet: &apos;%s&apos;</source>
         <translation>Network sconosciuta specificata in -onlynet: &apos;%s&apos;</translation>
     </message>
@@ -2707,7 +4114,7 @@ Indirizzo: %4
         <translation>Versione -socks proxy sconosciuta: %i</translation>
     </message>
     <message>
-        <location line="-74"/>
+        <location line="-78"/>
         <source>Cannot resolve -bind address: &apos;%s&apos;</source>
         <translation>Impossibile risolvere indirizzo -bind: &apos;%s&apos;</translation>
     </message>
@@ -2724,40 +4131,40 @@ Indirizzo: %4
     <message>
         <location line="-15"/>
         <source>Error: could not start node</source>
-        <translation>Errore: nodo non puo' essere avviato</translation>
+        <translation>Errore: nodo non puo&apos; essere avviato</translation>
     </message>
     <message>
-        <location line="+40"/>
+        <location line="+43"/>
         <source>Sending...</source>
         <translation>Spedizione in corso...</translation>
     </message>
     <message>
-        <location line="-24"/>
+        <location line="-26"/>
         <source>Invalid amount</source>
         <translation>Ammontare invalido</translation>
     </message>
     <message>
-        <location line="-4"/>
+        <location line="-5"/>
         <source>Insufficient funds</source>
         <translation>Fondi insufficienti</translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+9"/>
         <source>Loading block index...</source>
         <translation>Caricamento indice blocchi...</translation>
     </message>
     <message>
-        <location line="-46"/>
+        <location line="-45"/>
         <source>Add a node to connect to and attempt to keep the connection open</source>
         <translation>Aggiungi un nodo e tenta di tenere la connessione aperta</translation>
     </message>
     <message>
-        <location line="-25"/>
+        <location line="-22"/>
         <source>Unable to bind to %s on this computer. LitecoinPlus is probably already running.</source>
-        <translation>Impossibile linkare %s su questo computer. LitecoinPlus e' probabilmente gia' in esecuzione.</translation>
+        <translation>Impossibile linkare %s su questo computer. LitecoinPlus e&apos; probabilmente gia&apos; in esecuzione.</translation>
     </message>
     <message>
-        <location line="+55"/>
+        <location line="+50"/>
         <source>Find peers using internet relay chat (default: 1)</source>
         <translation>Cerca peers utilizzanto la internet relay chat (default: 1)</translation>
     </message>
@@ -2767,12 +4174,12 @@ Indirizzo: %4
         <translation>Fee per ogni KB da aggiungere alla transazione inviata</translation>
     </message>
     <message>
-        <location line="+19"/>
+        <location line="+20"/>
         <source>Loading wallet...</source>
         <translation>Caricamento portafoglio...</translation>
     </message>
     <message>
-        <location line="-39"/>
+        <location line="-40"/>
         <source>Cannot downgrade wallet</source>
         <translation>Impossibile fare downgrade del portafoglio</translation>
     </message>
@@ -2784,20 +4191,20 @@ Indirizzo: %4
     <message>
         <location line="+3"/>
         <source>Cannot write default address</source>
-        <translation>Impossibile scrivere l'indirizzo di default</translation>
+        <translation>Impossibile scrivere l&apos;indirizzo di default</translation>
     </message>
     <message>
-        <location line="+46"/>
+        <location line="+49"/>
         <source>Rescanning...</source>
         <translation>Scansione blocchi...</translation>
     </message>
     <message>
-        <location line="-40"/>
+        <location line="-43"/>
         <source>Done loading</source>
         <translation>Caricamento OK</translation>
     </message>
     <message>
-        <location line="+64"/>
+        <location line="+67"/>
         <source>To use the %s option</source>
         <translation>Utlizza opzione %s</translation>
     </message>
@@ -2813,20 +4220,20 @@ If the file does not exist, create it with owner-readable-only file permissions.
 </source>
         <translation>%s, devi impostare una rpcpassword nel file di configurazione:
  %s
-E' suggerito impostare una password casuale, generata qua sotto dal sistema:
+E&apos; suggerito impostare una password casuale, generata qua sotto dal sistema:
 rpcuser=bitcoinrpc
 rpcpassword=%s
-(non c'e' bisogno di ricordarsela)
+(non c&apos;e&apos; bisogno di ricordarsela)
 Se il file non esiste, crearlo appositamente.
 </translation>
     </message>
     <message>
-        <location line="+91"/>
+        <location line="+88"/>
         <source>Error</source>
         <translation>Errore</translation>
     </message>
     <message>
-        <location line="-30"/>
+        <location line="-28"/>
         <source>You must set rpcpassword=&lt;password&gt; in the configuration file:
 %s
 If the file does not exist, create it with owner-readable-only file permissions.</source>
