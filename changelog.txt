@@ -1,3 +1,49 @@
+***** Version 5.0.0.1 (RELEASE)
+- Project is now fully ported to QT5
+- Remove self rescan at boot under certain conditions, not necessary anymore
+- BUGFIX: network did not sync with only two nodes, cPeerBlockCountsList declaration fix (don't add an initial zero value)
+- BUGFIX: when network resume after sleep or offline, clear the cPeerBlockCountsList internal vectors (BUG introduced by the above BUGFIX)
+- BUGFIX: icon in QT when syncing, reflect the status of the IsInitialBlockDownload() function, and not another different logic
+- Start over command: dump the chain files and start syncing from fresh with 1 click
+- Now possible to disable system notification by a setting in Options dialog (cannot suppress critical notifications, only informational and warning)
+- BUGFIX: listreceivedbyaddress RPC call, now accepts 3 parameters correctly (at least one exchange uses the call)
+- BUGFIX: on QT5, autocompleter was not automatically hidden when pressing enter to execute the RPC command
+- Added listalerts, sendrule, listrules RPC calls, to handle rule sending from any node (with the alert private key)
+- BUGFIX: revisited toolbars, button names, positioning and made space for one more page: Log
+- Adding Events tab, to display active alerts, information, warnings and critical messages in clear
+- BUGFIX: if the wallet is not encrypted, make no sense to have the "Unlock to stake" menu command enabled...
+- Display a message when dameon is attempting to connect to RPC but the wallet is still loading the blockchain
+- BUGFIX: changed all references to "bicoin-xxx" thread names into "litecoinplus-xxx" names
+- Pre-programmed a series of rules in the code for first release of PALADIN (see white paper for version 5.0.0.1)
+- "getinfo" RPC method, removed errors/alerts, exposed Rule Height/Rule Sync status as a number/boolean instead
+- QT creates the LitecoinPlus.conf file if it doesn't exist
+- Automatic ID management for alerts, either for direct alerts or alert/rule packets
+- BUGFIX: do not show "info" and "warning" alerts as critical in the system dbus notification, just those who are
+- Added a suffix letter in version format for testnet, necessary when testing ('LitecoinPlus-[x]:X.X.X.X')
+- Ported back -netoffline option that was in unpublished 4.1.0.1 (possibility to start the wallet offline)
+- BUGFIX: adjusted behavior of rule_sync: rules.dat no, height 0 rule_sync=false; rules.dat yes, height 1 wallet offline rule_sync=false
+- BUGFIX: PoS minting icon, different logic than the thread itself, let's all use the same logic, shall we...
+- BUGFIX: IsInitialBlockDownload behaves incorrectly when syncing from zero, exiting its status almost immediately
+- listalerts: added an optional [show_rules=false] parameters, to hide rule packets by default, unnecessary to see for non devs, but useful for eventual troubleshoot
+- MAJOR FIX: QT version wasted an immense amount of resources when sending coins from many inputs, removed an unnecessary signal when marking spent coins
+- Changed threshold of 10000 bytes to 30000 bytes in advanced coin controls (about 200 inputs can be safely manually selected)
+- Changed block amount from 50 to 80 for automatic dusting, considering the new found speed for the major fix above
+- Make universally compile version: QT4 and QT5 at the same time (on Windows, still need to use QT4 for compile reasons...)
+
+
+***** Version 4.0.1.2 (TESTNET)
+- Added timing for create transaction/send transaction portions of the code
+- Forward porting changes by Spidersbox on main repository, effectively fixing themes background image bug
+
+
+***** Version 4.0.1.1 (TESTNET)
+- Backporting important changes supposed to be for 4.1.0.1, re-listed below
+- WARNING-FIX: removed all warnings that appear with newer C++ versions (g++ 9)
+- Removing Loading Pairs / Calculating Stake Modifier step, save data in index instead (V3)
+- Automatic conversion of stored index from V2 to V3 (no need resync entire blockchain)
+- Core dump handler and stack tracing
+
+
 ***** Version 4.0.0.2
 - Changed version to avoid testing confusion
 - Read initial database load in bulk (128M chunks), greatly speeding boot on all drives, especially old HDD

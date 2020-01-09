@@ -5,6 +5,7 @@ INCLUDEPATH += src src/json src/qt /usr/include/libdb4
 DEFINES += QT_GUI BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE BOOST_ASIO_ENABLE_OLD_SERVICES
 CONFIG += no_include_pwd
 CONFIG += thread
+QT += widgets
 QT += network
 
 # for boost 1.37, add -mt to the boost libraries
@@ -35,7 +36,10 @@ contains(RELEASE, 1) {
 !win32 {
 # for extra security against potential buffer overflows: enable GCCs Stack Smashing Protection
 QMAKE_CXXFLAGS *= -fstack-protector-all --param ssp-buffer-size=1
-QMAKE_LFLAGS *= -fstack-protector-all --param ssp-buffer-size=1
+QMAKE_LFLAGS *= -rdynamic -fstack-protector-all --param ssp-buffer-size=1
+!macx {
+	QMAKE_LFLAGS *= -no-pie
+}
 # We need to exclude this for Windows cross compile with MinGW 4.2.x, as it will result in a non-working executable!
 # This can be enabled for Windows, when we switch to MinGW >= 4.4.x.
 }
@@ -144,6 +148,7 @@ HEADERS += src/qt/bitcoingui.h \
     src/qt/editaddressdialog.h \
     src/qt/bitcoinaddressvalidator.h \
     src/alert.h \
+    src/rules.h \
     src/addrman.h \
     src/base58.h \
     src/bignum.h \
@@ -211,7 +216,8 @@ HEADERS += src/qt/bitcoingui.h \
 	src/qt/trafficgraphwidget.h \
 	src/qt/bantablemodel.h \
 	src/qt/peertablemodel.h \
-	src/qt/dustinggui.h
+	src/qt/dustinggui.h \
+	src/qt/alertgui.h
 
 SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/transactiontablemodel.cpp \
@@ -227,6 +233,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/editaddressdialog.cpp \
     src/qt/bitcoinaddressvalidator.cpp \
     src/alert.cpp \
+    src/rules.cpp \
     src/version.cpp \
     src/sync.cpp \
     src/util.cpp \
@@ -284,7 +291,8 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
 	src/qt/trafficgraphwidget.cpp \
 	src/qt/bantablemodel.cpp \
 	src/qt/peertablemodel.cpp \
-	src/qt/dustinggui.cpp
+	src/qt/dustinggui.cpp \
+	src/qt/alertgui.cpp
 
 
 RESOURCES += \
@@ -299,6 +307,7 @@ FORMS += \
     src/qt/forms/splash.ui \
 	src/qt/forms/skinspage.ui \
 	src/qt/forms/dustinggui.ui \
+	src/qt/forms/alertgui.ui \
     src/qt/forms/editaddressdialog.ui \
     src/qt/forms/transactiondescdialog.ui \
     src/qt/forms/overviewpage.ui \
