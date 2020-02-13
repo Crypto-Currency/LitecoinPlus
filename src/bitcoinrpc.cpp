@@ -269,6 +269,8 @@ static const CRPCCommand vRPCCommands[] =
     { "checkwallet",            &checkwallet,            false,  true},
     { "repairwallet",           &repairwallet,           false,  true},
     { "zapwallettxes",          &zapwallettxes,          false,  false},
+    { "listcoins",              &listcoins,              false,  false},
+    { "dustwallet",             &dustwallet,             false,  false},
     { "resendtx",               &resendtx,               false,  true},
     { "makekeypair",            &makekeypair,            false,  true},
     { "sendalert",              &sendalert,              false,  false},
@@ -1236,6 +1238,8 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "listalerts"             && n > 0) ConvertTo<bool>(params[0]);
     if (strMethod == "testrule"               && n > 0) ConvertTo<boost::int64_t>(params[0]);
     if (strMethod == "testrule"               && n > 1) ConvertTo<boost::int64_t>(params[1]);
+    if (strMethod == "dustwallet"             && n > 1) ConvertTo<boost::int64_t>(params[1]);
+    if (strMethod == "listcoins"              && n > 0) ConvertTo<bool>(params[0]);
 
     return params;
 }

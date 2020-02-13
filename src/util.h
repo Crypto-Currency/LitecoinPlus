@@ -49,15 +49,15 @@ static const int64 CENT = 10000;
 #define UINTBEGIN(a)        ((uint32_t*)&(a))
 #define CUINTBEGIN(a)        ((const uint32_t*)&(a))
 
-#ifndef PRI64d
+#ifndef  PRI64d 
 #if defined(_MSC_VER) || defined(__MSVCRT__)
-#define PRI64d  "I64d"
+#define  PRI64d   "I64d"
 #define PRI64u  "I64u"
-#define PRI64x  "I64x"
+#define  PRI64x   "I64x"
 #else
-#define PRI64d  "lld"
+#define  PRI64d   "lld"
 #define PRI64u  "llu"
-#define PRI64x  "llx"
+#define  PRI64x   "llx"
 #endif
 #endif
 

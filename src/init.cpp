@@ -445,6 +445,7 @@ bool AppInit2()
 #endif
 //#ifndef WIN32
 #if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(__APPLE__))
+
     umask(077);
 
     // Clean shutdown on SIGTERM
@@ -807,7 +808,7 @@ bool AppInit2()
 
 	// by Simone: start RPC server before loading the blockchain
 	if (fServer)
-		NewThread(ThreadRPCServer, NULL);
+      	NewThread(ThreadRPCServer, NULL);
 
     if (GetBoolArg("-loadblockindextest"))
     {

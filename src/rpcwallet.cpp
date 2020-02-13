@@ -6,6 +6,7 @@
 #include "wallet.h"
 #include "walletdb.h"
 #include "bitcoinrpc.h"
+#include "coincontrol.h"
 #include "init.h"
 #include "base58.h"
 
@@ -1835,5 +1836,232 @@ Value zapwallettxes(const Array& params, bool fHelp)
   printf("Please restart your wallet.\n");
 
   return ("Zap Wallet Finished.\nPlease restart your wallet for changes to take effect.\n");
+}
+
+// by Simone: local version of strPad
+string strPad(string s, long unsigned int nPadLength, string sPadding)
+{
+	while (s.length() < nPadLength)
+	{
+		s = sPadding + s;
+	}
+    return s;
+}
+
+// by Simone: function used only by dustwallet below, to refresh coin list
+void dwListCoins(map<string, vector<COutput> > &mapCoins)
+{
+	std::vector<COutput> vCoins;
+	pwalletMain->AvailableCoins(vCoins);
+	std::vector<COutPoint> vLockedCoins;
+
+	// add locked coins
+	BOOST_FOREACH(const COutPoint& outpoint, vLockedCoins)
+	{
+		if (!pwalletMain->mapWallet.count(outpoint.hash)) continue;
+		COutput out(&pwalletMain->mapWallet[outpoint.hash], outpoint.n, pwalletMain->mapWallet[outpoint.hash].GetDepthInMainChain());
+		vCoins.push_back(out);
+	}
+
+	BOOST_FOREACH(const COutput& out, vCoins)
+	{
+		COutput cout = out;
+ 
+		while (pwalletMain->IsChange(cout.tx->vout[cout.i]) && cout.tx->vin.size() > 0 && pwalletMain->IsMine(cout.tx->vin[0]))
+		{
+			if (!pwalletMain->mapWallet.count(cout.tx->vin[0].prevout.hash)) break;
+			cout = COutput(&pwalletMain->mapWallet[cout.tx->vin[0].prevout.hash], cout.tx->vin[0].prevout.n, 0);
+		}
+ 
+		CTxDestination address;
+		if(!ExtractDestination(cout.tx->vout[cout.i].scriptPubKey, address)) continue;
+		mapCoins[strPad(std::to_string(out.tx->vout[out.i].nValue), 18, "0") + out.tx->GetHash().GetHex()].push_back(out);
+	}
+}
+
+// by Simone: listcoins, with same logic used for dust, to debug
+Value listcoins(const Array& params, bool fHelp)
+{
+    Array ret;
+
+	if (fHelp)
+		throw runtime_error("listcoins [totalcount=true]\n"
+			"List the coins that are used by the dustwallet function, in the same exact order and filter that it is used there. If nothing is specified, just the total number is shown.\n");
+
+// loop unlocked coins
+	map<string, vector<COutput> > mapCoins;
+	dwListCoins(mapCoins);
+
+// decide what to show
+	bool showSize = true;
+    if (params.size() > 0)
+	{
+		if (!params[0].get_bool())
+		{
+			showSize = false;
+		}
+	}
+	if (showSize)
+	{
+		Object obj;
+		obj.push_back(Pair("block_count", mapCoins.size()));
+		return obj;
+	}
+
+    BOOST_FOREACH(PAIRTYPE(string, vector<COutput>) coins, mapCoins)
+    {
+		Object obj;
+
+		obj.push_back(Pair("map_index", coins.first));
+        BOOST_FOREACH(const COutput& out, coins.second)
+        {
+			obj.push_back(Pair("amount", std::to_string(out.tx->vout[out.i].nValue)));
+		}
+		ret.push_back(obj);
+	}
+	return(ret);
+}
+
+// by Simone: dustwallet
+Value dustwallet(const Array& params, bool fHelp)
+{
+	CCoinControl coinControl;
+    Array ret;
+
+	if (fHelp || params.size() < 1)
+		throw runtime_error("dustwallet <address> [blocks=2000]\n"
+			"Execute the block dusting (compacting) of the chain, to the specified <address>. Blocks is the total number of blocks at which to stop dusting (defaults to 2000).\n");
+
+// check whether sending is suspended
+	if (nSendSuspended)
+		throw JSONRPCError(RPC_WALLET_ERROR, "Sending is currently suspended network wise");
+
+// we need to be unlocked first
+	EnsureWalletIsUnlocked();
+
+// loop unlocked coins
+	map<string, vector<COutput> > mapCoins;
+	dwListCoins(mapCoins);
+
+// declare some settings
+	int blockCount = mapCoins.size();
+	int minimumBlockAmount = 2000;
+    if (params.size() > 1)
+        minimumBlockAmount = params[1].get_int();
+	int blockDivisor = 80;
+
+// check number of blocks and do some preparation for the loop
+	if (blockCount <= minimumBlockAmount)
+	{
+		return("The wallet is already optimized.");
+	}
+	int nOps = ((blockCount - minimumBlockAmount) / blockDivisor) + 1;
+	int nOdds = (blockCount - minimumBlockAmount) % blockDivisor;
+	if (nOdds == 1)
+	{
+		nOdds = blockDivisor + 1;
+	}
+	else if (nOdds == 2)
+	{
+		nOdds = blockDivisor + 2;
+	}
+	else if (nOdds == 0)
+	{
+		nOdds = blockDivisor;
+	}
+	if (nOdds >= (blockCount - minimumBlockAmount))
+	{
+		nOdds = blockCount - minimumBlockAmount + 2;		// optimize the last piece to the target length
+	}
+
+	// now, let's select the first batch of items
+	int64 selectionSum;
+	while (nOps > 0) {
+
+		// reset previous selection
+		Object obj;
+		selectionSum = 0;
+		int i = nOdds;
+		coinControl.SetNull();
+		BOOST_FOREACH(PAIRTYPE(string, vector<COutput>) coins, mapCoins)
+		{
+		    BOOST_FOREACH(const COutput& out, coins.second)
+		    {
+
+			// prepare selection here
+				selectionSum += out.tx->vout[out.i].nValue;
+				COutPoint outpt(out.tx->GetHash(), out.i);
+				coinControl.Select(outpt);
+
+
+				//fprintf(stderr, "%d --> [%ld] %s/%d\n", i, selectionSum, uint256(itemTx->text().toStdString()).ToString().c_str(), itemVout->text().toUInt());
+				i--;
+				if (i < 0) 
+				{
+					break;
+				}
+			}
+			if (i < 0) 
+			{
+				break;
+			}
+		}
+
+	// sending block here
+		obj.push_back(Pair("selected_coins", nOdds));
+		obj.push_back(Pair("selection_sum", std::to_string(selectionSum)));
+
+	// because we select all coins manually, we do our own shit here
+		std::vector<COutput> vCoins;
+		pwalletMain->AvailableCoins(vCoins, true, &coinControl);
+		std::vector<std::pair<CScript, int64> > vecSend;
+        CScript scriptPubKey;
+        scriptPubKey.SetDestination(CBitcoinAddress(params[0].get_str()).Get());
+        vecSend.push_back(make_pair(scriptPubKey, selectionSum - 110));	// this is safe value to not incurr in "not enough for fee" errors, in any case it will be credited back as "change"
+
+        CWalletTx wtx;
+        CReserveKey keyChange(pwalletMain);
+        int64 nFeeRequired = 0;
+        bool fCreated = pwalletMain->CreateTransaction(vecSend, wtx, keyChange, nFeeRequired, &coinControl);
+		if (!fCreated)
+		{
+			throw JSONRPCError(RPC_WALLET_ERROR, "Transaction creation failed");
+		}
+		if (!pwalletMain->CommitTransaction(wtx, keyChange))
+		{
+			throw JSONRPCError(RPC_WALLET_ERROR, "Transaction commit failed");
+		}
+
+	// store the txid alongside the total and # of blocks selected
+		obj.push_back(Pair("txid", wtx.GetHash().GetHex()));
+		ret.push_back(obj);
+
+	// refresh the coin map
+		mapCoins.clear();
+		dwListCoins(mapCoins);
+		blockCount = mapCoins.size();
+		nOps = (blockCount - minimumBlockAmount) / blockDivisor;
+		nOdds = (blockCount - minimumBlockAmount) % blockDivisor;
+		if (nOdds == 1)
+		{
+			nOdds = blockDivisor + 1;
+		}
+		else if (nOdds == 2)
+		{
+			nOdds = blockDivisor + 2;
+		}
+		else if (nOdds == 0)
+		{
+			nOdds = blockDivisor;
+		}
+		if (nOdds >= (blockCount - minimumBlockAmount))
+		{
+			nOdds = blockCount - minimumBlockAmount + 1;		// optimize the last piece to the target length
+		}
+	}
+
+// return the array of txids and amount combined
+    return ret;
+
 }
 
