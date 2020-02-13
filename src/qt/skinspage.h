@@ -22,82 +22,69 @@
 
 namespace Ui
 {
-  class SkinsPage;
+	class SkinsPage;
 }
 
 class SkinsPage : public QWidget
 {
-  Q_OBJECT
+	Q_OBJECT
 
-  QNetworkAccessManager manager;
-  QList<QNetworkReply *> currentDownloads;
-  //QVector<QNetworkReply *> currentDownloads;
+	QNetworkAccessManager manager;
+	QList<QNetworkReply *> currentDownloads;
 
 
 public:
-  SkinsPage(QWidget *parent = 0);
-//  static SSettings *Settings;
-//    static QString saveFileName(const QUrl &url);
-    bool saveToDisk(const QString &filename, QIODevice *data);
-    static bool isHttpRedirect(QNetworkReply *reply);
-    void loadSkin();
+	SkinsPage(QWidget *parent = 0);
+	bool saveToDisk(const QString &filename, QIODevice *data);
+	static bool isHttpRedirect(QNetworkReply *reply);
+	void loadSkin();
 
 private slots:
-//  void browse();
-  void reset();
-  void find();
-  void openFileOfItem(int row, int column);
-  void optionChanged();
-  void getlist();
-  bool netHandleError(QNetworkReply* reply, QString urlDownload);
-  void getListFinished(QNetworkReply* reply);
-  void downloadFinished(QNetworkReply *reply);
-  void networkTimeout();
+	void reset();
+	void find();
+	void openFileOfItem(int row, int column);
+	void optionChanged();
+	void checkForUpdatesCore(QNetworkReply* reply);
+	void getlist();
+	bool netHandleError(QNetworkReply* reply, QString urlDownload);
+	void getListFinished(QNetworkReply* reply);
+	void downloadFinished(QNetworkReply *reply);
+	void networkTimeout();
 
 protected:
-  void resizeEvent(QResizeEvent *event);
+	void resizeEvent(QResizeEvent *event);
+	void showEvent(QShowEvent * event);
 
 private:
-  Ui::SkinsPage *ui;
-  QStringList findFiles(const QStringList &files, const QString &text);
-  void showFiles(const QStringList &files);
-  QPushButton *createButton(const QString &text, const char *member);
-//  QComboBox *createComboBox(const QString &text = QString());
+	Ui::SkinsPage *ui;
+	QStringList findFiles(const QStringList &files, const QString &text);
+	void showFiles(const QStringList &files);
+	QPushButton *createButton(const QString &text, const char *member);
+	void createFilesTable();
+	void loadSkin(QString fname);
+	void loadSettings();
+	void saveSettings();
+	void checkForUpdates();
+	void download(const QUrl &filename);
+	boost::filesystem::path IniFile;
+	QString inipath,inifname;
+	QMainWindow fSize;
 
-
-  void createFilesTable();
-  void loadSkin(QString fname);
-  void loadSettings();
-  void saveSettings();
-  void download(const QUrl &filename);
-  boost::filesystem::path IniFile;
-  QString inipath,inifname;
-//  QDesktopWidget fSize;
-  QMainWindow fSize;
-
-  QTimer *networkTimer;
-//  QComboBox *fileComboBox;
-//  QComboBox *textComboBox;
-//  QComboBox *directoryComboBox;
-//  QLabel *fileLabel;
-//  QLabel *textLabel;
-//  QLabel *directoryLabel;
-  QLabel *filesFoundLabel;
-  QLabel *statusLabel;
-//  QPushButton *browseButton;
-  QPushButton *resetButton;
-//  QPushButton *findButton;
-  QPushButton *downloadButton;
-  QTableWidget *filesTable;
-  QDir currentDir;
-  QNetworkReply *reply;
-  QString latestNetError;
-  QString latestFileError;
+	QTimer *networkTimer;
+	QLabel *filesFoundLabel;
+	QLabel *statusLabel;
+	QPushButton *resetButton;
+	QPushButton *downloadButton;
+	QTableWidget *filesTable;
+	QDir currentDir;
+	QNetworkReply *reply;
+	QString latestNetError;
+	QString latestFileError;
 
 signals:
-  void error(const QString &title, const QString &message, bool modal);
-  void status(const QString &message);
-  void information(const QString &title, const QString &message);
+	void error(const QString &title, const QString &message, bool modal);
+	void status(const QString &message);
+	void information(const QString &title, const QString &message);
 };
 
 #endif

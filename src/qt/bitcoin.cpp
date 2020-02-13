@@ -29,7 +29,7 @@
 #include <QLabel>
 #include <QRegExp>
 #include <QTextTable>
-#include <QTextCursor>
+//#include <QTextCursor>
 #include <QVBoxLayout>
 #include <QObject>
 
