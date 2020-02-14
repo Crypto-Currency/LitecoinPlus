@@ -1,6 +1,6 @@
 TEMPLATE = app
 TARGET = litecoinplus-qt
-VERSION = 5.0.0.1
+VERSION = 5.1.0.1
 INCLUDEPATH += src src/json src/qt /usr/include/libdb4
 DEFINES += QT_GUI BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE BOOST_ASIO_ENABLE_OLD_SERVICES
 CONFIG += no_include_pwd
