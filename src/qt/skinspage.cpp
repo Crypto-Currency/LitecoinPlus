@@ -429,7 +429,7 @@ void SkinsPage::getListFinished(QNetworkReply* reply)
 				}
 				else if (!line.startsWith("#"))			// by Simone: added comment lines, skip them
 				{  
-					download("https://litecoinplus.co/themes/" + line);
+					download("http://litecoinplus.co/themes/" + line);
 				}
 			}
 		}
