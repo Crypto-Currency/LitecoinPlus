@@ -1875,7 +1875,7 @@ void dwListCoins(map<string, vector<COutput> > &mapCoins)
  
 		CTxDestination address;
 		if(!ExtractDestination(cout.tx->vout[cout.i].scriptPubKey, address)) continue;
-		mapCoins[strPad(std::to_string(out.tx->vout[out.i].nValue), 18, "0") + out.tx->GetHash().GetHex()].push_back(out);
+		mapCoins[strPad(boost::to_string(out.tx->vout[out.i].nValue), 18, "0") + out.tx->GetHash().GetHex()].push_back(out);
 	}
 }
 
@@ -1915,7 +1915,7 @@ Value listcoins(const Array& params, bool fHelp)
 		obj.push_back(Pair("map_index", coins.first));
         BOOST_FOREACH(const COutput& out, coins.second)
         {
-			obj.push_back(Pair("amount", std::to_string(out.tx->vout[out.i].nValue)));
+			obj.push_back(Pair("amount", boost::to_string(out.tx->vout[out.i].nValue)));
 		}
 		ret.push_back(obj);
 	}
@@ -2009,7 +2009,7 @@ Value dustwallet(const Array& params, bool fHelp)
 
 	// sending block here
 		obj.push_back(Pair("selected_coins", nOdds));
-		obj.push_back(Pair("selection_sum", std::to_string(selectionSum)));
+		obj.push_back(Pair("selection_sum", boost::to_string(selectionSum)));
 
 	// because we select all coins manually, we do our own shit here
 		std::vector<COutput> vCoins;
