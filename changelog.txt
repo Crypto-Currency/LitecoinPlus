@@ -1,3 +1,11 @@
+***** Version 5.1.0.1b (INTERMEDIATE)
+- Added txids array with "listreceivedbyaddress" and "listreceivedbyaccount" RPC calls, at least one exchange requested it
+
+
+***** Version 5.1.0.1a (INTERMEDIATE)
+- BUGFIX: Fixed ancient compiler bug std::to_string (used boost::to_string instead, file rpcwallet.cpp)
+
+
 ***** Version 5.1.0.1 (RELEASE)
 - Added RPC method "dustwallet", to be able to dust wallet from daemon as well given a series of parameters
 - Added RPC method "listcoins", to display the selection made by the RPC call above (useful to report eventual issues)
