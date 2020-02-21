@@ -20,6 +20,7 @@
 #include <QVector>
 #include <QRegExp>
 #include <QHeaderView>
+#include <QCryptographicHash>
 
 #include <QDebug>
 using namespace std;
