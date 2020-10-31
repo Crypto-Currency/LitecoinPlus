@@ -23,6 +23,7 @@
 #include <QFileDialog>
 #include <QDesktopServices>
 #include <QThread>
+#include <QTextEdit>
 
 
 #include <boost/filesystem.hpp>
@@ -565,6 +566,25 @@ void HelpMessageBox::showOrPrint()
         // On other operating systems, print help text to console
         printToConsole();
 #endif
+}
+
+bool HelpMessageBox::event(QEvent* e)
+{
+    bool result = QMessageBox::event(e);
+    // force resizing back on, QMessageBox keeps turning it off:
+    if (maximumWidth() != QWIDGETSIZE_MAX) {
+        QTextEdit *textEdit = findChild<QTextEdit*>();
+        if (textEdit && textEdit->isVisible()) {
+            textEdit->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+            textEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+            setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+            setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        } else {
+            setMaximumWidth(QWIDGETSIZE_MAX);
+            setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        }
+    }
+    return result;
 }
 
 } // namespace GUIUtil

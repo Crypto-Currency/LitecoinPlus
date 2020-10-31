@@ -1,6 +1,8 @@
 #include "signverifymessagedialog.h"
 #include "ui_signverifymessagedialog.h"
 
+#include <openssl/ec.h> // for EC_KEY definition
+
 #include "addressbookpage.h"
 #include "base58.h"
 #include "guiutil.h"
@@ -194,6 +196,7 @@ void SignVerifyMessageDialog::on_verifyMessageButton_VM_clicked()
         ui->statusLabel_VM->setText(tr("The entered address is invalid.") + QString(" ") + tr("Please check the address and try again."));
         return;
     }
+
     CKeyID keyID;
     if (!addr.GetKeyID(keyID))
     {
@@ -215,8 +218,9 @@ void SignVerifyMessageDialog::on_verifyMessageButton_VM_clicked()
     }
 
     CDataStream ss(SER_GETHASH, 0);
+	std::string message = ui->messageIn_VM->document()->toPlainText().toStdString();
     ss << strMessageMagic;
-    ss << ui->messageIn_VM->document()->toPlainText().toStdString();
+    ss << message;
 
     CKey key;
     if (!key.SetCompactSignature(Hash(ss.begin(), ss.end()), vchSig))

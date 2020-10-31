@@ -146,6 +146,9 @@ namespace GUIUtil
         QString header;
         QString coreOptions;
         QString uiOptions;
+        
+	protected:
+		bool event(QEvent* e);
     };
 
 } // namespace GUIUtil

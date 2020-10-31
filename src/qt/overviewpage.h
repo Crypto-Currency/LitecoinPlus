@@ -29,7 +29,8 @@ public:
 public slots:
     void setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBalance, qint64 immatureBalance);
     void setNumTransactions(int count);
-//	void unlockWallet();
+    void setHeight(int count);
+    //	void unlockWallet();
 
 signals:
     void transactionClicked(const QModelIndex &index);

@@ -173,6 +173,7 @@ signals:
 
     // Number of transactions in wallet changed
     void numTransactionsChanged(int count);
+	void numHeightChanged(int count);
 
     // Encryption status of wallet changed
     void encryptionStatusChanged(int status);
