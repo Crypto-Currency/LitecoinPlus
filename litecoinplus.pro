@@ -94,18 +94,6 @@ QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wextra -Wformat -Wform
 # Input
 DEPENDPATH += src src/json src/qt
 HEADERS += src/qt/bitcoingui.h \
-    src/qt/transactiontablemodel.h \
-    src/qt/addresstablemodel.h \
-    src/qt/optionsdialog.h \
-    src/qt/sendcoinsdialog.h \
-    src/qt/coincontroldialog.h \
-    src/qt/coincontroltreewidget.h \
-    src/qt/addressbookpage.h \
-    src/qt/signverifymessagedialog.h \
-    src/qt/aboutdialog.h \
-    src/qt/splash.h \
-    src/qt/editaddressdialog.h \
-    src/qt/bitcoinaddressvalidator.h \
     src/alert.h \
     src/rules.h \
     src/addrman.h \
@@ -131,6 +119,16 @@ HEADERS += src/qt/bitcoingui.h \
     src/init.h \
 	src/qt/skinspage.h \
     src/mruset.h \
+    src/wallet.h \
+    src/keystore.h \
+    src/bitcoinrpc.h \
+    src/crypter.h \
+    src/protocol.h \
+    src/version.h \
+    src/netbase.h \
+    src/clientversion.h \
+    src/allocators.h \
+    src/ui_interface.h \
     src/json/json_spirit_writer_template.h \
     src/json/json_spirit_writer.h \
     src/json/json_spirit_value.h \
@@ -140,6 +138,18 @@ HEADERS += src/qt/bitcoingui.h \
     src/json/json_spirit_reader.h \
     src/json/json_spirit_error_position.h \
     src/json/json_spirit.h \
+    src/qt/transactiontablemodel.h \
+    src/qt/addresstablemodel.h \
+    src/qt/optionsdialog.h \
+    src/qt/sendcoinsdialog.h \
+    src/qt/coincontroldialog.h \
+    src/qt/coincontroltreewidget.h \
+    src/qt/addressbookpage.h \
+    src/qt/signverifymessagedialog.h \
+    src/qt/aboutdialog.h \
+    src/qt/splash.h \
+    src/qt/editaddressdialog.h \
+    src/qt/bitcoinaddressvalidator.h \
     src/qt/clientmodel.h \
     src/qt/guiutil.h \
     src/qt/transactionrecord.h \
@@ -149,29 +159,19 @@ HEADERS += src/qt/bitcoingui.h \
     src/qt/transactiondesc.h \
     src/qt/transactiondescdialog.h \
     src/qt/bitcoinamountfield.h \
-    src/wallet.h \
-    src/keystore.h \
     src/qt/transactionfilterproxy.h \
     src/qt/transactionview.h \
     src/qt/walletmodel.h \
-    src/bitcoinrpc.h \
     src/qt/overviewpage.h \
     src/qt/csvmodelwriter.h \
-    src/crypter.h \
     src/qt/sendcoinsentry.h \
     src/qt/qvalidatedlineedit.h \
     src/qt/bitcoinunits.h \
     src/qt/qvaluecombobox.h \
     src/qt/askpassphrasedialog.h \
-    src/protocol.h \
     src/qt/notificator.h \
     src/qt/qtipcserver.h \
-    src/allocators.h \
-    src/ui_interface.h \
     src/qt/rpcconsole.h \
-    src/version.h \
-    src/netbase.h \
-    src/clientversion.h \
 	src/qt/trafficgraphwidget.h \
 	src/qt/bantablemodel.h \
 	src/qt/peertablemodel.h \
@@ -179,18 +179,35 @@ HEADERS += src/qt/bitcoingui.h \
 	src/qt/alertgui.h
 
 SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
-    src/qt/transactiontablemodel.cpp \
-    src/qt/addresstablemodel.cpp \
-    src/qt/optionsdialog.cpp \
-    src/qt/sendcoinsdialog.cpp \
-    src/qt/coincontroldialog.cpp \
-    src/qt/coincontroltreewidget.cpp \
-    src/qt/addressbookpage.cpp \
-    src/qt/signverifymessagedialog.cpp \
-    src/qt/aboutdialog.cpp \
-    src/qt/splash.cpp \
-    src/qt/editaddressdialog.cpp \
-    src/qt/bitcoinaddressvalidator.cpp \
+    src/bignum/bn_add.c \
+    src/bignum/bn_asm.c \
+    src/bignum/bn_blind.c \
+    src/bignum/bn_const.c \
+    src/bignum/bn_ctx.c \
+    src/bignum/bn_depr.c \
+    src/bignum/bn_div.c \
+    src/bignum/bn_err.c \
+    src/bignum/bn_exp.c \
+    src/bignum/bn_exp2.c \
+    src/bignum/bn_gcd.c \
+    src/bignum/bn_gf2m.c \
+    src/bignum/bn_kron.c \
+    src/bignum/bn_lib.c \
+    src/bignum/bn_mod.c \
+    src/bignum/bn_mont.c \
+    src/bignum/bn_mpi.c \
+    src/bignum/bn_mul.c \
+    src/bignum/bn_nist.c \
+    src/bignum/bn_prime.c \
+    src/bignum/bn_print.c \
+    src/bignum/bn_rand.c \
+    src/bignum/bn_recp.c \
+    src/bignum/bn_shift.c \
+    src/bignum/bn_sqr.c \
+    src/bignum/bn_sqrt.c \
+    src/bignum/bn_word.c \
+    src/bignum/bn_x931p.c \
+    src/bignum/bn_misc.c \
     src/alert.cpp \
     src/rules.cpp \
     src/version.cpp \
@@ -207,6 +224,36 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/addrman.cpp \
     src/db.cpp \
     src/walletdb.cpp \
+    src/wallet.cpp \
+    src/keystore.cpp \
+    src/rpcdump.cpp \
+    src/rpcnet.cpp \
+    src/rpcmining.cpp \
+    src/rpcwallet.cpp \
+    src/rpcblockchain.cpp \
+    src/rpcrawtransaction.cpp \
+    src/bitcoinrpc.cpp \
+    src/crypter.cpp \
+    src/noui.cpp \
+    src/kernel.cpp \
+    src/scrypt-x86.S \
+    src/scrypt-x86_64.S \
+    src/scrypt-arm.S \
+    src/scrypt_mine.cpp \
+    src/pbkdf2.cpp \
+    src/protocol.cpp \
+    src/qt/transactiontablemodel.cpp \
+    src/qt/addresstablemodel.cpp \
+    src/qt/optionsdialog.cpp \
+    src/qt/sendcoinsdialog.cpp \
+    src/qt/coincontroldialog.cpp \
+    src/qt/coincontroltreewidget.cpp \
+    src/qt/addressbookpage.cpp \
+    src/qt/signverifymessagedialog.cpp \
+    src/qt/aboutdialog.cpp \
+    src/qt/splash.cpp \
+    src/qt/editaddressdialog.cpp \
+    src/qt/bitcoinaddressvalidator.cpp \
     src/qt/clientmodel.cpp \
     src/qt/guiutil.cpp \
     src/qt/transactionrecord.cpp \
@@ -216,37 +263,19 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/transactiondescdialog.cpp \
     src/qt/bitcoinstrings.cpp \
     src/qt/bitcoinamountfield.cpp \
-    src/wallet.cpp \
-    src/keystore.cpp \
     src/qt/transactionfilterproxy.cpp \
     src/qt/transactionview.cpp \
     src/qt/walletmodel.cpp \
-    src/bitcoinrpc.cpp \
-    src/rpcdump.cpp \
-    src/rpcnet.cpp \
-    src/rpcmining.cpp \
-    src/rpcwallet.cpp \
-    src/rpcblockchain.cpp \
-    src/rpcrawtransaction.cpp \
     src/qt/overviewpage.cpp \
     src/qt/csvmodelwriter.cpp \
-    src/crypter.cpp \
     src/qt/sendcoinsentry.cpp \
     src/qt/qvalidatedlineedit.cpp \
     src/qt/bitcoinunits.cpp \
     src/qt/qvaluecombobox.cpp \
     src/qt/askpassphrasedialog.cpp \
-    src/protocol.cpp \
     src/qt/notificator.cpp \
     src/qt/qtipcserver.cpp \
     src/qt/rpcconsole.cpp \
-    src/noui.cpp \
-    src/kernel.cpp \
-    src/scrypt-x86.S \
-    src/scrypt-x86_64.S \
-    src/scrypt-arm.S \
-    src/scrypt_mine.cpp \
-    src/pbkdf2.cpp \
 	src/qt/trafficgraphwidget.cpp \
 	src/qt/bantablemodel.cpp \
 	src/qt/peertablemodel.cpp \
@@ -318,7 +347,7 @@ OTHER_FILES += \
 # platform specific defaults, if not overridden on command line
 isEmpty(BOOST_LIB_SUFFIX) {
     macx:BOOST_LIB_SUFFIX = -mt
-    windows:BOOST_LIB_SUFFIX = -mgw92-mt-s-1_65
+    windows:BOOST_LIB_SUFFIX = -mgw10-mt-s-x64-1_73
 }
 
 isEmpty(BOOST_THREAD_LIB_SUFFIX) {

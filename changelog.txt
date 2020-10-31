@@ -1,3 +1,14 @@
+***** Version 5.1.2.1 (RELEASE)
+- Split the BIGNUM management from the SSL, make it possible to compile with SSL 1.0 or 1.1
+- BUGFIX: removed the <id> from the syntax of sendalert command
+- Added the number of minutes in which the alert need to stay alive and been broadcasted (default to 3 minutes)
+- When sending a rule, ignore the rule.nID, and just make it so that alert.nID = rule.nID (automatic numbering)
+- BUGFIX: verify message did not work with SSL 1.1, ECDA structure not initializing r and s BIGNUM
+- Added blockchain height display in Overview page
+- BUGFIX: compile with BOOST >= 1.70, get_io_service() method no more present (replaced by another)
+- USER REQUEST: make the command line option dialog resizable
+
+
 ***** Version 5.1.0.1b (INTERMEDIATE)
 - Added txids array with "listreceivedbyaddress" and "listreceivedbyaccount" RPC calls, at least one exchange requested it
 
