@@ -4,6 +4,8 @@
 
 #include <boost/assign/list_of.hpp>
 
+#include <openssl/ec.h> // for EC_KEY definition
+
 #include "kernel.h"
 #include "db.h"
 

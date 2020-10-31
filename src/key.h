@@ -8,12 +8,12 @@
 #include <stdexcept>
 #include <vector>
 
+#include <openssl/ec.h> // for EC_KEY definition
+
 #include "allocators.h"
 #include "serialize.h"
 #include "uint256.h"
 #include "util.h"
-
-#include <openssl/ec.h> // for EC_KEY definition
 
 // secp160k1
 // const unsigned int PRIVATE_KEY_SIZE = 192;

@@ -2,6 +2,9 @@
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+#include <openssl/ec.h> // for EC_KEY definition
+
 #include "db.h"
 #include "walletdb.h"
 #include "bitcoinrpc.h"
@@ -16,6 +19,7 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <openssl/crypto.h>
+
 
 //#ifndef WIN32 && __APPLE__
 #if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(__APPLE__))
@@ -934,7 +938,7 @@ bool AppInit2()
         else
             strErrors << _("Error loading wallet.dat") << "\n";
     }
-
+    
     if (GetBoolArg("-upgradewallet", fFirstRun))
     {
         int nMaxVersion = GetArg("-upgradewallet", 0);

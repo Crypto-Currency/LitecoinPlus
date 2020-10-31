@@ -5,6 +5,8 @@
 
 #include <boost/assign/list_of.hpp>
 
+#include <openssl/ec.h> // for EC_KEY definition
+
 #include "base58.h"
 #include "bitcoinrpc.h"
 #include "db.h"

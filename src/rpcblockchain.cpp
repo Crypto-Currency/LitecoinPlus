@@ -3,6 +3,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <openssl/ec.h> // for EC_KEY definition
+
 #include "main.h"
 #include "bitcoinrpc.h"
 

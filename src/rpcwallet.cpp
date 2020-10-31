@@ -3,6 +3,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <openssl/ec.h> // for EC_KEY definition
+
 #include "wallet.h"
 #include "walletdb.h"
 #include "bitcoinrpc.h"
@@ -1969,8 +1971,8 @@ Value dustwallet(const Array& params, bool fHelp)
 // declare some settings
 	int blockCount = mapCoins.size();
 	int minimumBlockAmount = 2000;
-    if (params.size() > 1)
-        minimumBlockAmount = params[1].get_int();
+	if (params.size() > 1)
+		minimumBlockAmount = params[1].get_int();
 	int blockDivisor = 80;
 
 // check number of blocks and do some preparation for the loop

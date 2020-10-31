@@ -8,13 +8,16 @@
 using namespace std;
 using namespace boost;
 
-#include "script.h"
-#include "keystore.h"
+#include <openssl/ec.h> // for EC_KEY definition
+
 #include "bignum.h"
-#include "key.h"
 #include "main.h"
 #include "sync.h"
 #include "util.h"
+
+#include "script.h"
+#include "keystore.h"
+#include "key.h"
 
 bool CheckSig(vector<unsigned char> vchSig, vector<unsigned char> vchPubKey, CScript scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType);
 
@@ -809,17 +812,17 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
                         break;
 
                     case OP_MUL:
-                        if (!BN_mul(&bn, &bn1, &bn2, pctx))
+                        if (!BN_LCP_mul(&bn, &bn1, &bn2, pctx))
                             return false;
                         break;
 
                     case OP_DIV:
-                        if (!BN_div(&bn, NULL, &bn1, &bn2, pctx))
+                        if (!BN_LCP_div(&bn, NULL, &bn1, &bn2, pctx))
                             return false;
                         break;
 
                     case OP_MOD:
-                        if (!BN_mod(&bn, &bn1, &bn2, pctx))
+                        if (!BN_LCP_mod(&bn, &bn1, &bn2, pctx))
                             return false;
                         break;
 

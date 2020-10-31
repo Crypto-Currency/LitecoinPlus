@@ -3,13 +3,7 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "init.h"
 #include "util.h"
-#include "sync.h"
-#include "ui_interface.h"
-#include "base58.h"
-#include "bitcoinrpc.h"
-#include "db.h"
 
 #undef printf
 #include <boost/asio.hpp>
@@ -27,6 +21,14 @@
 #include <list>
 
 #define printf OutputDebugStringF
+
+#include <openssl/ec.h> // for EC_KEY definition
+#include "init.h"
+#include "sync.h"
+#include "ui_interface.h"
+#include "base58.h"
+#include "bitcoinrpc.h"
+#include "db.h"
 
 using namespace std;
 using namespace boost;
@@ -582,7 +584,7 @@ public:
     }
     bool connect(const std::string& server, const std::string& port)
     {
-        ip::tcp::resolver resolver(stream.get_io_service());
+        ip::tcp::resolver resolver(GetIOService(stream));
         ip::tcp::resolver::query query(server.c_str(), port.c_str());
         ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
         ip::tcp::resolver::iterator end;
@@ -688,7 +690,7 @@ static void RPCListen(boost::shared_ptr< basic_socket_acceptor<Protocol, SocketA
                    const bool fUseSSL)
 {
     // Accept connection
-    AcceptedConnectionImpl<Protocol>* conn = new AcceptedConnectionImpl<Protocol>(acceptor->get_io_service(), context, fUseSSL);
+    AcceptedConnectionImpl<Protocol>* conn = new AcceptedConnectionImpl<Protocol>(GetIOServiceFromPtr(acceptor), context, fUseSSL);
 
     acceptor->async_accept(
             conn->sslStream.lowest_layer(),
@@ -1235,6 +1237,7 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "sendalert"              && n > 3) ConvertTo<boost::int64_t>(params[3]);
     if (strMethod == "sendalert"              && n > 4) ConvertTo<boost::int64_t>(params[4]);
     if (strMethod == "sendalert"              && n > 5) ConvertTo<boost::int64_t>(params[5]);
+    if (strMethod == "sendalert"              && n > 6) ConvertTo<boost::int64_t>(params[6]);
     if (strMethod == "listalerts"             && n > 0) ConvertTo<bool>(params[0]);
     if (strMethod == "testrule"               && n > 0) ConvertTo<boost::int64_t>(params[0]);
     if (strMethod == "testrule"               && n > 1) ConvertTo<boost::int64_t>(params[1]);

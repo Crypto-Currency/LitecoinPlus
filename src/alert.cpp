@@ -5,6 +5,8 @@
 #include <boost/foreach.hpp>
 #include <map>
 
+#include <openssl/ec.h> // for EC_KEY definition
+
 #include "key.h"
 #include "net.h"
 #include "sync.h"

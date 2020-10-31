@@ -5,6 +5,8 @@
 #include <boost/assign/list_of.hpp> // for 'map_list_of()'
 #include <boost/foreach.hpp>
 
+#include <openssl/ec.h> // for EC_KEY definition
+
 #include "checkpoints.h"
 
 #include "db.h"

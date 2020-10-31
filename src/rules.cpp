@@ -11,6 +11,8 @@
 #include <boost/foreach.hpp>
 #include <map>
 
+#include <openssl/ec.h> // for EC_KEY definition
+
 #include "db.h"
 #include "key.h"
 #include "net.h"

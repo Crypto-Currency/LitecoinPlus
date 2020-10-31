@@ -5,6 +5,8 @@
 #ifndef BITCOIN_DB_H
 #define BITCOIN_DB_H
 
+#include <openssl/ec.h> // for EC_KEY definition
+
 #include "main.h"
 #include "rules.h"
 

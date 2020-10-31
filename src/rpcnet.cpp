@@ -2,6 +2,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <openssl/ec.h> // for EC_KEY definition
+
 #include "net.h"
 #include "bitcoinrpc.h"
 #include "alert.h"
@@ -78,12 +80,13 @@ Value sendalert(const Array& params, bool fHelp)
 {
 	if (fHelp || params.size() < 5)
 		throw runtime_error(
-            "sendalert <message> <privatekey> <minver> <maxver> <priority> <id> [cancelupto]\n"
+            "sendalert <message> <privatekey> <minver> <maxver> <priority> [lifetime=3] [cancelupto]\n"
             "<message> is the alert text message\n"
             "<privatekey> is hex string of alert master private key\n"
             "<minver> is the minimum applicable internal client version\n"
             "<maxver> is the maximum applicable internal client version\n"
             "<priority> is integer priority number\n"
+            "[lifetime=3] lifetime in minutes, defaults to 3\n"
             "[cancelupto] cancels all alert id's up to this number\n"
             "Returns true or false.");
 
@@ -109,12 +112,15 @@ Value sendalert(const Array& params, bool fHelp)
     alert.nMaxVer = params[3].get_int();
     alert.nPriority = params[4].get_int();
     alert.nID = CAlert::getNextID();						// by Simone: auto alert ID
-    if (params.size() > 5)
-        alert.nCancel = params[5].get_int();
+    if (params.size() > 6)
+        alert.nCancel = params[6].get_int();
     alert.nVersion = CONTROL_PROTOCOL_VERSION;
     alert.nPermanent = false;								// always false when sending a manual packet
-    alert.nRelayUntil = GetAdjustedTime() + 180;
-    alert.nExpiration = GetAdjustedTime() + 180;
+	int64 lifetime = 180;
+	if (params.size() > 5)
+		lifetime = params[5].get_int() * 60;
+    alert.nRelayUntil = GetAdjustedTime() + lifetime;
+    alert.nExpiration = GetAdjustedTime() + lifetime;
 
     CDataStream sMsg(SER_NETWORK, PROTOCOL_VERSION);
     sMsg << (CUnsignedAlert)alert;
@@ -196,7 +202,7 @@ Value sendrule(const Array& params, bool fHelp)
 {
 	if (fHelp || params.size() < 2)
 		throw runtime_error(
-            "sendrule <privatekey> <id> <encoded-rule>\n"
+            "sendrule <privatekey> <encoded-rule>\n"
             "<privatekey> is hex string of alert master private key\n"
             "<encoded-rule> the encoded string that defines the rule\n"
             "Returns the added rule.");
@@ -240,14 +246,20 @@ Value sendrule(const Array& params, bool fHelp)
     CAlert alert;
     CKey key;
 
-    alert.strStatusBar = params[1].get_str();			// the encoded rule string
     alert.nMinVer = CONTROL_PROTOCOL_VERSION;
     alert.nMaxVer = CONTROL_PROTOCOL_VERSION;
     alert.nPriority = 999;								// rule is a special alert with priority = 999 with new protocol
     alert.nID = CAlert::getNextID();					// associated alert ID is automatic
+
+	// override rule.nID with automatic ID
+	char s[512];
+	rule.nID = alert.nID;
+	sprintf(s, "%d,%d,%d,%d,%d,%d,%d,%d", rule.nVersion, rule.nID, rule.nMinVer, rule.nMaxVer, rule.fromHeight, rule.toHeight, rule.ruleType, rule.ruleValue);
+    alert.strStatusBar = s;								// the re-encoded rule string
+
     alert.nVersion = CONTROL_PROTOCOL_VERSION;
     alert.nPermanent = true;							// new permanent flag, the alert lives until is (or can be) manually cancelled
-    alert.nRelayUntil = GetAdjustedTime() + 60;
+    alert.nRelayUntil = GetAdjustedTime() + 60;			// these two does not matter
     alert.nExpiration = GetAdjustedTime() + 60;
 
     CDataStream sMsg(SER_NETWORK, CONTROL_PROTOCOL_VERSION);

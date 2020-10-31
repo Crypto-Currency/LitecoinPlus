@@ -96,6 +96,10 @@ DEBUGFLAGS=-g
 xCXXFLAGS=-rdynamic -O2 -pthread -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter \
     $(DEBUGFLAGS) $(DEFS) $(HARDENING) $(CXXFLAGS)
 
+xCFLAGS=-msse2 -O2 -D_REENTRANT -Wall -W -fPIC \
+    $(DEBUGFLAGS) $(DEFS) $(HARDENING) $(CFLAGS)
+
+
 # If we have an ARM device, we can't use SSE2 instructions, so don't try to use them
 # xCPUARCH is passed in as a define (xCPUARCH=armv7l, xCPUARCH=armv6l)
 ifeq ($(xCPUARCH),armv7l)
@@ -111,6 +115,35 @@ endif
 xLDFLAGS=$(LDHARDENING) $(LDFLAGS)
 
 OBJS= \
+    obj/bn_add.o \
+    obj/bn_asm.o \
+    obj/bn_blind.o \
+    obj/bn_const.o \
+    obj/bn_ctx.o \
+    obj/bn_depr.o \
+    obj/bn_div.o \
+    obj/bn_err.o \
+    obj/bn_exp.o \
+    obj/bn_exp2.o \
+    obj/bn_gcd.o \
+    obj/bn_gf2m.o \
+    obj/bn_kron.o \
+    obj/bn_lib.o \
+    obj/bn_mod.o \
+    obj/bn_mont.o \
+    obj/bn_mpi.o \
+    obj/bn_mul.o \
+    obj/bn_nist.o \
+    obj/bn_prime.o \
+    obj/bn_print.o \
+    obj/bn_rand.o \
+    obj/bn_recp.o \
+    obj/bn_shift.o \
+    obj/bn_sqr.o \
+    obj/bn_sqrt.o \
+    obj/bn_word.o \
+    obj/bn_x931p.o \
+    obj/bn_misc.o \
     obj/alert.o \
     obj/rules.o \
     obj/version.o \
@@ -170,6 +203,13 @@ obj/scrypt-x86_64.o: scrypt-x86_64.S
 
 obj/%.o: %.cpp
 	$(CXX) -c $(xCXXFLAGS) -MMD -MF $(@:%.o=%.d) -o $@ $<
+	@cp $(@:%.o=%.d) $(@:%.o=%.P); \
+	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	      -e '/^$$/ d' -e 's/$$/ :/' < $(@:%.o=%.d) >> $(@:%.o=%.P); \
+	  rm -f $(@:%.o=%.d)
+
+obj/%.o: bignum/%.c
+	$(CC) -c $(xCFLAGS) -MMD -MF $(@:%.o=%.d) -o $@ $<
 	@cp $(@:%.o=%.d) $(@:%.o=%.P); \
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 	      -e '/^$$/ d' -e 's/$$/ :/' < $(@:%.o=%.d) >> $(@:%.o=%.P); \
