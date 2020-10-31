@@ -236,6 +236,23 @@
             </property>
            </widget>
           </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_height">
+            <property name="text">
+             <string>Block height:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLabel" name="blockHeight">
+            <property name="toolTip">
+             <string>current block height in sync</string>
+            </property>
+            <property name="text">
+             <string notr="true">0</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
