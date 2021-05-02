@@ -96,7 +96,7 @@ DEBUGFLAGS=-g
 xCXXFLAGS=-rdynamic -O2 -pthread -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter \
     $(DEBUGFLAGS) $(DEFS) $(HARDENING) $(CXXFLAGS)
 
-xCFLAGS=-msse2 -O2 -D_REENTRANT -Wall -W -fPIC \
+xCFLAGS= -O2 -D_REENTRANT -Wall -W -fPIC \
     $(DEBUGFLAGS) $(DEFS) $(HARDENING) $(CFLAGS)
 
 
