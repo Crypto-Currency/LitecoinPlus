@@ -29,7 +29,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <xmmintrin.h>
+
 
 extern "C"
 {

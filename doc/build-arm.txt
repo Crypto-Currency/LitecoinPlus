@@ -1,0 +1,30 @@
+UNIX ARM BUILD NOTES
+================
+
+To Build
+--------
+
+cd src/
+make -f makefile.unix USE_UPNP=- xCPUARCH=armv7l    (or xCPUARCH=armv6l)   # Headless bitcoin
+
+
+Building QT
+-----------
+sudo apt-get install qt4-qmake libqt4-dev build-essential libboost-dev libboost-system-dev \
+libboost-filesystem-dev libboost-program-options-dev libboost-thread-dev \
+libssl-dev libdb4.8++-dev
+
+If you get an error that libdb4.8++dev cannot be found, please do the following first:
+
+sudo add-apt-repository ppa:bitcoin/bitcoin
+sudo apt-get update
+sudo apt-get install libdb4.8++dev
+
+After installation completed, then execute the following:
+
+qmake USE_UPNP=-
+make
+strip liteoinplus-qt
+
+
+
