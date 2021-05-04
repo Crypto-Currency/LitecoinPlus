@@ -24,7 +24,7 @@ After installation completed, then execute the following:
 
 qmake USE_UPNP=-
 make
-strip liteoinplus-qt
+strip litecoinplus-qt
 
 
 
