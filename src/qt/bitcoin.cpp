@@ -18,6 +18,7 @@
 
 #include <QDesktopWidget>
 #include <QApplication>
+#include <QStyleFactory>
 #include <QMessageBox>
 #include <QTextCodec>
 #include <QLocale>
@@ -174,6 +175,10 @@ int main(int argc, char *argv[])
     //QTextCodec::setCodecForCStrings(QTextCodec::codecForTr());
 
     Q_INIT_RESOURCE(bitcoin);
+
+	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+	QApplication::setStyle(QStyleFactory::create("Fusion"));
+
     QApplication app(argc, argv);
 
     // Install global event filter that makes sure that long tooltips can be word-wrapped
