@@ -59,7 +59,9 @@ void LCP_ERR_load_strings(int lib,LCP_ERR_STRING_DATA str[])
 
 const char *LCP_ERR_func_error_string(unsigned long e)
 {
-	fprintf(stderr, "LCP_ERR_func_error_string, damn it...\n");
+	// this function is called in the daemon process, need probably to verify why, for now output is commented.
+	
+	// fprintf(stderr, "LCP_ERR_func_error_string, damn it...\n");
 	return(NULL);
 }
 
