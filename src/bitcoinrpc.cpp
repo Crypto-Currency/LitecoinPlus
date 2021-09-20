@@ -1060,11 +1060,16 @@ void ThreadRPCServer3(void* parg)
     }
 }
 
+// by Simone: coming from db.cpp, progress of blockchain load
+extern unsigned int loadProgress;
 json_spirit::Value CRPCTable::execute(const std::string &strMethod, const json_spirit::Array &params) const
 {
 	// by Simone: check if is enabled
-	if (!enableRpcExecution)
-        throw JSONRPCError(RPC_MISC_ERROR, "Wallet is loading the blockchain, please wait");
+	if (!enableRpcExecution) {
+		char m[256];
+		sprintf(m, "Wallet is loading the blockchain (%d%%), please wait", loadProgress);
+        throw JSONRPCError(RPC_MISC_ERROR, m);
+    }
 
     // Find method
     const CRPCCommand *pcmd = tableRPC[strMethod];

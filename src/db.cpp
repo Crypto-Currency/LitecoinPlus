@@ -27,6 +27,8 @@ extern CClientUIInterface uiInterface;
 
 unsigned int nWalletDBUpdated;
 
+unsigned int loadProgress;
+
 // by Simone: extend the class for conversion for >= 4.1.0.1
 class CDiskBlockIndexV3Conv : public CDiskBlockIndexV3
 {
@@ -1134,7 +1136,7 @@ bool CBlkDB::LoadBlockIndexGuts()
 	// prepare for loop
 	memset(&key, 0, sizeof(key));
 	memset(&data, 0, sizeof(data));
-	#define	BUFFER_LENGTH	(128 * 1024 * 1024)
+	#define	BUFFER_LENGTH	(2 * 1024 * 1024)
 	if ((data.data = malloc(BUFFER_LENGTH)) == NULL)
 		return false;
 	data.ulen = BUFFER_LENGTH;
@@ -1166,6 +1168,7 @@ bool CBlkDB::LoadBlockIndexGuts()
 				progress = 100;
 			}
 			if (progress != oldProgress) {
+				loadProgress = progress;		// store for global use
 				char pString[256];
 				if (needUpgradeV3)
 					sprintf(pString, (_("Upgrading index (%d%%)... [DO NOT INTERRUPT]")).c_str(), progress);
